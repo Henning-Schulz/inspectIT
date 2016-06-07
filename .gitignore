@@ -4,4 +4,4 @@ version.log
 .metadata/
 .gradle/
 build/
-bin/
+/bin/
