@@ -12,6 +12,9 @@ public:
 	HelloSensor();
 	~HelloSensor();
 
+	void init(ICorProfilerInfo *profilerInfo) {}
+	void notifyShutdown() {}
+
 	void beforeBody(METHOD_ID methodID);
 	void afterBody(METHOD_ID methodID);
 

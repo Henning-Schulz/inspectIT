@@ -93,7 +93,7 @@ JAVA_LONG CMRRestfulConnection::registerPlatform(std::vector<std::string> define
 	if (c == status_codes::OK) {
 		auto body = response.extract_string();
 		JAVA_LONG id = _wtoi64(body.get().c_str());
-		logger.debug("Platform registered. ID is %lli.", id);
+		logger.debug("Platform registered. ID is %lld", id);
 		return id;
 	} else {
 		logger.error("Could not register platform. Response was %u!", c);
@@ -179,6 +179,7 @@ JAVA_LONG CMRRestfulConnection::registerMethod(JAVA_LONG platformId, LPWSTR clas
 	if (c == status_codes::OK) {
 		auto body = response.extract_string();
 		JAVA_LONG id = _wtoi64(body.get().c_str());
+		logger.debug("Successfully registered method. ID is %lld.", id);
 		return id;
 	}
 	else {
@@ -215,7 +216,7 @@ JAVA_LONG CMRRestfulConnection::registerMethodSensorType(JAVA_LONG platformId, L
 	if (c == status_codes::OK) {
 		auto body = response.extract_string();
 		JAVA_LONG id = _wtoi64(body.get().c_str());
-		logger.debug("Method sensor type registered. ID is %lli.", id);
+		logger.debug("Method sensor type registered. ID is %lld.", id);
 		return id;
 	}
 	else {
@@ -264,8 +265,6 @@ void CMRRestfulConnection::sendDataObjects(std::vector<std::shared_ptr<MethodSen
 		objectsJson[i] = (*it)->toJson();
 		i++;
 	}
-
-	logger.debug("Json created");
 
 	Logger nestedLogger = logger;
 

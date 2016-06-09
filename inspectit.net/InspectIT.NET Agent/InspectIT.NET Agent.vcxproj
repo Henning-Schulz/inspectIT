@@ -145,11 +145,19 @@
     <ClInclude Include="NoHookStrategy.h" />
     <ClInclude Include="regutil.h" />
     <ClInclude Include="regutil.hpp" />
+    <ClInclude Include="SamplingTrigger.h" />
     <ClInclude Include="SendingStrategy.h" />
     <ClInclude Include="ShadowStack.h" />
+    <ClInclude Include="ShadowStackProvider.h" />
     <ClInclude Include="ShadowStackSensor.h" />
     <ClInclude Include="SimpleBufferStrategy.h" />
     <ClInclude Include="SingleClassHookStrategy.h" />
+    <ClInclude Include="StackTraceData.h" />
+    <ClInclude Include="StackTraceProvider.h" />
+    <ClInclude Include="StackTraceSample.h" />
+    <ClInclude Include="StackTraceSampler.h" />
+    <ClInclude Include="StackTraceStorage.h" />
+    <ClInclude Include="TimedTrigger.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Agent.cpp" />
@@ -164,9 +172,15 @@
     <ClCompile Include="CMRRestfulConnection.cpp" />
     <ClCompile Include="NoHookStrategy.cpp" />
     <ClCompile Include="ShadowStack.cpp" />
+    <ClCompile Include="ShadowStackProvider.cpp" />
     <ClCompile Include="ShadowStackSensor.cpp" />
     <ClCompile Include="SimpleBufferStrategy.cpp" />
     <ClCompile Include="SingleClassHookStrategy.cpp" />
+    <ClCompile Include="StackTraceData.cpp" />
+    <ClCompile Include="StackTraceSample.cpp" />
+    <ClCompile Include="StackTraceSampler.cpp" />
+    <ClCompile Include="StackTraceStorage.cpp" />
+    <ClCompile Include="TimedTrigger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="agent.def" />

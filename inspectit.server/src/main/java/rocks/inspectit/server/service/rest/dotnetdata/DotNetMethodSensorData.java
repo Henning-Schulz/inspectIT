@@ -16,7 +16,7 @@ import rocks.inspectit.shared.all.communication.MethodSensorData;
  *
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "objectType")
-@JsonSubTypes({ @JsonSubTypes.Type(name = "HelloData", value = DotNetHelloData.class) })
+@JsonSubTypes({ @JsonSubTypes.Type(name = "HelloData", value = DotNetHelloData.class), @JsonSubTypes.Type(name = "StackTraceData", value = DotNetStackTraceData.class) })
 public abstract class DotNetMethodSensorData {
 
 	/**
