@@ -13,6 +13,7 @@
 #include "SingleClassHookStrategy.h"
 #include "SimpleBufferStrategy.h"
 #include "ListSizeStrategy.h"
+#include "ShadowStackSensor.h"
 
 Agent *globalAgentInstance;
 
@@ -20,7 +21,7 @@ Agent::Agent()
 {
 	methodSensorList = new std::list<MethodSensor*>();
 
-	addMethodSensor(new HelloSensor());
+	addMethodSensor(new ShadowStackSensor());
 }
 
 
@@ -185,11 +186,11 @@ UINT_PTR  FunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
 		// TODO: Return method ID (as unsigned int or pointer to JAVA_LONG)?
 
 		if (methodId > UINT_MAX) {
-			printf("ERROR FunctionMapper - methodId %ll is greater than maximum value of unsigned int (%u)!\n", methodId, UINT_MAX);
+			printf("ERROR FunctionMapper - methodId %lld is greater than maximum value of unsigned int (%u)!\n", methodId, UINT_MAX);
 			*pbHookFunction = 0;
 		}
 		else if (methodId < 0) {
-			printf("ERROR FunctionMapper - methodId %ll is less than zero!\n", methodId);
+			printf("ERROR FunctionMapper - methodId %lld is less than zero!\n", methodId);
 			*pbHookFunction = 0;
 		}
 		else {
@@ -238,14 +239,6 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 
 	// TODO: change
 	hookStrategy = new SingleClassHookStrategy(L"TestSystem.Program");
-
-	for (std::list<MethodSensor*>::iterator it = methodSensorList->begin(); it != methodSensorList->end(); it++) {
-		WCHAR className[MAX_BUFFERSIZE];
-		getMethodSensorClassName(*it, className);
-		JAVA_LONG sensorTypeId = cmrConnection->registerMethodSensorType(platformID, className);
-		(*it)->setSensorTypeId(sensorTypeId);
-		logger.debug("Sensor %ls has id %lli", className, sensorTypeId);
-	}
 	//
 
 	HRESULT hr;
@@ -275,6 +268,16 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 		return hr;
 	}
 
+	for (std::list<MethodSensor*>::iterator it = methodSensorList->begin(); it != methodSensorList->end(); it++) {
+		WCHAR className[MAX_BUFFERSIZE];
+		getMethodSensorClassName(*it, className);
+		JAVA_LONG sensorTypeId = cmrConnection->registerMethodSensorType(platformID, className);
+		(*it)->setSensorTypeId(sensorTypeId);
+		(*it)->setPlatformId(platformID);
+		(*it)->init(profilerInfo3);
+		logger.debug("Sensor %ls has id %lli", className, sensorTypeId);
+	}
+
 	logger.info("Initialized successfully");
 
 	return S_OK;
@@ -283,6 +286,11 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 HRESULT Agent::Shutdown()
 {
 	shutdownCounter++;
+
+	for (std::list<MethodSensor*>::iterator it = methodSensorList->begin(); it != methodSensorList->end(); it++) {
+		(*it)->notifyShutdown();
+	}
+
 	shutdownDataSendingService();
 	cmrConnection->unregisterPlatform(getAllDefinedIPs(), L".NET%20agent");
 	shutdownCMRConnection();

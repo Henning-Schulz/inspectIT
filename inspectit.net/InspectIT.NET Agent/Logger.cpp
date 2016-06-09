@@ -48,6 +48,21 @@ void Logger::info(char* message, ...)
 	}
 }
 
+void Logger::warn(char* message, ...)
+{
+	if (logLevel >= LEVEL_WARN) {
+		va_list ap;
+
+		printf("WARN %s - ", name);
+
+		va_start(ap, message);
+		vprintf(message, ap);
+		va_end(ap);
+
+		printf("\n");
+	}
+}
+
 void Logger::error(char* message, ...)
 {
 	if (logLevel >= LEVEL_ERROR) {
@@ -94,10 +109,26 @@ void LoggerFactory::updateLogLevel() {
 	errno_t err = _dupenv_s(&level, &len, "LOG_LEVEL");
 	if (err || len == 0) {
 		logLevel = LEVEL_INFO;
+		printf("No log level specified. Using INFO\n");
 		return;
 	}
 
-	if (strcmp(level, "DEBUG") == 0) {
+	bool found = false;
+	for (int i = 0; i < logLevelNames.size(); i++) {
+		if (strcmp(level, logLevelNames.at(i)) == 0) {
+			logLevel = static_cast<LogLevel>(i);
+			printf("Log level is %s\n", logLevelNames.at(i));
+			found = true;
+			break;
+		}
+	}
+
+	if (!found) {
+		printf("Unknown log level %s. Using INFO\n", level);
+		logLevel = LEVEL_INFO;
+	}
+
+	/*if (strcmp(level, "DEBUG") == 0) {
 		logLevel = LEVEL_DEBUG;
 		printf("Log level is DEBUG\n");
 	}
@@ -105,10 +136,14 @@ void LoggerFactory::updateLogLevel() {
 		logLevel = LEVEL_INFO;
 		printf("Log level is INFO\n");
 	}
+	else if (strcmp(level, "WARN") == 0) {
+		logLevel = LEVEL_WARN;
+		printf("Log level is WARN\n");
+	}
 	else {
 		logLevel = LEVEL_ERROR;
 		printf("Log level is ERROR\n");
-	}
+	}*/
 
 	free(level);
 }

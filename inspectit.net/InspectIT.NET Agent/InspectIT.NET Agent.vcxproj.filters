@@ -13,144 +13,225 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\core">
+      <UniqueIdentifier>{4229934b-c9fa-4dd1-b15c-cd4f2dbfc112}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\dll">
+      <UniqueIdentifier>{47cea0d4-bfc4-4b9a-a61c-aa78100e45aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sending">
+      <UniqueIdentifier>{ba93a3bc-5701-405a-82ed-659598f5f261}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\logging">
+      <UniqueIdentifier>{a6f35c7f-ffa5-4069-ad70-a4519fe5939f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\test">
+      <UniqueIdentifier>{a3b6eab5-3f4f-483b-9957-863a584c0ccd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sampling.shadow">
+      <UniqueIdentifier>{c5381398-d20f-4b58-9b8a-8e5bdd723b62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sampling.core">
+      <UniqueIdentifier>{711ce918-bbe5-4e50-b586-259b57c50bf5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{d59941fe-ef43-460f-b876-abb878f79585}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sending">
+      <UniqueIdentifier>{ddbe1c3b-ac38-4b5c-b9e1-d603d3eedb59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\test">
+      <UniqueIdentifier>{1ef6dbf9-ce0b-45d8-ad44-76ae65c147d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sampling.shadow">
+      <UniqueIdentifier>{edebddc8-3a01-45bc-9dce-051d84ce7c2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sampling.core">
+      <UniqueIdentifier>{36799e63-41e2-42f8-a7e2-34bb0c00c12d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\logging">
+      <UniqueIdentifier>{fd83f324-6fef-4e2d-bf5f-f84a6c70ad2f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="classfactory.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dllmain.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="regutil.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="regutil.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CorProfilerCallbackDefaultImpl.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Agent.h">
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="basehdr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Agent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MethodSensor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HelloSensor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Logger.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="agentutils.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
-    <ClInclude Include="HookStrategy.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="classfactory.hpp">
+      <Filter>Header Files\dll</Filter>
     </ClInclude>
-    <ClInclude Include="SingleClassHookStrategy.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="dllmain.hpp">
+      <Filter>Header Files\dll</Filter>
+    </ClInclude>
+    <ClInclude Include="regutil.h">
+      <Filter>Header Files\dll</Filter>
+    </ClInclude>
+    <ClInclude Include="regutil.hpp">
+      <Filter>Header Files\dll</Filter>
     </ClInclude>
     <ClInclude Include="AgentConfiguration.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CMRConnection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CMRRestfulConnection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NoHookStrategy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ShadowStackSensor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ShadowStack.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MethodSensorData.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="BufferStrategy.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\sending</Filter>
     </ClInclude>
-    <ClInclude Include="SimpleBufferStrategy.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="CMRConnection.h">
+      <Filter>Header Files\sending</Filter>
+    </ClInclude>
+    <ClInclude Include="CorProfilerCallbackDefaultImpl.h">
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="DataSendingService.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\sending</Filter>
     </ClInclude>
-    <ClInclude Include="MeasurementStorage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HelloSensorData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SendingStrategy.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="CMRRestfulConnection.h">
+      <Filter>Header Files\sending</Filter>
     </ClInclude>
     <ClInclude Include="ListSizeListener.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\sending</Filter>
     </ClInclude>
     <ClInclude Include="ListSizeStrategy.h">
+      <Filter>Header Files\sending</Filter>
+    </ClInclude>
+    <ClInclude Include="HookStrategy.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="SendingStrategy.h">
+      <Filter>Header Files\sending</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleBufferStrategy.h">
+      <Filter>Header Files\sending</Filter>
+    </ClInclude>
+    <ClInclude Include="HelloSensor.h">
+      <Filter>Header Files\test</Filter>
+    </ClInclude>
+    <ClInclude Include="HelloSensorData.h">
+      <Filter>Header Files\test</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>Header Files\logging</Filter>
+    </ClInclude>
+    <ClInclude Include="NoHookStrategy.h">
+      <Filter>Header Files\test</Filter>
+    </ClInclude>
+    <ClInclude Include="SingleClassHookStrategy.h">
+      <Filter>Header Files\test</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodSensor.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodSensorData.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="MeasurementStorage.h">
+      <Filter>Header Files\sending</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowStack.h">
+      <Filter>Header Files\sampling.shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowStackSensor.h">
+      <Filter>Header Files\sampling.shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="StackTraceSampler.h">
+      <Filter>Header Files\sampling.core</Filter>
+    </ClInclude>
+    <ClInclude Include="StackTraceProvider.h">
+      <Filter>Header Files\sampling.core</Filter>
+    </ClInclude>
+    <ClInclude Include="StackTraceSample.h">
+      <Filter>Header Files\sampling.core</Filter>
+    </ClInclude>
+    <ClInclude Include="SamplingTrigger.h">
+      <Filter>Header Files\sampling.core</Filter>
+    </ClInclude>
+    <ClInclude Include="StackTraceData.h">
+      <Filter>Header Files\sampling.core</Filter>
+    </ClInclude>
+    <ClInclude Include="StackTraceStorage.h">
+      <Filter>Header Files\sampling.core</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowStackProvider.h">
+      <Filter>Header Files\sampling.shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="TimedTrigger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CorProfilerCallbackDefaultImpl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Agent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="HelloSensor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Logger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="agentutils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SingleClassHookStrategy.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="AgentConfiguration.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="CMRRestfulConnection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NoHookStrategy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ShadowStackSensor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ShadowStack.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SimpleBufferStrategy.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="agentutils.cpp">
+      <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="DataSendingService.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\sending</Filter>
+    </ClCompile>
+    <ClCompile Include="CMRRestfulConnection.cpp">
+      <Filter>Source Files\sending</Filter>
+    </ClCompile>
+    <ClCompile Include="CorProfilerCallbackDefaultImpl.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="HelloSensor.cpp">
+      <Filter>Source Files\test</Filter>
     </ClCompile>
     <ClCompile Include="HelloSensorData.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\test</Filter>
     </ClCompile>
     <ClCompile Include="ListSizeStrategy.cpp">
+      <Filter>Source Files\sending</Filter>
+    </ClCompile>
+    <ClCompile Include="NoHookStrategy.cpp">
+      <Filter>Source Files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="SingleClassHookStrategy.cpp">
+      <Filter>Source Files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpleBufferStrategy.cpp">
+      <Filter>Source Files\sending</Filter>
+    </ClCompile>
+    <ClCompile Include="StackTraceData.cpp">
+      <Filter>Source Files\sampling.core</Filter>
+    </ClCompile>
+    <ClCompile Include="StackTraceSample.cpp">
+      <Filter>Source Files\sampling.core</Filter>
+    </ClCompile>
+    <ClCompile Include="StackTraceSampler.cpp">
+      <Filter>Source Files\sampling.core</Filter>
+    </ClCompile>
+    <ClCompile Include="StackTraceStorage.cpp">
+      <Filter>Source Files\sampling.core</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowStack.cpp">
+      <Filter>Source Files\sampling.shadow</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowStackSensor.cpp">
+      <Filter>Source Files\sampling.shadow</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowStackProvider.cpp">
+      <Filter>Source Files\sampling.shadow</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>Source Files\logging</Filter>
+    </ClCompile>
+    <ClCompile Include="TimedTrigger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="agent.def">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="packages.config" />
+    <None Include="agent.def">
+      <Filter>Source Files\core</Filter>
+    </None>
   </ItemGroup>
 </Project>

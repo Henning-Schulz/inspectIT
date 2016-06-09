@@ -1,6 +1,9 @@
 #pragma once
 
-enum LogLevel { LEVEL_DEBUG = 20, LEVEL_INFO = 10, LEVEL_ERROR = 0 };
+#include <vector>
+
+enum LogLevel { LEVEL_ERROR = 0, LEVEL_WARN, LEVEL_INFO, LEVEL_DEBUG };
+const std::vector<char*> logLevelNames = { "ERROR", "WARN", "INFO", "DEBUG" };
 
 class Logger
 {
@@ -14,6 +17,7 @@ public:
 
 	void debug(char* message, ...);
 	void info(char* message, ...);
+	void warn(char* message, ...);
 	void error(char* message, ...);
 	void log(LogLevel level, char* message, ...);
 };

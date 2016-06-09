@@ -21,7 +21,7 @@ void HelloSensor::beforeBody(METHOD_ID methodID)
 {
 	std::wstringstream wss;
 	wss << "Hi from before " << methodID;
-	std::shared_ptr<HelloSensorData> data = std::make_shared<HelloSensorData>((LPWSTR)wss.str().c_str(), 0, getSensorTypeId(), methodID);
+	std::shared_ptr<HelloSensorData> data = std::make_shared<HelloSensorData>((LPWSTR)wss.str().c_str(), getPlatformId(), getSensorTypeId(), methodID);
 	dataSendingService->addMethodSensorData(data, std::to_string(counter));
 	counter++;
 }
@@ -33,7 +33,7 @@ void HelloSensor::afterBody(METHOD_ID methodID)
 	if (data == nullptr || data->finished()) {
 		std::wstringstream wss;
 		wss << "Hi from after " << methodID << " ";
-		std::shared_ptr<HelloSensorData> data = std::make_shared<HelloSensorData>((LPWSTR)wss.str().c_str(), 0, getSensorTypeId(), methodID);
+		std::shared_ptr<HelloSensorData> data = std::make_shared<HelloSensorData>((LPWSTR)wss.str().c_str(), getPlatformId(), getSensorTypeId(), methodID);
 		dataSendingService->addMeasurementStorage(data, "after");
 	}
 	else {
