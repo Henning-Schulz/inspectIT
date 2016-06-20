@@ -4,7 +4,6 @@
 
 #include <vector>
 #include <cpprest/json.h>
-#include <ctime>
 
 /* 
  * Represents a stack trace. The offset can be used to indicate
@@ -20,7 +19,7 @@ private:
 	JAVA_LONG timestamp;
 
 public:
-	StackTraceSample(std::vector<JAVA_LONG> trace, JAVA_INT offset, JAVA_LONG timestamp = time(nullptr));
+	StackTraceSample(std::vector<JAVA_LONG> trace, JAVA_INT offset, JAVA_LONG timestamp = -1);
 	~StackTraceSample();
 
 	std::vector<JAVA_LONG> getTrace();

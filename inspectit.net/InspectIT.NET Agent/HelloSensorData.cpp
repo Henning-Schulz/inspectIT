@@ -2,7 +2,7 @@
 
 
 
-HelloSensorData::HelloSensorData(LPWSTR greeting, JAVA_LONG platformId, JAVA_LONG methodSensorId, JAVA_LONG methodId, std::time_t timestamp)
+HelloSensorData::HelloSensorData(LPWSTR greeting, JAVA_LONG platformId, JAVA_LONG methodSensorId, JAVA_LONG methodId, JAVA_LONG timestamp)
 	: MethodSensorData(platformId, methodSensorId, methodId, timestamp), MeasurementStorage(platformId, methodSensorId, methodId, timestamp)
 {
 	this->greeting = new WCHAR[MAX_BUFFERSIZE];

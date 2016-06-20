@@ -11,9 +11,9 @@ AgentConfiguration::~AgentConfiguration()
 {
 }
 
-std::list<MethodSensor*> AgentConfiguration::CreateAndGetMethodSensors()
+std::list<MethodHook*> AgentConfiguration::CreateAndGetMethodSensors()
 {
-	return std::list<MethodSensor*>();
+	return std::list<MethodHook*>();
 }
 
 HookStrategy* AgentConfiguration::CreateAndGetHookStrategy()

@@ -23,6 +23,7 @@ CMRRestfulConnection::CMRRestfulConnection()
 	baseUrl = L"http://localhost:8182/rest";
 	registrationPath = L"/dotNetRegistration";
 	connectionTestPath = L"/dotNetConnection/test";
+	configPath = L"/dotNetAgentConfig";
 	storagePath = L"/dotNetAgentStorage";
 	logger.debug("Created connection to %ls", baseUrl);
 }
@@ -251,6 +252,142 @@ void CMRRestfulConnection::addSensorTypeToMethod(JAVA_LONG sensorTypeId, JAVA_LO
 	}
 }
 
+std::shared_ptr<StrategyConfig> CMRRestfulConnection::getStrategyConfig(JAVA_LONG platformId, const wchar_t* path)
+{
+	std::wstringstream argsStream;
+	argsStream << "?platformId=" << platformId;
+
+	http_client client(path);
+	http_response response;
+	try {
+		response = client.request(methods::GET, argsStream.str().c_str()).get();
+	}
+	catch (web::http::http_exception) {
+		logger.error("Could not connect to %ls", path);
+		return nullptr;
+	}
+
+	status_code c = response.status_code();
+	if (c == status_codes::OK) {
+		json::object obj = response.extract_json().get().as_object();
+		return strategyConfigFactory.createFromJson(obj);
+	}
+	else {
+		logger.error("Could not get sending strategy config. Response was %u!", c);
+		return nullptr;
+	}
+}
+
+std::shared_ptr<StrategyConfig> CMRRestfulConnection::getSendingStrategyConfig(JAVA_LONG platformId)
+{
+	std::wstringstream urlStream;
+	urlStream << baseUrl << configPath << "/getSendingStrategyConfig";
+
+	return getStrategyConfig(platformId, urlStream.str().c_str());
+}
+
+std::shared_ptr<StrategyConfig> CMRRestfulConnection::getBufferStrategyConfig(JAVA_LONG platformId)
+{
+	std::wstringstream urlStream;
+	urlStream << baseUrl << configPath << "/getBufferStrategyConfig";
+
+	return getStrategyConfig(platformId, urlStream.str().c_str());
+}
+
+std::vector<std::shared_ptr<MethodSensorConfig>> CMRRestfulConnection::getMethodSensorConfigs(JAVA_LONG platformId)
+{
+	std::wstringstream urlStream;
+	urlStream << baseUrl << configPath << "/getMethodSensorConfigs";
+
+	std::wstringstream argsStream;
+	argsStream << "?platformId=" << platformId;
+
+	http_client client(urlStream.str().c_str());
+	http_response response;
+	try {
+		response = client.request(methods::GET, argsStream.str().c_str()).get();
+	}
+	catch (web::http::http_exception) {
+		logger.error("Could not connect to %ls", urlStream.str().c_str());
+		return std::vector<std::shared_ptr<MethodSensorConfig>>();
+	}
+
+	status_code c = response.status_code();
+	if (c == status_codes::OK) {
+		json::array arr = response.extract_json().get().as_array();
+		std::vector<std::shared_ptr<MethodSensorConfig>> sensorConfigs;
+		
+		for (auto it = arr.begin(); it != arr.end(); it++) {
+			json::object obj = it->as_object();
+			logger.debug("Creating object from Json...");
+			std::shared_ptr<MethodSensorConfig> config = sensorConfigFactory.createFromJson(obj);
+			logger.debug("Object created.");
+
+			if (config) {
+				logger.debug("Adding config...");
+				sensorConfigs.push_back(config);
+				logger.debug("Config added.");
+			}
+			else {
+				logger.warn("Could not create object from Json");
+			}
+		}
+		
+		return sensorConfigs;
+	}
+	else {
+		logger.error("Could not get sending strategy config. Response was %u!", c);
+		return std::vector<std::shared_ptr<MethodSensorConfig>>();
+	}
+}
+
+std::vector<std::shared_ptr<MethodSensorAssignment>> CMRRestfulConnection::getMethodSensorAssignments(JAVA_LONG platformId)
+{
+	std::wstringstream urlStream;
+	urlStream << baseUrl << configPath << "/getSensorAssignments";
+
+	std::wstringstream argsStream;
+	argsStream << "?platformId=" << platformId;
+
+	http_client client(urlStream.str().c_str());
+	http_response response;
+	try {
+		response = client.request(methods::GET, argsStream.str().c_str()).get();
+	}
+	catch (web::http::http_exception) {
+		logger.error("Could not connect to %ls", urlStream.str().c_str());
+		return std::vector<std::shared_ptr<MethodSensorAssignment>>();
+	}
+
+	status_code c = response.status_code();
+	if (c == status_codes::OK) {
+		json::array arr = response.extract_json().get().as_array();
+		std::vector<std::shared_ptr<MethodSensorAssignment>> sensorAssignments;
+
+		for (auto it = arr.begin(); it != arr.end(); it++) {
+			json::object obj = it->as_object();
+			logger.debug("Creating object from Json...");
+			std::shared_ptr<MethodSensorAssignment> ass = sensorAssignmentFactory.createFromJson(obj);
+			logger.debug("Object created.");
+
+			if (ass) {
+				logger.debug("Adding config...");
+				sensorAssignments.push_back(ass);
+				logger.debug("Config added.");
+			}
+			else {
+				logger.warn("Could not create object from Json");
+			}
+		}
+
+		return sensorAssignments;
+	}
+	else {
+		logger.error("Could not get sending strategy config. Response was %u!", c);
+		return std::vector<std::shared_ptr<MethodSensorAssignment>>();
+	}
+}
+
 void CMRRestfulConnection::sendDataObjects(std::vector<std::shared_ptr<MethodSensorData>> dataObjects, bool waitForResponse)
 {
 	logger.debug("Sending data objects...");
@@ -286,6 +423,49 @@ void CMRRestfulConnection::sendDataObjects(std::vector<std::shared_ptr<MethodSen
 			}
 			else {
 				nestedLogger.error("Could not send data objects. Response was %u!", c);
+			}
+		});
+
+		if (waitForResponse)
+		{
+			stream.wait();
+		}
+	}
+	catch (web::http::http_exception) {
+		logger.error("Could not connect to %ls", urlStream.str().c_str());
+	}
+}
+
+void CMRRestfulConnection::sendKeepAlive(JAVA_LONG platformId, bool waitForResponse)
+{
+	logger.debug("Sending keep alive signal...");
+
+	std::wstringstream urlStream;
+	urlStream << baseUrl << storagePath << "/keepAlive";
+
+	std::wstringstream argsStream;
+	argsStream << "?platformId=" << platformId;
+
+	Logger nestedLogger = logger;
+
+	http_client client(urlStream.str().c_str());
+	try {
+		auto stream = client.request(methods::POST, argsStream.str().c_str(), MIME_JSON).then([&nestedLogger](http_response response)
+		{
+			status_code c = response.status_code();
+			if (c == status_codes::OK) {
+				auto body = response.extract_string();
+				JAVA_INT succ = _wtoi(body.get().c_str());
+
+				if (succ < 0) {
+					nestedLogger.error("Server-side error when sending keep alive signal! Ignoring...");
+				}
+				else {
+					nestedLogger.debug("Keep alive signal sent.");
+				}
+			}
+			else {
+				nestedLogger.error("Could not send keep alive signal. Response was %u!", c);
 			}
 		});
 

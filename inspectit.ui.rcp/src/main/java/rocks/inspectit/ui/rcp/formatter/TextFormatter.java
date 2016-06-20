@@ -29,6 +29,7 @@ import rocks.inspectit.shared.all.communication.data.TimerData;
 import rocks.inspectit.shared.all.communication.data.cmr.AgentStatusData;
 import rocks.inspectit.shared.cs.ci.assignment.impl.MethodSensorAssignment;
 import rocks.inspectit.shared.cs.ci.sensor.ISensorConfig;
+import rocks.inspectit.shared.cs.ci.sensor.dotNet.DotNetStackTraceSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.exception.impl.ExceptionSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.method.impl.ConnectionMetaDataSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.method.impl.ConnectionSensorConfig;
@@ -738,6 +739,8 @@ public final class TextFormatter {
 			return "System Information";
 		} else if (ObjectUtils.equals(sensorClass, ThreadSensorConfig.class)) {
 			return "Thread Information";
+		} else if (ObjectUtils.equals(sensorClass, DotNetStackTraceSensorConfig.class)) {
+			return "[.NET] Stack Trace Sampling Sensor";
 		}
 		return null;
 	}

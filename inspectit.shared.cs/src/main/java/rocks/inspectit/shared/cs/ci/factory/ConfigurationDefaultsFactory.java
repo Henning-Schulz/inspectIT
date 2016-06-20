@@ -3,6 +3,7 @@ package rocks.inspectit.shared.cs.ci.factory;
 import java.util.ArrayList;
 import java.util.List;
 
+import rocks.inspectit.shared.cs.ci.sensor.dotNet.DotNetStackTraceSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.exception.IExceptionSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.exception.impl.ExceptionSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.method.IMethodSensorConfig;
@@ -91,6 +92,7 @@ public final class ConfigurationDefaultsFactory {
 		methodSensorConfigs.add(new PreparedStatementSensorConfig());
 		methodSensorConfigs.add(new StatementSensorConfig());
 		methodSensorConfigs.add(new TimerSensorConfig());
+		methodSensorConfigs.add(new DotNetStackTraceSensorConfig());
 		methodSensorConfigs.add(new Log4jLoggingSensorConfig());
 		return methodSensorConfigs;
 	}

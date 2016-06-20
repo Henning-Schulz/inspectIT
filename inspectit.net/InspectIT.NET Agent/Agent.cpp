@@ -13,44 +13,50 @@
 #include "SingleClassHookStrategy.h"
 #include "SimpleBufferStrategy.h"
 #include "ListSizeStrategy.h"
-#include "ShadowStackSensor.h"
+#include "ShadowStackHook.h"
+#include "StrategyConfig.h"
+#include "ListSizeStrategyConfig.h"
+#include "TimeStrategyConfig.h"
+#include "SimpleBufferStrategyConfig.h"
+#include "SizeBufferStrategyConfig.h"
+#include "MethodSensorConfig.h"
+#include "StackTraceSensorConfig.h"
+#include "MethodSensorAssignment.h"
+#include "StackTraceSamplingSensor.h"
+#include "AssignmentHookStrategy.h"
 
 Agent *globalAgentInstance;
 
 Agent::Agent()
 {
-	methodSensorList = new std::list<MethodSensor*>();
-
-	addMethodSensor(new ShadowStackSensor());
+	methodHookList = new std::list<std::shared_ptr<MethodHook>>();
+	methodSensorList = new std::list<std::shared_ptr<MethodSensor>>();
 }
 
 
 Agent::~Agent()
 {
-	for (std::list<MethodSensor*>::iterator it = methodSensorList->begin(); it != methodSensorList->end(); it++) {
-		delete *it;
-	}
-
 	methodSensorList->clear();
+	methodHookList->clear();
 
-	delete methodSensorList;
+	delete methodHookList;
 	delete hookStrategy;
 }
 
 
-void Agent::addMethodSensor(MethodSensor *sensor)
+void Agent::addMethodHook(std::shared_ptr<MethodHook> hook)
 {
-	methodSensorList->push_back(sensor);
+	methodHookList->push_back(hook);
 }
 
-void Agent::removeMethodSensor(MethodSensor *sensor)
+void Agent::removeMethodHook(std::shared_ptr<MethodHook> hook)
 {
-	methodSensorList->remove(sensor);
+	methodHookList->remove(hook);
 }
 
-void Agent::removeAllMethodSensors()
+void Agent::removeAllMethodHooks()
 {
-	methodSensorList->clear();
+	methodHookList->clear();
 }
 
 HookStrategy* Agent::getHookStrategy()
@@ -65,22 +71,22 @@ HookStrategy* Agent::getHookStrategy()
 
 void Agent::Enter(METHOD_ID methodID)
 {
-	if (methodSensorList->empty()) {
+	if (methodHookList->empty()) {
 		return;
 	}
 
-	for (std::list<MethodSensor*>::iterator it = methodSensorList->begin(); it != methodSensorList->end(); it++) {
+	for (std::list<std::shared_ptr<MethodHook>>::iterator it = methodHookList->begin(); it != methodHookList->end(); it++) {
 		(*it)->beforeBody(methodID);
 	}
 }
 
 void Agent::Leave(METHOD_ID methodID)
 {
-	if (methodSensorList->empty()) {
+	if (methodHookList->empty()) {
 		return;
 	}
 
-	for (std::list<MethodSensor*>::iterator it = methodSensorList->begin(); it != methodSensorList->end(); it++) {
+	for (std::list<std::shared_ptr<MethodHook>>::iterator it = methodHookList->begin(); it != methodHookList->end(); it++) {
 		(*it)->afterBody(methodID);
 	}
 }
@@ -163,7 +169,7 @@ UINT_PTR  FunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
 	std::vector<LPWSTR> parameterTypes; // elements will be created on the heap --> need to delete them afterwards
 	globalAgentInstance->getMethodSpecifics(functionID, className, methodName, returnType, &javaModifiers, &parameterTypes);
 
-	if (globalAgentInstance->getHookStrategy()->hook(functionID, className, methodName)) {
+	if (globalAgentInstance->getHookStrategy()->hook(className, methodName, parameterTypes, javaModifiers)) {
 		LogLevel level = loggerFactory.getLogLevel();
 
 		if (level >= LEVEL_DEBUG) {
@@ -183,14 +189,12 @@ UINT_PTR  FunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
 
 		JAVA_LONG methodId = cmrConnection->registerMethod(globalAgentInstance->platformID, className, methodName, returnType, parameterTypes, javaModifiers);
 
-		// TODO: Return method ID (as unsigned int or pointer to JAVA_LONG)?
-
 		if (methodId > UINT_MAX) {
-			printf("ERROR FunctionMapper - methodId %lld is greater than maximum value of unsigned int (%u)!\n", methodId, UINT_MAX);
+			printf("ERROR FunctionMapper - methodId %lld is greater than maximum value of unsigned int (%u)! Disabling hook.\n", methodId, UINT_MAX);
 			*pbHookFunction = 0;
 		}
 		else if (methodId < 0) {
-			printf("ERROR FunctionMapper - methodId %lld is less than zero!\n", methodId);
+			printf("ERROR FunctionMapper - methodId %lld is less than zero! Disabling hook.\n", methodId);
 			*pbHookFunction = 0;
 		}
 		else {
@@ -220,11 +224,6 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 {
 	globalAgentInstance = this;
 	logger.debug("Set globalAgentInstance to this");
-	
-	std::shared_ptr<ListSizeStrategy> sendingStrategy = std::make_shared<ListSizeStrategy>(20);
-	startDataSendingService(std::make_shared<SimpleBufferStrategy>(), sendingStrategy);
-	sendingStrategy->setDataSendingService(dataSendingService);
-	dataSendingService->addListSizeListener(sendingStrategy);
 
 	if (setupCMRConnection()) {
 		logger.info("Successfully connected to CMR.");
@@ -237,9 +236,57 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 	// TODO...
 	platformID = cmrConnection->registerPlatform(getAllDefinedIPs(), L".NET%20agent", L"0.1");
 
-	// TODO: change
-	hookStrategy = new SingleClassHookStrategy(L"TestSystem.Program");
-	//
+	std::shared_ptr<StrategyConfig> bufferStrategyConfig = cmrConnection->getBufferStrategyConfig(platformID);
+	std::shared_ptr<BufferStrategy> bufferStrategy;
+
+	if (wcscmp(bufferStrategyConfig->getClassName(), SimpleBufferStrategyConfig::CLASS_NAME) == 0) {
+		logger.debug("Buffer strategy is %ls", bufferStrategyConfig->getClassName());
+		bufferStrategy = std::make_shared<SimpleBufferStrategy>();
+	}
+	else if (wcscmp(bufferStrategyConfig->getClassName(), SizeBufferStrategyConfig::CLASS_NAME) == 0) {
+		std::shared_ptr<SizeBufferStrategyConfig> config = std::static_pointer_cast<SizeBufferStrategyConfig>(bufferStrategyConfig);
+		logger.debug("Buffer strategy is %ls with size %ld", bufferStrategyConfig->getClassName(), config->getSize());
+		// TODO
+		logger.error("Not yet implemented! Shutting dowm.");
+		return E_FAIL;
+	}
+	else {
+		logger.error("Buffer strategy %ls is not supported. Shutting down...");
+		return E_FAIL;
+	}
+
+	std::shared_ptr<StrategyConfig> sendingStrategyConfig = cmrConnection->getSendingStrategyConfig(platformID);
+	
+	if (wcscmp(sendingStrategyConfig->getClassName(), ListSizeStrategyConfig::CLASS_NAME) == 0) {
+		std::shared_ptr<ListSizeStrategyConfig> config = std::static_pointer_cast<ListSizeStrategyConfig>(sendingStrategyConfig);
+		logger.debug("Sending strategy is %ls with listSize %ld", sendingStrategyConfig->getClassName(), config->getListSize());
+
+		std::shared_ptr<ListSizeStrategy> sendingStrategy = std::make_shared<ListSizeStrategy>(config->getListSize());
+		startDataSendingService(bufferStrategy, sendingStrategy);
+		sendingStrategy->setDataSendingService(dataSendingService);
+		dataSendingService->addListSizeListener(sendingStrategy);
+	}
+	else if (wcscmp(sendingStrategyConfig->getClassName(), TimeStrategyConfig::CLASS_NAME) == 0) {
+		std::shared_ptr<TimeStrategyConfig> config = std::static_pointer_cast<TimeStrategyConfig>(sendingStrategyConfig);
+		logger.debug("Sending strategy is %ls with time %lld", sendingStrategyConfig->getClassName(), config->getTime());
+		// TODO
+		logger.error("Not yet implemented! Shutting dowm.");
+		return E_FAIL;
+	} else {
+		logger.error("Sending strategy %ls is not supported. Shutting down...");
+		return E_FAIL;
+	}
+
+	std::vector<std::shared_ptr<MethodSensorConfig>> sensorConfigs = cmrConnection->getMethodSensorConfigs(platformID);
+	logger.debug("Sensor configs retrieved.");
+
+	for (auto it = sensorConfigs.begin(); it != sensorConfigs.end(); it++) {
+		logger.debug("Using sensor config %ls", (*it)->getClassName());
+	}
+
+	std::vector<std::shared_ptr<MethodSensorAssignment>> sensorAssignements = cmrConnection->getMethodSensorAssignments(platformID);
+	AssignmentHookStrategy *ahs = new AssignmentHookStrategy();
+	hookStrategy = ahs;
 
 	HRESULT hr;
 	hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo3,
@@ -268,15 +315,61 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 		return hr;
 	}
 
-	for (std::list<MethodSensor*>::iterator it = methodSensorList->begin(); it != methodSensorList->end(); it++) {
+	bool stackTraceSensorCreated = false;
+
+	for (auto it = sensorAssignements.begin(); it != sensorAssignements.end(); it++) {
+		std::shared_ptr<MethodSensorAssignment> ass = *it;
+		logger.debug("Using sensor assignment for sensor %ls with parameters:", ass->getSensorClassName());
+		logger.debug("\tclassName: %ls", ass->getClassName().c_str());
+		logger.debug("\tsuperclass: %s", (ass->isSuperclass() ? "true" : "false"));
+		logger.debug("\tinterface: %s", (ass->isInterface() ? "true" : "false"));
+		logger.debug("\tmethodName: %ls", ass->getMethodName());
+		logger.debug("\tparameters: %s", (ass->getParameters().empty() ? "*" : "..."));
+		logger.debug("\tconstructor: %s", (ass->isConstructor() ? "true" : "false"));
+		logger.debug("\tpublicModifier: %s", (ass->isPublicModifier() ? "true" : "false"));
+		logger.debug("\tprotectedModifier: %s", (ass->isProtectedModifier() ? "true" : "false"));
+		logger.debug("\tprivateModifier: %s", (ass->isPrivateModifier() ? "true" : "false"));
+		logger.debug("\tdefaultModifier: %s", (ass->isDefaultModifier() ? "true" : "false"));
+
+		std::shared_ptr<MethodSensor> sensor;
+		std::shared_ptr<MethodSensorConfig> config;
+
+		if (wcscmp(ass->getSensorClassName(), StackTraceSensorConfig::CLASS_NAME) == 0) {
+			if (!stackTraceSensorCreated) {
+				for (auto it = sensorConfigs.begin(); it != sensorConfigs.end(); it++) {
+					if (wcscmp((*it)->getClassName(), ass->getSensorClassName()) == 0) {
+						config = *it;
+						break;
+					}
+				}
+
+				sensor = std::make_shared<StackTraceSamplingSensor>();
+				stackTraceSensorCreated = true;
+				logger.debug("Created StackTraceSamplingSensor.");
+			}
+
+			ahs->addAssignment(ass);
+			logger.debug("Added assignment for %ls", ass->getSensorClassName());
+		}
+		else {
+			logger.warn("Sensor %ls is not supported!", ass->getSensorClassName());
+			continue;
+		}
+
 		WCHAR className[MAX_BUFFERSIZE];
-		getMethodSensorClassName(*it, className);
+		getMethodSensorClassName(sensor, className);
 		JAVA_LONG sensorTypeId = cmrConnection->registerMethodSensorType(platformID, className);
-		(*it)->setSensorTypeId(sensorTypeId);
-		(*it)->setPlatformId(platformID);
-		(*it)->init(profilerInfo3);
 		logger.debug("Sensor %ls has id %lli", className, sensorTypeId);
+		sensor->init(config, sensorTypeId, platformID, profilerInfo3);
+		methodSensorList->push_back(sensor);
+
+		if (sensor->hasHook()) {
+			methodHookList->push_back(sensor->getHook());
+		}
 	}
+
+	alive = true;
+	keepAliveThread = std::thread([this]() { keepAlive(); });
 
 	logger.info("Initialized successfully");
 
@@ -287,12 +380,14 @@ HRESULT Agent::Shutdown()
 {
 	shutdownCounter++;
 
-	for (std::list<MethodSensor*>::iterator it = methodSensorList->begin(); it != methodSensorList->end(); it++) {
+	for (auto it = methodSensorList->begin(); it != methodSensorList->end(); it++) {
 		(*it)->notifyShutdown();
 	}
 
 	shutdownDataSendingService();
 	cmrConnection->unregisterPlatform(getAllDefinedIPs(), L".NET%20agent");
+	alive = false;
+	keepAliveThread.join();
 	shutdownCMRConnection();
 	return S_OK;
 }
@@ -313,6 +408,14 @@ HRESULT Agent::DllDetachShutdown()
 	}
 
 	return S_OK;
+}
+
+void Agent::keepAlive()
+{
+	while (alive) {
+		cmrConnection->sendKeepAlive(platformID, !alive);
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+	}
 }
 
 

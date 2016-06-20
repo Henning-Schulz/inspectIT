@@ -1,7 +1,9 @@
 package rocks.inspectit.ui.rcp.ci.form.part;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -27,6 +29,9 @@ import org.eclipse.ui.forms.widgets.Section;
 
 import rocks.inspectit.shared.cs.ci.Environment;
 import rocks.inspectit.shared.cs.ci.sensor.StringConstraintSensorConfig;
+import rocks.inspectit.shared.cs.ci.sensor.dotNet.DotNetStackTraceSensorConfig;
+import rocks.inspectit.shared.cs.ci.sensor.dotNet.DotNetStackTraceSensorConfig.StackTraceProviderType;
+import rocks.inspectit.shared.cs.ci.sensor.dotNet.DotNetStackTraceSensorConfig.TriggerType;
 import rocks.inspectit.shared.cs.ci.sensor.exception.impl.ExceptionSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.method.IMethodSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.method.impl.HttpSensorConfig;
@@ -43,9 +48,9 @@ import rocks.inspectit.ui.rcp.validation.ValidationControlDecoration;
 
 /**
  * Part for displaying sensor options.
- * 
+ *
  * @author Ivan Senic
- * 
+ *
  */
 public class SensorOptionsPart extends SectionPart implements IPropertyListener {
 
@@ -67,16 +72,16 @@ public class SensorOptionsPart extends SectionPart implements IPropertyListener 
 	/**
 	 * All {@link StringConstraintComponent} on the page.
 	 */
-	private List<StringConstraintComponent> constrainComponents = new ArrayList<>();
+	private final List<StringConstraintComponent> constrainComponents = new ArrayList<>();
 
 	/**
 	 * Form page part belongs to.
 	 */
-	private FormPage formPage;
+	private final FormPage formPage;
 
 	/**
 	 * Default constructor.
-	 * 
+	 *
 	 * @param formPage
 	 *            {@link FormPage} section belongs to.
 	 * @param parent
@@ -105,7 +110,7 @@ public class SensorOptionsPart extends SectionPart implements IPropertyListener 
 
 	/**
 	 * Creates complete client.
-	 * 
+	 *
 	 * @param section
 	 *            {@link Section}
 	 * @param toolkit
@@ -122,7 +127,13 @@ public class SensorOptionsPart extends SectionPart implements IPropertyListener 
 		IMessageManager messageManager = formPage.getManagedForm().getMessageManager();
 		// method sensors
 		for (IMethodSensorConfig methodSensorConfig : environment.getMethodSensorConfigs()) {
-			if (methodSensorConfig instanceof StringConstraintSensorConfig) {
+			if (methodSensorConfig instanceof DotNetStackTraceSensorConfig) {
+				DotNetStackTraceComponent dotNetComponent = new DotNetStackTraceComponent((DotNetStackTraceSensorConfig) methodSensorConfig, messageManager);
+				constrainComponents.add(dotNetComponent);
+				dotNetComponent.createComponent(mainComposite, toolkit, "String length of captured context(s):",
+						"Defines the maximum string length of captured context (parameters, fields, return values) for timer sensor.", layoutColumns);
+
+			} else if (methodSensorConfig instanceof StringConstraintSensorConfig) {
 				StringConstraintComponent stringConstraintComponent = new StringConstraintComponent((StringConstraintSensorConfig) methodSensorConfig, messageManager);
 				constrainComponents.add(stringConstraintComponent);
 
@@ -139,8 +150,8 @@ public class SensorOptionsPart extends SectionPart implements IPropertyListener 
 					stringConstraintComponent.createComponent(mainComposite, toolkit, "String length of SQLs:",
 							"Defines the maximum string length of SQL strings and parameters for prepared statement sensor.", layoutColumns);
 				} else if (methodSensorConfig instanceof StatementSensorConfig) {
-					stringConstraintComponent.createComponent(mainComposite, toolkit, "String length of SQLs:",
-							"Defines the maximum string length of SQL strings and parameters for statement sensor.", layoutColumns);
+					stringConstraintComponent.createComponent(mainComposite, toolkit, "String length of SQLs:", "Defines the maximum string length of SQL strings and parameters for statement sensor.",
+							layoutColumns);
 				}
 			}
 		}
@@ -161,9 +172,7 @@ public class SensorOptionsPart extends SectionPart implements IPropertyListener 
 		exceptionSimple.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		exceptionEnhanced = toolkit.createButton(radioGroupHelp, "Enhanced", SWT.RADIO);
 		toolkit.createLabel(mainComposite, "");
-		createInfoLabel(
-				mainComposite,
-				toolkit,
+		createInfoLabel(mainComposite, toolkit,
 				"Simple mode will only provide the information where have the exceptions been created. All other informations like passed and handled will be available when enhanced mode if on. But, with simple mode there will be no performance overhead for using the exception sensor.");
 
 		// set selection for simple / enhanced
@@ -222,7 +231,7 @@ public class SensorOptionsPart extends SectionPart implements IPropertyListener 
 
 	/**
 	 * Creates info icon with given text as tool-tip.
-	 * 
+	 *
 	 * @param parent
 	 *            Composite to create on.
 	 * @param toolkit
@@ -236,11 +245,225 @@ public class SensorOptionsPart extends SectionPart implements IPropertyListener 
 		label.setImage(InspectIT.getDefault().getImage(InspectITImages.IMG_INFORMATION));
 	}
 
+	private static class DotNetStackTraceComponent extends StringConstraintComponent {
+
+		private final Map<TriggerType, Button> triggerButtons = new HashMap<>();
+		private final Map<StackTraceProviderType, Button> providerButtons = new HashMap<>();
+
+		private Text samplingInterval;
+		private ValidationControlDecoration<Text> samplingIntervalDecoration;
+
+		private DotNetStackTraceSensorConfig sensorConfig;
+
+		/**
+		 * @param sensorConfig
+		 * @param messageManager
+		 */
+		public DotNetStackTraceComponent(DotNetStackTraceSensorConfig sensorConfig, IMessageManager messageManager) {
+			super(sensorConfig, messageManager);
+			this.sensorConfig = sensorConfig;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void createComponent(Composite parent, FormToolkit toolkit, String label, String infoText, int layoutColumns) {
+			super.createComponent(parent, toolkit, label, infoText, layoutColumns);
+
+			toolkit.createLabel(parent, "Trigger:").setLayoutData(getIndentGridData());
+			Composite radioGroupHelp = toolkit.createComposite(parent);
+			radioGroupHelp.setLayout(getLayoutForRadioGroup());
+			radioGroupHelp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+			for (TriggerType triggerType : TriggerType.values()) {
+				Button b = toolkit.createButton(radioGroupHelp, triggerType.getName(), SWT.RADIO);
+				b.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				triggerButtons.put(triggerType, b);
+			}
+
+			samplingInterval = toolkit.createText(parent, "", SWT.BORDER | SWT.RIGHT);
+			samplingInterval.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			createInfoLabel(parent, toolkit,
+					"Defines the type of trigger for sampling. For time-based triggers, the sampling interval (the time between two samplings) in milliseconds has to be specified.");
+
+			// decoration
+			samplingIntervalDecoration = new ValidationControlDecoration<Text>(samplingInterval, super.messageManager) {
+				@Override
+				protected boolean validate(Text control) {
+					return validateSamplingIntervalUpdate(false);
+				}
+			};
+			samplingIntervalDecoration.setDescriptionText("Must be a positive number.");
+			samplingIntervalDecoration.registerListener(SWT.Modify);
+
+			fillTriggerSelectionAndSamplingInterval();
+
+			// listeners
+			Listener listener = new Listener() {
+				@Override
+				public void handleEvent(Event event) {
+					boolean samplingIntervalRequired = false;
+
+					for (Map.Entry<TriggerType, Button> entry : triggerButtons.entrySet()) {
+						if (entry.getKey().dependsOnSamplingInterval() && entry.getValue().getSelection()) {
+							samplingIntervalRequired = true;
+							break;
+						}
+					}
+
+					if (samplingIntervalRequired) {
+						samplingInterval.setEnabled(true);
+						samplingInterval.setText(String.valueOf(sensorConfig.getSamplingInterval()));
+					} else {
+						samplingInterval.setEnabled(false);
+						samplingInterval.setText("");
+					}
+				}
+			};
+
+			for (Map.Entry<TriggerType, Button> entry : triggerButtons.entrySet()) {
+				entry.getValue().addListener(SWT.Selection, listener);
+			}
+
+			// Provider
+			toolkit.createLabel(parent, "Provider:").setLayoutData(getIndentGridData());
+			radioGroupHelp = toolkit.createComposite(parent);
+			radioGroupHelp.setLayout(getLayoutForRadioGroup());
+			radioGroupHelp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+			boolean buttonSelected = false;
+			for (StackTraceProviderType providerType : StackTraceProviderType.values()) {
+				Button b = toolkit.createButton(radioGroupHelp, providerType.getName(), SWT.RADIO);
+				b.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				providerButtons.put(providerType, b);
+
+				if (providerType == sensorConfig.getProviderType()) {
+					b.setSelection(true);
+					buttonSelected = true;
+				}
+			}
+
+			if (!buttonSelected) {
+				sensorConfig.setProviderType(StackTraceProviderType.SHADOW_STACK);
+				providerButtons.get(StackTraceProviderType.SHADOW_STACK).setSelection(true);
+			}
+
+			createInfoLabel(parent, toolkit, "Defines the stack trace provider. Besides retrieving the native stack of the CLR, alternatives like shadow stacks could be used.");
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public boolean validateUpdate(boolean update) {
+			boolean valid = super.validateUpdate(update);
+
+			if (update) {
+				valid &= validateSamplingIntervalUpdate(true);
+
+				for (Map.Entry<StackTraceProviderType, Button> entry : providerButtons.entrySet()) {
+					if (entry.getValue().getSelection()) {
+						sensorConfig.setProviderType(entry.getKey());
+						break;
+					}
+				}
+			}
+
+			return valid;
+		}
+
+		public boolean validateSamplingIntervalUpdate(boolean update) {
+			boolean valid = true;
+
+			for (Map.Entry<TriggerType, Button> entry : triggerButtons.entrySet()) {
+				if (entry.getValue().getSelection()) {
+					TriggerType triggerType = entry.getKey();
+					if (triggerType.dependsOnSamplingInterval()) {
+						try {
+							int interval = Integer.parseInt(samplingInterval.getText());
+							if (interval <= 0) {
+								valid = false;
+							} else {
+								if (update) {
+									sensorConfig.setSamplingInterval(interval);
+									sensorConfig.setTriggerType(triggerType);
+								}
+							}
+						} catch (NumberFormatException e) {
+							valid = false;
+						}
+					} else {
+						if (update) {
+							sensorConfig.setSamplingInterval(0);
+							sensorConfig.setTriggerType(triggerType);
+						}
+					}
+					break;
+				}
+			}
+
+			return valid;
+		}
+
+		private void fillTriggerSelectionAndSamplingInterval() {
+			long interval = sensorConfig.getSamplingInterval();
+
+			if (sensorConfig.getTriggerType() == null) {
+				sensorConfig.setTriggerType(TriggerType.TIMER);
+			}
+
+			for (Map.Entry<TriggerType, Button> entry : triggerButtons.entrySet()) {
+				TriggerType triggerType = entry.getKey();
+				boolean selected = triggerType == sensorConfig.getTriggerType();
+				entry.getValue().setSelection(selected);
+
+				if (selected && triggerType.dependsOnSamplingInterval()) {
+					samplingInterval.setText(String.valueOf(interval));
+				} else if (selected && !triggerType.dependsOnSamplingInterval()) {
+					samplingInterval.setText("");
+					samplingInterval.setEnabled(false);
+				}
+			}
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void addDirtyListener(Listener listener) {
+			super.addDirtyListener(listener);
+			for (Map.Entry<TriggerType, Button> entry : triggerButtons.entrySet()) {
+				entry.getValue().addListener(SWT.Selection, listener);
+			}
+			for (Map.Entry<StackTraceProviderType, Button> entry : providerButtons.entrySet()) {
+				entry.getValue().addListener(SWT.Selection, listener);
+			}
+			samplingInterval.addListener(SWT.Modify, listener);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public boolean updateSensorConfig(StringConstraintSensorConfig sensorConfig) {
+			boolean updated = super.updateSensorConfig(sensorConfig);
+
+			if (updated && Objects.equals(this.sensorConfig.getClassName(), sensorConfig.getClassName())) {
+				this.sensorConfig = (DotNetStackTraceSensorConfig) sensorConfig;
+				return true;
+			}
+
+			return false;
+		}
+
+	}
+
 	/**
 	 * Help class for managing {@link StringConstraintSensorConfig}s.
-	 * 
+	 *
 	 * @author Ivan Senic
-	 * 
+	 *
 	 */
 	private static class StringConstraintComponent {
 
@@ -252,7 +475,7 @@ public class SensorOptionsPart extends SectionPart implements IPropertyListener 
 		/**
 		 * Message manager to use in the validation control decoration.
 		 */
-		private IMessageManager messageManager;
+		private final IMessageManager messageManager;
 
 		/**
 		 * Unlimited button.
@@ -276,7 +499,7 @@ public class SensorOptionsPart extends SectionPart implements IPropertyListener 
 
 		/**
 		 * Default constructor.
-		 * 
+		 *
 		 * @param sensorConfig
 		 *            Sensor config.
 		 * @param messageManager
@@ -289,7 +512,7 @@ public class SensorOptionsPart extends SectionPart implements IPropertyListener 
 
 		/**
 		 * Creates component.
-		 * 
+		 *
 		 * @param parent
 		 *            Parent composite
 		 * @param toolkit
@@ -353,7 +576,7 @@ public class SensorOptionsPart extends SectionPart implements IPropertyListener 
 
 		/**
 		 * Adds dirty listener to needed controls.
-		 * 
+		 *
 		 * @param listener
 		 *            Dirty listener.
 		 */
@@ -365,7 +588,7 @@ public class SensorOptionsPart extends SectionPart implements IPropertyListener 
 
 		/**
 		 * Validates the value and updates if needed.
-		 * 
+		 *
 		 * @param update
 		 *            If beside validation an update on the model object should be done.
 		 * @return if value in the control is valid
@@ -412,7 +635,7 @@ public class SensorOptionsPart extends SectionPart implements IPropertyListener 
 
 		/**
 		 * Updates the sensor config if it's relating to the same class.
-		 * 
+		 *
 		 * @param sensorConfig
 		 *            new config
 		 * @return <code>true</code> if update occurred

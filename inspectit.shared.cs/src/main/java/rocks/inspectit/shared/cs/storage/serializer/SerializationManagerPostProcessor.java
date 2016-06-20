@@ -23,6 +23,7 @@ import rocks.inspectit.shared.cs.ci.context.impl.FieldContextCapture;
 import rocks.inspectit.shared.cs.ci.context.impl.ParameterContextCapture;
 import rocks.inspectit.shared.cs.ci.context.impl.ReturnContextCapture;
 import rocks.inspectit.shared.cs.ci.exclude.ExcludeRule;
+import rocks.inspectit.shared.cs.ci.sensor.dotNet.DotNetStackTraceSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.exception.impl.ExceptionSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.method.impl.ConnectionMetaDataSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.method.impl.ConnectionSensorConfig;
@@ -300,6 +301,7 @@ public class SerializationManagerPostProcessor implements BeanPostProcessor {
 		kryo.register(PreparedStatementSensorConfig.class, new FieldSerializer<PreparedStatementSensorConfig>(kryo, PreparedStatementSensorConfig.class), nextRegistrationId++);
 		kryo.register(StatementSensorConfig.class, new FieldSerializer<StatementSensorConfig>(kryo, StatementSensorConfig.class), nextRegistrationId++);
 		kryo.register(TimerSensorConfig.class, new FieldSerializer<TimerSensorConfig>(kryo, TimerSensorConfig.class), nextRegistrationId++);
+		kryo.register(DotNetStackTraceSensorConfig.class, new FieldSerializer<DotNetStackTraceSensorConfig>(kryo, DotNetStackTraceSensorConfig.class), nextRegistrationId++);
 		// platform sensor configs
 		kryo.register(ClassLoadingSensorConfig.class, new FieldSerializer<ClassLoadingSensorConfig>(kryo, ClassLoadingSensorConfig.class), nextRegistrationId++);
 		kryo.register(CompilationSensorConfig.class, new FieldSerializer<CompilationSensorConfig>(kryo, CompilationSensorConfig.class), nextRegistrationId++);

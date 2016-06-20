@@ -1,8 +1,9 @@
 #include "StackTraceData.h"
 
+#include <chrono>
 
 
-StackTraceData::StackTraceData(std::vector<std::shared_ptr<StackTraceSample>> traces, JAVA_LONG platformId, JAVA_LONG methodSensorId, JAVA_LONG methodId, ThreadID threadId, std::time_t timestamp)
+StackTraceData::StackTraceData(std::vector<std::shared_ptr<StackTraceSample>> traces, JAVA_LONG platformId, JAVA_LONG methodSensorId, JAVA_LONG methodId, ThreadID threadId, JAVA_LONG timestamp)
 	: MethodSensorData(platformId, methodSensorId, methodId, timestamp)
 {
 	this->threadId = threadId;

@@ -14,22 +14,18 @@ ShadowStack::~ShadowStack()
 void ShadowStack::pushMethod(METHOD_ID methodId)
 {
 	std::unique_lock<std::mutex> lock(stackMutex);
-	logger.debug("push_back(%i)", methodId);
 	stack.push_back(std::make_pair(methodId, true));
 }
 
 void ShadowStack::popMethod()
 {
 	std::unique_lock<std::mutex> lock(stackMutex);
-	logger.debug("pop_back(%i)", stack.back().first);
 	stack.pop_back();
-	if (stack.empty()) {
-		logger.debug("Stack is empty");
-	}
 }
 
 std::shared_ptr<StackTraceSample> ShadowStack::doSnapshot()
 {
+	JAVA_LONG timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 	std::vector<JAVA_LONG> trace;
 	JAVA_INT offset;
 
@@ -44,5 +40,5 @@ std::shared_ptr<StackTraceSample> ShadowStack::doSnapshot()
 		}
 	}
 
-	return std::make_shared<StackTraceSample>(trace, offset);
+	return std::make_shared<StackTraceSample>(trace, offset, timestamp);
 }

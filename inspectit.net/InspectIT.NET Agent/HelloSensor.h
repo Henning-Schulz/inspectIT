@@ -1,9 +1,9 @@
 #pragma once
 
-#include "MethodSensor.h"
+#include "MethodHook.h"
 #include "Logger.h"
 
-class HelloSensor :	public MethodSensor
+class HelloSensor :	public MethodHook
 {
 private:
 	Logger logger = loggerFactory.createLogger("HelloSensor");

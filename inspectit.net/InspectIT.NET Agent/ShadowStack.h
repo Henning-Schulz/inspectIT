@@ -8,6 +8,7 @@
 #include <utility>
 #include <mutex>
 #include <memory>
+#include <chrono>
 
 class ShadowStack
 {

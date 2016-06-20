@@ -2,24 +2,22 @@
 
 #include "basehdr.h"
 
-#include "MethodSensor.h"
-#include "ShadowStackProvider.h"
+#include "MethodHook.h"
+#include "ShadowStackHolder.h"
 #include "StackTraceSampler.h"
 #include "SamplingTrigger.h"
 
 #include <memory>
 
-class ShadowStackSensor : public MethodSensor
+class ShadowStackHook : public MethodHook
 {
 private:
 	ICorProfilerInfo *profilerInfo;
-	std::shared_ptr<ShadowStackProvider> provider;
-	std::shared_ptr<SamplingTrigger> trigger;
-	std::shared_ptr<StackTraceSampler> sampler;
+	std::shared_ptr<ShadowStackHolder> stackHolder;
 
 public:
-	ShadowStackSensor();
-	~ShadowStackSensor();
+	ShadowStackHook(std::shared_ptr<ShadowStackHolder> stackHolder);
+	~ShadowStackHook();
 
 	void init(ICorProfilerInfo *profilerInfo);
 	void notifyShutdown();

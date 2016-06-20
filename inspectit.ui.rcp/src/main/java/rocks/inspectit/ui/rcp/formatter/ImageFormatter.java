@@ -24,6 +24,7 @@ import rocks.inspectit.shared.cs.ci.context.impl.FieldContextCapture;
 import rocks.inspectit.shared.cs.ci.context.impl.ParameterContextCapture;
 import rocks.inspectit.shared.cs.ci.context.impl.ReturnContextCapture;
 import rocks.inspectit.shared.cs.ci.sensor.ISensorConfig;
+import rocks.inspectit.shared.cs.ci.sensor.dotNet.DotNetStackTraceSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.exception.impl.ExceptionSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.method.impl.ConnectionMetaDataSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.method.impl.ConnectionSensorConfig;
@@ -396,6 +397,8 @@ public final class ImageFormatter {
 			return InspectIT.getDefault().getImage(InspectITImages.IMG_SYSTEM_OVERVIEW);
 		} else if (ObjectUtils.equals(sensorClass, ThreadSensorConfig.class)) {
 			return InspectIT.getDefault().getImage(InspectITImages.IMG_THREADS_OVERVIEW);
+		} else if (ObjectUtils.equals(sensorClass, DotNetStackTraceSensorConfig.class)) {
+			return InspectIT.getDefault().getImage(InspectITImages.IMG_COUNTER);
 		}
 		return null;
 	}

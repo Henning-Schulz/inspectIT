@@ -10,7 +10,7 @@
 class StackTraceSampler
 {
 private:
-	/* ID of the sensor providing the data (e.g. of ShadowStackSensor) */
+	/* ID of the sensor providing the data (e.g. of ShadowStackHook) */
 	JAVA_LONG sensorTypeId;
 	JAVA_LONG platformId;
 
@@ -21,8 +21,11 @@ private:
 	void storeTrace(ThreadID threadId, std::shared_ptr<StackTraceSample> trace, bool forceNewStorage);
 
 public:
-	StackTraceSampler(std::shared_ptr<StackTraceProvider> provider, JAVA_LONG sensorTypeId, JAVA_LONG platformId);
+	StackTraceSampler(std::shared_ptr<StackTraceProvider> provider);
 	~StackTraceSampler();
+
+	void setSensorTypeId(JAVA_LONG sensorTypeId);
+	void setPlatformId(JAVA_LONG platformId);
 
 	/*
 	 * Should be called by the trigger

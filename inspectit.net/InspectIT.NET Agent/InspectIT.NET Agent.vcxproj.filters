@@ -52,6 +52,30 @@
     <Filter Include="Source Files\logging">
       <UniqueIdentifier>{fd83f324-6fef-4e2d-bf5f-f84a6c70ad2f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\sampling.trigger">
+      <UniqueIdentifier>{37061e37-47b6-4b5b-88a2-c53fc5d77ca2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sampling.trigger">
+      <UniqueIdentifier>{ddeb7163-88ae-4a60-9532-73964e224076}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\config.strategy">
+      <UniqueIdentifier>{d0a42feb-ee34-45fd-b7bb-5b435b48f7cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\config.strategy">
+      <UniqueIdentifier>{1eb1e7e0-5fb7-4816-9781-870a92691ccb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\config.sensor">
+      <UniqueIdentifier>{fa34d856-a1c4-44d7-b354-c89c97188cf8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\config.sensor">
+      <UniqueIdentifier>{4d228176-09aa-4aff-9778-7333f6d3118b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\utils">
+      <UniqueIdentifier>{8e37ad29-29f1-4a03-8e3c-35cf892b8ba8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\utils">
+      <UniqueIdentifier>{e6d9751f-d566-4e9f-b4f6-aee95dbc42d2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Agent.h">
@@ -123,9 +147,6 @@
     <ClInclude Include="SingleClassHookStrategy.h">
       <Filter>Header Files\test</Filter>
     </ClInclude>
-    <ClInclude Include="MethodSensor.h">
-      <Filter>Header Files\core</Filter>
-    </ClInclude>
     <ClInclude Include="MethodSensorData.h">
       <Filter>Header Files\core</Filter>
     </ClInclude>
@@ -133,9 +154,6 @@
       <Filter>Header Files\sending</Filter>
     </ClInclude>
     <ClInclude Include="ShadowStack.h">
-      <Filter>Header Files\sampling.shadow</Filter>
-    </ClInclude>
-    <ClInclude Include="ShadowStackSensor.h">
       <Filter>Header Files\sampling.shadow</Filter>
     </ClInclude>
     <ClInclude Include="StackTraceSampler.h">
@@ -160,7 +178,64 @@
       <Filter>Header Files\sampling.shadow</Filter>
     </ClInclude>
     <ClInclude Include="TimedTrigger.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\sampling.trigger</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodHook.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowStackHook.h">
+      <Filter>Header Files\sampling.shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodSensor.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="StrategyConfig.h">
+      <Filter>Header Files\config.strategy</Filter>
+    </ClInclude>
+    <ClInclude Include="ListSizeStrategyConfig.h">
+      <Filter>Header Files\config.strategy</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleBufferStrategyConfig.h">
+      <Filter>Header Files\config.strategy</Filter>
+    </ClInclude>
+    <ClInclude Include="SizeBufferStrategyConfig.h">
+      <Filter>Header Files\config.strategy</Filter>
+    </ClInclude>
+    <ClInclude Include="StrategyConfigJsonFactory.h">
+      <Filter>Header Files\config.strategy</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeStrategyConfig.h">
+      <Filter>Header Files\config.strategy</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodSensorConfig.h">
+      <Filter>Header Files\config.sensor</Filter>
+    </ClInclude>
+    <ClInclude Include="StackTraceSensorConfig.h">
+      <Filter>Header Files\config.sensor</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodSensorAssignment.h">
+      <Filter>Header Files\config.sensor</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodSensorConfigJsonFactory.h">
+      <Filter>Header Files\config.sensor</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowStackHolder.h">
+      <Filter>Header Files\sampling.shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="stringutils.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="cmp_wstr.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="StackTraceSamplingSensor.h">
+      <Filter>Header Files\sampling.core</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodSensorAssignmentJsonFactory.h">
+      <Filter>Header Files\config.sensor</Filter>
+    </ClInclude>
+    <ClInclude Include="AssignmentHookStrategy.h">
+      <Filter>Header Files\core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -215,9 +290,6 @@
     <ClCompile Include="ShadowStack.cpp">
       <Filter>Source Files\sampling.shadow</Filter>
     </ClCompile>
-    <ClCompile Include="ShadowStackSensor.cpp">
-      <Filter>Source Files\sampling.shadow</Filter>
-    </ClCompile>
     <ClCompile Include="ShadowStackProvider.cpp">
       <Filter>Source Files\sampling.shadow</Filter>
     </ClCompile>
@@ -225,7 +297,46 @@
       <Filter>Source Files\logging</Filter>
     </ClCompile>
     <ClCompile Include="TimedTrigger.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\sampling.trigger</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowStackHook.cpp">
+      <Filter>Source Files\sampling.shadow</Filter>
+    </ClCompile>
+    <ClCompile Include="ListSizeStrategyConfig.cpp">
+      <Filter>Source Files\config.strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpleBufferStrategyConfig.cpp">
+      <Filter>Source Files\config.strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="SizeBufferStrategyConfig.cpp">
+      <Filter>Source Files\config.strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="StrategyConfigJsonFactory.cpp">
+      <Filter>Source Files\config.strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeStrategyConfig.cpp">
+      <Filter>Source Files\config.strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="StackTraceSensorConfig.cpp">
+      <Filter>Source Files\config.sensor</Filter>
+    </ClCompile>
+    <ClCompile Include="stringutils.cpp">
+      <Filter>Source Files\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="StackTraceSamplingSensor.cpp">
+      <Filter>Source Files\sampling.core</Filter>
+    </ClCompile>
+    <ClCompile Include="AssignmentHookStrategy.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="MethodSensorAssignment.cpp">
+      <Filter>Source Files\config.sensor</Filter>
+    </ClCompile>
+    <ClCompile Include="MethodSensorAssignmentJsonFactory.cpp">
+      <Filter>Source Files\config.sensor</Filter>
+    </ClCompile>
+    <ClCompile Include="MethodSensorConfigJsonFactory.cpp">
+      <Filter>Source Files\config.sensor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

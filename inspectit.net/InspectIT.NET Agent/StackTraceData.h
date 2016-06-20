@@ -20,7 +20,7 @@ protected:
 	LPWSTR getJavaTypeName();
 
 public:
-	StackTraceData(std::vector<std::shared_ptr<StackTraceSample>> traces, JAVA_LONG platformId, JAVA_LONG methodSensorId, JAVA_LONG methodId, ThreadID threadId, std::time_t timestamp = time(nullptr));
+	StackTraceData(std::vector<std::shared_ptr<StackTraceSample>> traces, JAVA_LONG platformId, JAVA_LONG methodSensorId, JAVA_LONG methodId, ThreadID threadId, JAVA_LONG timestamp = -1);
 	~StackTraceData();
 
 	ThreadID getThreadId();

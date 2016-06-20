@@ -3,7 +3,7 @@
 #include "basehdr.h"
 
 #include <cpprest/json.h>
-#include <ctime>
+#include <chrono>
 
 #define TYPE_KEY L"objectType"
 
@@ -20,12 +20,18 @@ protected:
 	virtual LPWSTR getJavaTypeName() = 0;
 
 public:
-	MethodSensorData(JAVA_LONG platformId, JAVA_LONG methodSensorId, JAVA_LONG methodId, std::time_t timestamp = time(nullptr))
+	MethodSensorData(JAVA_LONG platformId, JAVA_LONG methodSensorId, JAVA_LONG methodId, JAVA_LONG timestamp = -1)
 	{
 		this->platformId = platformId;
 		this->methodSensorId = methodSensorId;
 		this->methodId = methodId;
-		this->timestamp = timestamp;
+
+		if (timestamp < 0) {
+			this->timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+		}
+		else {
+			this->timestamp = timestamp;
+		}
 	}
 	virtual ~MethodSensorData() {}
 

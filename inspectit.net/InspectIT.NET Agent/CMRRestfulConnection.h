@@ -2,6 +2,9 @@
 
 #include "CMRConnection.h"
 #include "Logger.h"
+#include "StrategyConfigJsonFactory.h"
+#include "MethodSensorConfigJsonFactory.h"
+#include "MethodSensorAssignmentJsonFactory.h"
 
 #include <cpprest/http_client.h>
 #include <cpprest/filestream.h>
@@ -15,9 +18,16 @@ private:
 	LPWSTR baseUrl;
 	LPWSTR registrationPath;
 	LPWSTR connectionTestPath;
+	LPWSTR configPath;
 	LPWSTR storagePath;
 
+	StrategyConfigJsonFactory strategyConfigFactory = StrategyConfigJsonFactory();
+	MethodSensorConfigJsonFactory sensorConfigFactory = MethodSensorConfigJsonFactory();
+	MethodSensorAssignmentJsonFactory sensorAssignmentFactory = MethodSensorAssignmentJsonFactory();
+
 	Logger logger = loggerFactory.createLogger("CMRRestfulConnection");
+
+	std::shared_ptr<StrategyConfig> getStrategyConfig(JAVA_LONG platformId, const wchar_t* path);
 
 public:
 	CMRRestfulConnection();
@@ -34,7 +44,13 @@ public:
 
 	void addSensorTypeToMethod(JAVA_LONG sensorTypeId, JAVA_LONG methodId);
 
+	std::shared_ptr<StrategyConfig> getSendingStrategyConfig(JAVA_LONG platformId);
+	std::shared_ptr<StrategyConfig> getBufferStrategyConfig(JAVA_LONG platformId);
+	std::vector<std::shared_ptr<MethodSensorConfig>> getMethodSensorConfigs(JAVA_LONG platformId);
+	std::vector<std::shared_ptr<MethodSensorAssignment>> getMethodSensorAssignments(JAVA_LONG platformId);
+
 	void sendDataObjects(std::vector<std::shared_ptr<MethodSensorData>> dataObjects, bool waitForResponse);
+	void sendKeepAlive(JAVA_LONG platformId, bool waitForResponse);
 };
 
 #define MIME_JSON L"application/json"

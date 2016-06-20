@@ -9,6 +9,7 @@ import org.eclipse.swt.graphics.Image;
 
 import rocks.inspectit.shared.all.cmr.model.MethodIdentToSensorType;
 import rocks.inspectit.shared.all.cmr.model.SensorTypeIdent;
+import rocks.inspectit.shared.cs.ci.sensor.dotNet.DotNetStackTraceSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.exception.impl.ExceptionSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.method.impl.ConnectionSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.method.impl.HttpSensorConfig;
@@ -88,7 +89,9 @@ public enum SensorTypeEnum {
 	/** The JMX sensor data type. hard-coded until support for the JMX in CI */
 	JMX_SENSOR_DATA("rocks.inspectit.agent.java.sensor.jmx.JmxSensor", InspectITImages.IMG_BEAN),
 	/** The JMX sensor data type. hard-coded until support for the JMX in CI */
-	CHARTING_JMX_SENSOR_DATA("rocks.inspectit.agent.java.sensor.jmx.JmxSensor#charting", InspectITImages.IMG_BEAN);
+	CHARTING_JMX_SENSOR_DATA("rocks.inspectit.agent.java.sensor.jmx.JmxSensor#charting", InspectITImages.IMG_BEAN),
+	/** The JMX sensor data type. hard-coded until support for the JMX in CI */
+	DOT_NET_STACK_TRACE_SAMLPLER(DotNetStackTraceSensorConfig.CLASS_NAME, InspectITImages.IMG_CALL_HIERARCHY);
 
 	/**
 	 * The LOOKUP map which is used to get an element of the enumeration when passing the full

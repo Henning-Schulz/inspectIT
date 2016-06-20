@@ -263,7 +263,7 @@ JAVA_INT convertMethodModifiersToJava(DWORD netModifiers) {
 	return javaModifiers;
 }
 
-void getMethodSensorClassName(MethodSensor *sensor, LPWSTR className)
+void getMethodSensorClassName(std::shared_ptr<MethodSensor> sensor, LPWSTR className)
 {
 	const char *typeDef = typeid(*sensor).name();
 	className[0] = 0;

@@ -4,7 +4,12 @@ StackTraceSample::StackTraceSample(std::vector<JAVA_LONG> trace, JAVA_INT offset
 {
 	this->trace = trace;
 	this->offset = offset;
-	this->timestamp = timestamp;
+
+	if (timestamp < 0) {
+		this->timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+	} else {
+		this->timestamp = timestamp;
+	}
 }
 
 StackTraceSample::~StackTraceSample()
@@ -45,6 +50,7 @@ web::json::value StackTraceSample::toJson()
 {
 	web::json::value json;
 	json[L"offset"] = web::json::value::number(offset);
+	json[L"timestamp"] = web::json::value::number(timestamp);
 
 	web::json::value traceJson;
 	int i = 0;

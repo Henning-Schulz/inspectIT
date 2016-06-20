@@ -32,6 +32,10 @@ private:
 	std::shared_ptr<std::map<std::string, std::shared_ptr<MeasurementStorage>>> storagesPrepCopy;
 	std::shared_mutex mStorages;
 
+	std::shared_ptr<std::vector<std::shared_ptr<MeasurementStorage>>> finishedStorages;
+	std::shared_ptr<std::vector<std::shared_ptr<MeasurementStorage>>> finishedStoragesPrepCopy;
+	std::shared_mutex mFinishedStorages;
+
 	std::thread preparingThread;
 	std::thread sendingThread;
 	std::mutex mPrepare;
