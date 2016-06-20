@@ -95,4 +95,39 @@ public class DotNetStackTraceSample {
 		this.timestamp = timestamp;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+
+		boolean first = true;
+		int i = 0;
+
+		while (i < getOffset()) {
+			if (first) {
+				first = false;
+			} else {
+				builder.append("->");
+			}
+
+			builder.append("...");
+			i++;
+		}
+
+		while (i < size()) {
+			if (first) {
+				first = false;
+			} else {
+				builder.append("->");
+			}
+
+			builder.append(at(i));
+			i++;
+		}
+
+		return builder.toString();
+	}
+
 }

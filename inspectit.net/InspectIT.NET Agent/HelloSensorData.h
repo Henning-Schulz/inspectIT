@@ -16,7 +16,7 @@ protected:
 	LPWSTR getJavaTypeName();
 
 public:
-	HelloSensorData(LPWSTR greeting, JAVA_LONG platformId, JAVA_LONG methodSensorId, JAVA_LONG methodId, std::time_t timestamp = time(nullptr));
+	HelloSensorData(LPWSTR greeting, JAVA_LONG platformId, JAVA_LONG methodSensorId, JAVA_LONG methodId, JAVA_LONG timestamp = 0);
 	~HelloSensorData();
 
 	LPWSTR getGreeting();

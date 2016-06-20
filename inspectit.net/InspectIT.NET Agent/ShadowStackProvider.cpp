@@ -4,11 +4,23 @@
 
 ShadowStackProvider::ShadowStackProvider()
 {
+	std::shared_ptr<ShadowStackHolder> thisHolder(this);
+	hook = std::make_shared<ShadowStackHook>(thisHolder);
 }
 
 
 ShadowStackProvider::~ShadowStackProvider()
 {
+}
+
+bool ShadowStackProvider::hasHook()
+{
+	return true;
+}
+
+std::shared_ptr<MethodHook> ShadowStackProvider::getHook()
+{
+	return hook;
 }
 
 void ShadowStackProvider::pushMethod(ThreadID threadId, METHOD_ID methodId)

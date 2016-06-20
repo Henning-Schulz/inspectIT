@@ -18,7 +18,7 @@ private:
 	std::vector<std::shared_ptr<StackTraceSample>> traces;
 
 public:
-	StackTraceStorage(JAVA_LONG platformId, JAVA_LONG methodSensorId, ThreadID threadId, std::time_t timestamp = time(nullptr));
+	StackTraceStorage(JAVA_LONG platformId, JAVA_LONG methodSensorId, ThreadID threadId, JAVA_LONG timestamp = -1);
 	~StackTraceStorage();
 
 	ThreadID getThreadId();

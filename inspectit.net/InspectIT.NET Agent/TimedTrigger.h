@@ -1,25 +1,27 @@
 #pragma once
 
 #include "SamplingTrigger.h"
+#include "Logger.h"
 
 #include <vector>
 #include <thread>
 #include <chrono>
 #include <memory>
 
-#define SAMPLING_INTERVAL 200
-
 class TimedTrigger : public SamplingTrigger
 {
 private:
+	Logger logger = loggerFactory.createLogger("TimedTrigger");
+
 	std::shared_ptr<StackTraceSampler> sampler;
 	std::thread worker;
+	JAVA_LONG samplingInterval;
 	bool stopped = false;
 
 	void workerMethod();
 
 public:
-	TimedTrigger();
+	TimedTrigger(JAVA_LONG samplingInterval);
 	~TimedTrigger();
 
 	void start(std::shared_ptr<StackTraceSampler> sampler);

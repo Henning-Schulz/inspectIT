@@ -4,7 +4,6 @@
 
 ListSizeStrategy::ListSizeStrategy(size_t maxSize)
 {
-	this->sendingService = sendingService;
 	this->maxSize = maxSize;
 }
 

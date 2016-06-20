@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CorProfilerCallbackDefaultImpl.h"
+#include "MethodHook.h"
 #include "MethodSensor.h"
 #include "Logger.h"
 #include "mscoree.h"
@@ -11,6 +12,7 @@
 
 #include <list>
 #include <memory>
+#include <thread>
 
 #define DllImport  __declspec( dllimport )
 
@@ -34,10 +36,16 @@ private:
 	DWORD shutdownCounter;
 	ICorProfilerInfo3 *profilerInfo3;
 
-	std::list<MethodSensor*> *methodSensorList;
+	std::list<std::shared_ptr<MethodSensor>> *methodSensorList;
+	std::list<std::shared_ptr<MethodHook>> *methodHookList;
 	HookStrategy *hookStrategy;
 
+	std::thread keepAliveThread;
+	boolean alive = false;
+
 	Logger logger = loggerFactory.createLogger("Agent");
+
+	void keepAlive();
 
 public:
 	Agent();
@@ -45,9 +53,9 @@ public:
 
 	JAVA_LONG platformID;
 
-	void addMethodSensor(MethodSensor *sensor);
-	void removeMethodSensor(MethodSensor *sensor);
-	void removeAllMethodSensors();
+	void addMethodHook(std::shared_ptr<MethodHook> hook);
+	void removeMethodHook(std::shared_ptr<MethodHook> hook);
+	void removeAllMethodHooks();
 
 	HookStrategy* getHookStrategy();
 

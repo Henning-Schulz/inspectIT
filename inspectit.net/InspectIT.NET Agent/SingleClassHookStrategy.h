@@ -11,6 +11,6 @@ public:
 	SingleClassHookStrategy(LPWSTR className);
 	~SingleClassHookStrategy();
 
-	bool hook(FunctionID functionID, LPWSTR className, LPWSTR methodName);
+	bool hook(LPWSTR className, LPWSTR methodName, std::vector<LPWSTR> parameters, JAVA_INT modifiers);
 };
 

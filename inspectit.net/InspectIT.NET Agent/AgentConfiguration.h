@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MethodSensor.h"
+#include "MethodHook.h"
 #include "HookStrategy.h"
 #include <list>
 
@@ -10,7 +10,7 @@ public:
 	AgentConfiguration();
 	~AgentConfiguration();
 
-	std::list<MethodSensor*> CreateAndGetMethodSensors();
+	std::list<MethodHook*> CreateAndGetMethodSensors();
 	HookStrategy* CreateAndGetHookStrategy();
 
 };
