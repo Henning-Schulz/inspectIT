@@ -23,6 +23,21 @@ std::shared_ptr<MethodHook> ShadowStackProvider::getHook()
 	return hook;
 }
 
+bool ShadowStackProvider::hasThreadHook()
+{
+	return false;
+}
+
+std::shared_ptr<ThreadHook> ShadowStackProvider::getThreadHook()
+{
+	return std::shared_ptr<ThreadHook>();
+}
+
+DWORD ShadowStackProvider::getSpecialMonitorFlags()
+{
+	return 0;
+}
+
 void ShadowStackProvider::pushMethod(ThreadID threadId, METHOD_ID methodId)
 {
 	std::shared_ptr<ShadowStack> stack;

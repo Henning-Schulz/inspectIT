@@ -23,5 +23,10 @@ public:
 
 	bool hasHook();
 	std::shared_ptr<MethodHook> getHook();
+
+	bool hasThreadHook();
+	std::shared_ptr<ThreadHook> getThreadHook();
+
+	DWORD getSpecialMonitorFlags();
 };
 

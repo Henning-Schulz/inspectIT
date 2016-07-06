@@ -6,6 +6,7 @@
 #include "Logger.h"
 
 #include <memory>
+#include <set>
 
 class StackTraceSampler
 {
@@ -15,6 +16,8 @@ private:
 	JAVA_LONG platformId;
 
 	std::shared_ptr<StackTraceProvider> provider;
+
+	std::set<ThreadID> allThreads;
 
 	Logger logger = loggerFactory.createLogger("StackTraceSampler");
 
@@ -32,5 +35,7 @@ public:
 	 */
 	void doSampling(ThreadID threadId, bool forceNewStorage);
 	void doSamplingOfAllThreads(bool forceNewStorage);
+
+	void notifyShutdown();
 };
 

@@ -3,6 +3,7 @@
 #include "CorProfilerCallbackDefaultImpl.h"
 #include "MethodHook.h"
 #include "MethodSensor.h"
+#include "ThreadHook.h"
 #include "Logger.h"
 #include "mscoree.h"
 #include "agentutils.h"
@@ -13,6 +14,7 @@
 #include <list>
 #include <memory>
 #include <thread>
+#include <mutex>
 
 #define DllImport  __declspec( dllimport )
 
@@ -36,9 +38,14 @@ private:
 	DWORD shutdownCounter;
 	ICorProfilerInfo3 *profilerInfo3;
 
-	std::list<std::shared_ptr<MethodSensor>> *methodSensorList;
-	std::list<std::shared_ptr<MethodHook>> *methodHookList;
+	std::list<std::shared_ptr<MethodSensor>> methodSensorList;
+	std::list<std::shared_ptr<MethodHook>> methodHookList;
+	std::list<std::shared_ptr<ThreadHook>> threadHookList;
 	HookStrategy *hookStrategy;
+
+	std::mutex mCreatedThreads;
+	std::vector<ThreadID> createdThreads;
+	bool initializationFinished = false;
 
 	std::thread keepAliveThread;
 	boolean alive = false;
@@ -56,6 +63,7 @@ public:
 	void addMethodHook(std::shared_ptr<MethodHook> hook);
 	void removeMethodHook(std::shared_ptr<MethodHook> hook);
 	void removeAllMethodHooks();
+	size_t getNumberOfMethodHooks();
 
 	HookStrategy* getHookStrategy();
 
@@ -78,12 +86,17 @@ public:
 	COM_METHOD(HRESULT) Shutdown();
 
 	//
-	// Callbacks
+	// Method callbacks
 	//
-
 	void Enter(METHOD_ID functionID);
 	void Leave(METHOD_ID functionID);
 	void Tailcall(METHOD_ID functionID);
+
+	//
+	// Thread callbacks
+	//
+	COM_METHOD(HRESULT) ThreadCreated(ThreadID threadID);
+	COM_METHOD(HRESULT) ThreadDestroyed(ThreadID threadID);
 
 };
 

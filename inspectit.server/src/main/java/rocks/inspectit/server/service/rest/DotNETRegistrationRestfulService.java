@@ -83,6 +83,8 @@ public class DotNETRegistrationRestfulService {
 	public long registerMethodIdent(@RequestParam(value = "platformId", required = true) long platformId, @RequestParam(value = "className", required = true) String className,
 			@RequestParam(value = "methodName", required = true) String methodName, @RequestParam(value = "returnType", required = true) String returnType,
 			@RequestParam(value = "modifiers", required = true) int modifiers, @RequestBody(required = true) List<String> parameterTypes) {
+		System.out.println("registerMethodIdent");
+
 		if (className == null) {
 			// error
 			System.err.println("className is null");

@@ -33,5 +33,5 @@ void TimedTrigger::workerMethod()
 		std::this_thread::sleep_for(std::chrono::milliseconds(samplingInterval));
 	}
 
-	sampler->doSamplingOfAllThreads(true);
+	sampler->notifyShutdown();
 }

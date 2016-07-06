@@ -19,7 +19,7 @@ bool AssignmentHookStrategy::hook(LPWSTR className, LPWSTR methodName, std::vect
 		auto ass = *it;
 		bool hook = true;
 
-		if (ass->getClassName().compare(className) != 0) {
+		if (!patternMatches(ass->getClassName(), className)) {
 			hook = false;
 		} else if (!patternMatches(ass->getMethodName(), methodName)) {
 			hook = false;

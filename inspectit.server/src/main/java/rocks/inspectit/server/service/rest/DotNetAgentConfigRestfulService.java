@@ -120,6 +120,10 @@ public class DotNetAgentConfigRestfulService {
 			}
 		}
 
+		for (MethodSensorAssignment ass : assignments) {
+			System.out.println(ass.getClassName() + ": methodName = " + ass.getMethodName());
+		}
+
 		return assignments;
 	}
 

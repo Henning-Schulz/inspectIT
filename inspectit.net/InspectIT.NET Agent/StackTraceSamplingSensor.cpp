@@ -3,6 +3,7 @@
 #include "TimedTrigger.h"
 #include "ShadowStackProvider.h"
 #include "StackTraceSensorConfig.h"
+#include "NativeStackProvider.h"
 
 
 
@@ -13,6 +14,7 @@ StackTraceSamplingSensor::StackTraceSamplingSensor()
 
 StackTraceSamplingSensor::~StackTraceSamplingSensor()
 {
+	logger.debug("Deconstructor");
 }
 
 void StackTraceSamplingSensor::init(std::shared_ptr<MethodSensorConfig> config, JAVA_LONG sensorTypeId, JAVA_LONG platformId, ICorProfilerInfo *profilerInfo)
@@ -24,6 +26,7 @@ void StackTraceSamplingSensor::init(std::shared_ptr<MethodSensorConfig> config, 
 	}
 	else {
 		std::shared_ptr<StackTraceSensorConfig> stsc = std::static_pointer_cast<StackTraceSensorConfig>(config);
+		logger.debug("Initializing StackTraceSamplingSensor");
 
 		switch (stsc->getTriggerType()) {
 		case TIMER:
@@ -37,16 +40,29 @@ void StackTraceSamplingSensor::init(std::shared_ptr<MethodSensorConfig> config, 
 			break;
 		}
 
+		logger.debug("Setting provider...");
+
 		switch (stsc->getProviderType()) {
 		case SHADOW_STACK:
 			provider = std::make_shared<ShadowStackProvider>();
 			break;
 		case SIMPLE:
+			logger.debug("Using native stack provider...");
+			if (static_cast<ICorProfilerInfo2*>(profilerInfo)) {
+				logger.debug("Creating provider...");
+				provider = std::make_shared<NativeStackProvider>(static_cast<ICorProfilerInfo2*>(profilerInfo));
+				break;
+			}
+			else {
+				logger.error("Passed ICorProfilerInfo is not an ICorProfilerInfo2, which is needed for the NativeStackProvider!");
+			}
 		default:
-			logger.warn("Unknown provider! Using ShadowStackProvider.");
+			logger.warn("Unable to instantiate provider! Using ShadowStackProvider.");
 			provider = std::make_shared<ShadowStackProvider>();
 			break;
 		}
+
+		logger.debug("Provider set.");
 	}
 
 	sampler = std::make_shared<StackTraceSampler>(provider);
@@ -82,4 +98,19 @@ bool StackTraceSamplingSensor::hasHook()
 std::shared_ptr<MethodHook> StackTraceSamplingSensor::getHook()
 {
 	return provider->getHook();
+}
+
+bool StackTraceSamplingSensor::hasThreadHook()
+{
+	return provider->hasThreadHook();
+}
+
+std::shared_ptr<ThreadHook> StackTraceSamplingSensor::getThreadHook()
+{
+	return provider->getThreadHook();
+}
+
+DWORD StackTraceSamplingSensor::getSpecialMonitorFlags()
+{
+	return provider->getSpecialMonitorFlags();
 }

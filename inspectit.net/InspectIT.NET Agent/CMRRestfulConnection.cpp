@@ -1,4 +1,5 @@
 #include "CMRRestfulConnection.h"
+#include "json_string_prep.h"
 
 #include <exception>
 
@@ -20,12 +21,34 @@ void shutdownCMRConnection() {
 
 CMRRestfulConnection::CMRRestfulConnection()
 {
-	baseUrl = L"http://localhost:8182/rest";
+	char *url;
+	size_t len;
+	errno_t err = _dupenv_s(&url, &len, "URL_CMR");
+	if (err || len == 0) {
+		logger.warn("No URL to the CMR specified. Please use the environment variable URL_CMR. Trying to connect to http://localhost:8182");
+		baseUrl = L"http://localhost:8182/rest";
+	}
+	else {
+		std::wstringstream urlStream;
+		std::string sUrl(url);
+		std::wstring wUrl(sUrl.begin(), sUrl.end());
+		std::wstring prefix(L"http://");
+
+		if (wUrl.compare(0, prefix.size(), prefix) != 0) {
+			// url does not start with http://
+			urlStream << prefix;
+		}
+
+		urlStream << wUrl << L"/rest";
+
+		baseUrl = urlStream.str();
+	}
+
 	registrationPath = L"/dotNetRegistration";
 	connectionTestPath = L"/dotNetConnection/test";
 	configPath = L"/dotNetAgentConfig";
 	storagePath = L"/dotNetAgentStorage";
-	logger.debug("Created connection to %ls", baseUrl);
+	logger.debug("Using CMR URL %ls", baseUrl);
 }
 
 
@@ -78,7 +101,7 @@ JAVA_LONG CMRRestfulConnection::registerPlatform(std::vector<std::string> define
 	}
 
 	std::wstringstream argsStream;
-	argsStream << "?agentName=" << agentName << "&version=" << version;
+	argsStream << "?agentName=" << prepareStringForJson(agentName) << "&version=" << version;
 
 	http_client client(urlStream.str().c_str());
 	http_response response;
@@ -120,7 +143,7 @@ void CMRRestfulConnection::unregisterPlatform(std::vector<std::string> definedIp
 	}
 
 	std::wstringstream argsStream;
-	argsStream << "?agentName=" << agentName;
+	argsStream << "?agentName=" << prepareStringForJson(agentName);
 
 	http_client client(urlStream.str().c_str());
 	http_response response;
@@ -164,15 +187,21 @@ JAVA_LONG CMRRestfulConnection::registerMethod(JAVA_LONG platformId, LPWSTR clas
 	}
 
 	std::wstringstream argsStream;
-	argsStream << "?platformId=" << platformId << "&className=" << className << "&methodName=" << methodName << "&returnType=" << returnType << "&modifiers=" << modifiers;
+	argsStream << "?platformId=" << platformId << "&className=" << prepareStringForJson(className)
+		<< "&methodName=" << methodName << "&returnType=" << prepareStringForJson(returnType) << "&modifiers=" << modifiers;
 
 	http_client client(urlStream.str().c_str());
 	http_response response;
 	try {
+		logger.debug("Sending request with arguments %ls", argsStream.str().c_str());
 		response = client.request(methods::POST, argsStream.str().c_str(), paramArray.serialize(), MIME_JSON).get();
 	}
 	catch (web::http::http_exception) {
 		logger.error("Could not connect to %ls", urlStream.str().c_str());
+		return -1;
+	}
+	catch (uri_exception const& e) {
+		logger.error("uri_exception: %s", e.what());
 		return -1;
 	}
 
