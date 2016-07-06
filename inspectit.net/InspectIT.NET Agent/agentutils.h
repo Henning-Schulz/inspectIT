@@ -6,6 +6,9 @@
 #include <vector>
 #include <memory>
 
+BOOL getSpecificsOfMethod(ICorProfilerInfo *profilerInfo, FunctionID functionID, LPWSTR wszClass, LPWSTR wszMethod, LPWSTR returnType,
+	JAVA_INT *javaModifiers, std::vector<LPWSTR> *parameterTypes);
+
 PCCOR_SIGNATURE parseMethodSignature(IMetaDataImport *metaDataImport, PCCOR_SIGNATURE signature, LPWSTR signatureText);
 
 JAVA_INT convertMethodModifiersToJava(DWORD netModifiers);

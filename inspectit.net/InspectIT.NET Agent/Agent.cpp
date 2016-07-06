@@ -29,39 +29,40 @@ Agent *globalAgentInstance;
 
 Agent::Agent()
 {
-	methodHookList = new std::list<std::shared_ptr<MethodHook>>();
-	methodSensorList = new std::list<std::shared_ptr<MethodSensor>>();
 }
 
 
 Agent::~Agent()
 {
-	methodSensorList->clear();
-	methodHookList->clear();
-
-	delete methodHookList;
+	logger.debug("Deconstructor...");
 	delete hookStrategy;
+	logger.debug("Deconstructor finished.");
 }
 
 
 void Agent::addMethodHook(std::shared_ptr<MethodHook> hook)
 {
-	methodHookList->push_back(hook);
+	methodHookList.push_back(hook);
 }
 
 void Agent::removeMethodHook(std::shared_ptr<MethodHook> hook)
 {
-	methodHookList->remove(hook);
+	methodHookList.remove(hook);
 }
 
 void Agent::removeAllMethodHooks()
 {
-	methodHookList->clear();
+	methodHookList.clear();
 }
 
 HookStrategy* Agent::getHookStrategy()
 {
 	return hookStrategy;
+}
+
+size_t Agent::getNumberOfMethodHooks()
+{
+	return methodHookList.size();
 }
 
 
@@ -71,22 +72,22 @@ HookStrategy* Agent::getHookStrategy()
 
 void Agent::Enter(METHOD_ID methodID)
 {
-	if (methodHookList->empty()) {
+	if (methodHookList.empty()) {
 		return;
 	}
 
-	for (std::list<std::shared_ptr<MethodHook>>::iterator it = methodHookList->begin(); it != methodHookList->end(); it++) {
+	for (std::list<std::shared_ptr<MethodHook>>::iterator it = methodHookList.begin(); it != methodHookList.end(); it++) {
 		(*it)->beforeBody(methodID);
 	}
 }
 
 void Agent::Leave(METHOD_ID methodID)
 {
-	if (methodHookList->empty()) {
+	if (methodHookList.empty()) {
 		return;
 	}
 
-	for (std::list<std::shared_ptr<MethodHook>>::iterator it = methodHookList->begin(); it != methodHookList->end(); it++) {
+	for (std::list<std::shared_ptr<MethodHook>>::iterator it = methodHookList.begin(); it != methodHookList.end(); it++) {
 		(*it)->afterBody(methodID);
 	}
 }
@@ -162,6 +163,11 @@ void __declspec(naked) TailcallNaked3(FunctionIDOrClientID functionIDOrClientID)
 
 UINT_PTR  FunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
 {
+	if (globalAgentInstance->getNumberOfMethodHooks() == 0) {
+		*pbHookFunction = 0;
+		return functionID;
+	}
+
 	WCHAR className[MAX_BUFFERSIZE];
 	WCHAR methodName[MAX_BUFFERSIZE];
 	WCHAR returnType[MAX_BUFFERSIZE];
@@ -173,28 +179,28 @@ UINT_PTR  FunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
 		LogLevel level = loggerFactory.getLogLevel();
 
 		if (level >= LEVEL_DEBUG) {
-			printf("DEBUG FunctionMapper - Hook 0x%03x %ls %ls.%ls(", javaModifiers, returnType, className, methodName);
+			loggerFactory.staticLogWithoutNewLine(LEVEL_DEBUG, "FunctionMapper", "Hook 0x%03x %ls %ls.%ls(", javaModifiers, returnType, className, methodName);
 			bool first = true;
 			for (std::vector<LPWSTR>::iterator it = parameterTypes.begin(); it != parameterTypes.end(); it++) {
 				if (first) {
 					first = false;
 				}
 				else {
-					printf(", ");
+					loggerFactory.printf(", ");
 				}
-				printf("%ls", *it);
+				loggerFactory.printf("%ls", *it);
 			}
-			printf(")\n");
+			loggerFactory.printf(")\n");
 		}
 
 		JAVA_LONG methodId = cmrConnection->registerMethod(globalAgentInstance->platformID, className, methodName, returnType, parameterTypes, javaModifiers);
 
 		if (methodId > UINT_MAX) {
-			printf("ERROR FunctionMapper - methodId %lld is greater than maximum value of unsigned int (%u)! Disabling hook.\n", methodId, UINT_MAX);
+			loggerFactory.staticLog(LEVEL_ERROR, "FunctionMapper", "methodId %lld is greater than maximum value of unsigned int (%u)! Disabling hook.\n", methodId, UINT_MAX);
 			*pbHookFunction = 0;
 		}
 		else if (methodId < 0) {
-			printf("ERROR FunctionMapper - methodId %lld is less than zero! Disabling hook.\n", methodId);
+			loggerFactory.staticLog(LEVEL_ERROR, "FunctionMapper", "methodId %lld is less than zero! Disabling hook.\n", methodId);
 			*pbHookFunction = 0;
 		}
 		else {
@@ -213,6 +219,60 @@ UINT_PTR  FunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
 	parameterTypes.clear();
 
 	return (UINT_PTR)functionID;
+}
+
+//
+// Thread callbacks
+//
+
+HRESULT Agent::ThreadCreated(ThreadID threadID)
+{
+	logger.debug("Thread %i created", threadID);
+
+	if (initializationFinished) {
+		if (threadHookList.empty()) {
+			return S_OK;
+		}
+
+		for (auto it = threadHookList.begin(); it != threadHookList.end(); it++) {
+			(*it)->threadCreated(threadID);
+		}
+	}
+	else {
+		std::unique_lock<std::mutex> lock(mCreatedThreads);
+
+		createdThreads.push_back(threadID);
+	}
+
+	return S_OK;
+}
+
+HRESULT Agent::ThreadDestroyed(ThreadID threadID)
+{
+	printf("Thread destroyed\n");
+	logger.debug("Thread %i destroyed", threadID);
+
+	if (initializationFinished) {
+		if (threadHookList.empty()) {
+			return S_OK;
+		}
+
+		for (auto it = threadHookList.begin(); it != threadHookList.end(); it++) {
+			(*it)->threadDestroyed(threadID);
+		}
+	}
+	else {
+		std::unique_lock<std::mutex> lock(mCreatedThreads);
+
+		for (auto ptid = createdThreads.begin(); ptid != createdThreads.end(); ptid++) {
+			if (*ptid == threadID) {
+				createdThreads.erase(ptid);
+				break;
+			}
+		}
+	}
+
+	return S_OK;
 }
 
 
@@ -234,7 +294,7 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 	}
 
 	// TODO...
-	platformID = cmrConnection->registerPlatform(getAllDefinedIPs(), L".NET%20agent", L"0.1");
+	platformID = cmrConnection->registerPlatform(getAllDefinedIPs(), L".NET agent", L"0.1");
 
 	std::shared_ptr<StrategyConfig> bufferStrategyConfig = cmrConnection->getBufferStrategyConfig(platformID);
 	std::shared_ptr<BufferStrategy> bufferStrategy;
@@ -296,26 +356,8 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 		return hr;
 	}
 
-	hr = profilerInfo3->SetEventMask(COR_PRF_MONITOR_ENTERLEAVE);
-	if (FAILED(hr)) {
-		logger.error("Could not set event mask!");
-		return hr;
-	}
-
-	hr = profilerInfo3->SetEnterLeaveFunctionHooks3((FunctionEnter3 *)EnterNaked3,
-		(FunctionLeave3 *)LeaveNaked3, (FunctionTailcall3 *)TailcallNaked3);
-	if (FAILED(hr)) {
-		logger.error("Could not set enter leave function hooks!");
-		return hr;
-	}
-
-	hr = profilerInfo3->SetFunctionIDMapper((FunctionIDMapper *)&FunctionMapper);
-	if (FAILED(hr)) {
-		logger.error("Could not set function ID mapper!");
-		return hr;
-	}
-
 	bool stackTraceSensorCreated = false;
+	DWORD eventMask = COR_PRF_MONITOR_ENTERLEAVE;
 
 	for (auto it = sensorAssignements.begin(); it != sensorAssignements.end(); it++) {
 		std::shared_ptr<MethodSensorAssignment> ass = *it;
@@ -323,7 +365,7 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 		logger.debug("\tclassName: %ls", ass->getClassName().c_str());
 		logger.debug("\tsuperclass: %s", (ass->isSuperclass() ? "true" : "false"));
 		logger.debug("\tinterface: %s", (ass->isInterface() ? "true" : "false"));
-		logger.debug("\tmethodName: %ls", ass->getMethodName());
+		logger.debug("\tmethodName: %ls", ass->getMethodName().c_str());
 		logger.debug("\tparameters: %s", (ass->getParameters().empty() ? "*" : "..."));
 		logger.debug("\tconstructor: %s", (ass->isConstructor() ? "true" : "false"));
 		logger.debug("\tpublicModifier: %s", (ass->isPublicModifier() ? "true" : "false"));
@@ -361,15 +403,54 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 		JAVA_LONG sensorTypeId = cmrConnection->registerMethodSensorType(platformID, className);
 		logger.debug("Sensor %ls has id %lli", className, sensorTypeId);
 		sensor->init(config, sensorTypeId, platformID, profilerInfo3);
-		methodSensorList->push_back(sensor);
+		methodSensorList.push_back(sensor);
 
 		if (sensor->hasHook()) {
-			methodHookList->push_back(sensor->getHook());
+			methodHookList.push_back(sensor->getHook());
 		}
+
+		if (sensor->hasThreadHook()) {
+			threadHookList.push_back(sensor->getThreadHook());
+			eventMask |= COR_PRF_MONITOR_THREADS;
+			logger.debug("Adding thread hook");
+		}
+
+		eventMask |= sensor->getSpecialMonitorFlags();
+	}
+
+	hr = profilerInfo3->SetEventMask(eventMask);
+	if (FAILED(hr)) {
+		logger.error("Could not set event mask!");
+		return hr;
+	}
+
+	hr = profilerInfo3->SetEnterLeaveFunctionHooks3((FunctionEnter3 *)EnterNaked3,
+		(FunctionLeave3 *)LeaveNaked3, (FunctionTailcall3 *)TailcallNaked3);
+	if (FAILED(hr)) {
+		logger.error("Could not set enter leave function hooks!");
+		return hr;
+	}
+
+	hr = profilerInfo3->SetFunctionIDMapper((FunctionIDMapper *)&FunctionMapper);
+	if (FAILED(hr)) {
+		logger.error("Could not set function ID mapper!");
+		return hr;
 	}
 
 	alive = true;
 	keepAliveThread = std::thread([this]() { keepAlive(); });
+
+	{
+		std::unique_lock<std::mutex> lock(mCreatedThreads);
+
+		for (auto pth = threadHookList.begin(); pth != threadHookList.end(); pth++) {
+			for (auto ptid = createdThreads.begin(); ptid != createdThreads.end(); ptid++) {
+				(*pth)->threadCreated(*ptid, true);
+			}
+		}
+	}
+
+	initializationFinished = true;
 
 	logger.info("Initialized successfully");
 
@@ -380,12 +461,12 @@ HRESULT Agent::Shutdown()
 {
 	shutdownCounter++;
 
-	for (auto it = methodSensorList->begin(); it != methodSensorList->end(); it++) {
+	for (auto it = methodSensorList.begin(); it != methodSensorList.end(); it++) {
 		(*it)->notifyShutdown();
 	}
 
 	shutdownDataSendingService();
-	cmrConnection->unregisterPlatform(getAllDefinedIPs(), L".NET%20agent");
+	cmrConnection->unregisterPlatform(getAllDefinedIPs(), L".NET agent");
 	alive = false;
 	keepAliveThread.join();
 	shutdownCMRConnection();
@@ -496,68 +577,5 @@ HRESULT Agent::CreateObject(REFIID riid, void **ppInterface)
 
 BOOL Agent::getMethodSpecifics(FunctionID functionID, LPWSTR wszClass, LPWSTR wszMethod, LPWSTR returnType,
 	JAVA_INT *javaModifiers, std::vector<LPWSTR> *parameterTypes) {
-
-	BOOL succ = 0;
-
-	IMetaDataImport* pIMetaDataImport = 0;
-	HRESULT hr = S_OK;
-	mdToken funcToken = 0;
-	WCHAR szFunction[MAX_BUFFERSIZE];
-	char str[MAX_BUFFERSIZE];
-
-	WCHAR szClass[MAX_BUFFERSIZE];
-
-	// get the token for the function which we will use to get its name
-	hr = profilerInfo3->GetTokenAndMetaDataFromFunction(functionID, IID_IMetaDataImport, (LPUNKNOWN *)&pIMetaDataImport, &funcToken);
-
-	if (SUCCEEDED(hr))
-	{
-		mdTypeDef classTypeDef;
-		ULONG cchFunction;
-		ULONG cchClass;
-		DWORD methodModifiers = 0;
-		PCCOR_SIGNATURE sigBlob = NULL;
-		ULONG sigBlobSize;
-
-		// retrieve the function properties based on the token
-		hr = pIMetaDataImport->GetMethodProps(funcToken, &classTypeDef, szFunction, MAX_BUFFERSIZE, &cchFunction, &methodModifiers, &sigBlob, &sigBlobSize, 0, 0);
-		if (SUCCEEDED(hr))
-		{
-			// get the function name
-			hr = pIMetaDataImport->GetTypeDefProps(classTypeDef, szClass, MAX_BUFFERSIZE, &cchClass, 0, 0);
-
-			if (SUCCEEDED(hr))
-			{
-				wcscpy_s(wszMethod, MAX_BUFFERSIZE, szFunction);
-				wcscpy_s(wszClass, MAX_BUFFERSIZE, szClass);
-
-				*javaModifiers = convertMethodModifiersToJava(methodModifiers);
-
-				// Structure of sigBlob:
-				// first and second byte: ???
-				// following bytes: return type (one or several bytes; depending on type)
-				// after return type: parameter types
-
-				PCCOR_SIGNATURE sigBlobEnd = sigBlob + sigBlobSize;
-				sigBlob += 2;
-
-				memset(returnType, 0, MAX_BUFFERSIZE);
-				sigBlob = parseMethodSignature(pIMetaDataImport, sigBlob, returnType);
-
-				while (sigBlob < sigBlobEnd) {
-					LPWSTR param = new WCHAR[MAX_BUFFERSIZE];
-					memset(param, 0, MAX_BUFFERSIZE);
-					sigBlob = parseMethodSignature(pIMetaDataImport, sigBlob, param);
-					parameterTypes->push_back(param);
-				}
-
-				succ = 1;
-			}
-		}
-
-		// release our reference to the metadata
-		pIMetaDataImport->Release();
-	}
-
-	return succ;
+	return getSpecificsOfMethod(profilerInfo3, functionID, wszClass, wszMethod, returnType, javaModifiers, parameterTypes);
 }

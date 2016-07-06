@@ -80,6 +80,11 @@ public class DotNetStackTraceData extends DotNetMethodSensorData {
 		super.addAttributesToDefaultData(defaultData);
 		InvocationSequenceData invocData = (InvocationSequenceData) defaultData;
 
+		if (traces[0].size() == 0) {
+			invocData.setMethodIdent(-1);
+			return;
+		}
+
 		double start = getAsStartTime(0);
 		double end = getAsEndTime(traces.length - 1);
 		invocData.setMethodIdent(traces[0].at(0));

@@ -137,6 +137,7 @@
     <ClInclude Include="HelloSensor.h" />
     <ClInclude Include="HelloSensorData.h" />
     <ClInclude Include="HookStrategy.h" />
+    <ClInclude Include="json_string_prep.h" />
     <ClInclude Include="ListSizeListener.h" />
     <ClInclude Include="ListSizeStrategy.h" />
     <ClInclude Include="ListSizeStrategyConfig.h" />
@@ -150,6 +151,7 @@
     <ClInclude Include="MethodSensorConfig.h" />
     <ClInclude Include="MethodSensorConfigJsonFactory.h" />
     <ClInclude Include="MethodSensorData.h" />
+    <ClInclude Include="NativeStackProvider.h" />
     <ClInclude Include="NoHookStrategy.h" />
     <ClInclude Include="regutil.h" />
     <ClInclude Include="regutil.hpp" />
@@ -173,6 +175,7 @@
     <ClInclude Include="StrategyConfig.h" />
     <ClInclude Include="StrategyConfigJsonFactory.h" />
     <ClInclude Include="stringutils.h" />
+    <ClInclude Include="ThreadHook.h" />
     <ClInclude Include="TimedTrigger.h" />
     <ClInclude Include="TimeStrategyConfig.h" />
   </ItemGroup>
@@ -185,6 +188,7 @@
     <ClCompile Include="DataSendingService.cpp" />
     <ClCompile Include="HelloSensor.cpp" />
     <ClCompile Include="HelloSensorData.cpp" />
+    <ClCompile Include="json_string_prep.cpp" />
     <ClCompile Include="ListSizeStrategy.cpp" />
     <ClCompile Include="ListSizeStrategyConfig.cpp" />
     <ClCompile Include="Logger.cpp" />
@@ -192,6 +196,7 @@
     <ClCompile Include="MethodSensorAssignment.cpp" />
     <ClCompile Include="MethodSensorAssignmentJsonFactory.cpp" />
     <ClCompile Include="MethodSensorConfigJsonFactory.cpp" />
+    <ClCompile Include="NativeStackProvider.cpp" />
     <ClCompile Include="NoHookStrategy.cpp" />
     <ClCompile Include="ShadowStack.cpp" />
     <ClCompile Include="ShadowStackProvider.cpp" />

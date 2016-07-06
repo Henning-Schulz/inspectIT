@@ -27,6 +27,14 @@ public:
 	bool hasHook();
 	std::shared_ptr<MethodHook> getHook();
 
+	bool hasThreadHook();
+	std::shared_ptr<ThreadHook> getThreadHook();
+
+	/*
+	* Returns necessary monitor flags except for COR_PRF_MONITOR_ENTERLEAVE
+	*/
+	DWORD getSpecialMonitorFlags();
+
 	void pushMethod(ThreadID threadId, METHOD_ID methodId);
 	void popMethod(ThreadID threadId);
 

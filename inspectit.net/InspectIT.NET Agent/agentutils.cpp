@@ -21,6 +21,74 @@
 #define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
 
 
+BOOL getSpecificsOfMethod(ICorProfilerInfo *profilerInfo, FunctionID functionID, LPWSTR wszClass, LPWSTR wszMethod, LPWSTR returnType,
+	JAVA_INT *javaModifiers, std::vector<LPWSTR> *parameterTypes) {
+
+	BOOL succ = 0;
+
+	IMetaDataImport* pIMetaDataImport = 0;
+	HRESULT hr = S_OK;
+	mdToken funcToken = 0;
+	WCHAR szFunction[MAX_BUFFERSIZE];
+	char str[MAX_BUFFERSIZE];
+
+	WCHAR szClass[MAX_BUFFERSIZE];
+
+	// get the token for the function which we will use to get its name
+	hr = profilerInfo->GetTokenAndMetaDataFromFunction(functionID, IID_IMetaDataImport, (LPUNKNOWN *)&pIMetaDataImport, &funcToken);
+
+	if (SUCCEEDED(hr))
+	{
+		mdTypeDef classTypeDef;
+		ULONG cchFunction;
+		ULONG cchClass;
+		DWORD methodModifiers = 0;
+		PCCOR_SIGNATURE sigBlob = NULL;
+		ULONG sigBlobSize;
+
+		// retrieve the function properties based on the token
+		hr = pIMetaDataImport->GetMethodProps(funcToken, &classTypeDef, szFunction, MAX_BUFFERSIZE, &cchFunction, &methodModifiers, &sigBlob, &sigBlobSize, 0, 0);
+		if (SUCCEEDED(hr))
+		{
+			// get the function name
+			hr = pIMetaDataImport->GetTypeDefProps(classTypeDef, szClass, MAX_BUFFERSIZE, &cchClass, 0, 0);
+
+			if (SUCCEEDED(hr))
+			{
+				wcscpy_s(wszMethod, MAX_BUFFERSIZE, szFunction);
+				wcscpy_s(wszClass, MAX_BUFFERSIZE, szClass);
+
+				*javaModifiers = convertMethodModifiersToJava(methodModifiers);
+
+				// Structure of sigBlob:
+				// first and second byte: ???
+				// following bytes: return type (one or several bytes; depending on type)
+				// after return type: parameter types
+
+				PCCOR_SIGNATURE sigBlobEnd = sigBlob + sigBlobSize;
+				sigBlob += 2;
+
+				memset(returnType, 0, MAX_BUFFERSIZE);
+				sigBlob = parseMethodSignature(pIMetaDataImport, sigBlob, returnType);
+
+				while (sigBlob < sigBlobEnd) {
+					LPWSTR param = new WCHAR[MAX_BUFFERSIZE];
+					memset(param, 0, MAX_BUFFERSIZE);
+					sigBlob = parseMethodSignature(pIMetaDataImport, sigBlob, param);
+					parameterTypes->push_back(param);
+				}
+
+				succ = 1;
+			}
+		}
+
+		// release our reference to the metadata
+		pIMetaDataImport->Release();
+	}
+
+	return succ;
+}
+
 PCCOR_SIGNATURE parseMethodSignature(IMetaDataImport *metaDataImport, PCCOR_SIGNATURE signature, LPWSTR signatureText)
 {
 	COR_SIGNATURE corSignature = *signature++;

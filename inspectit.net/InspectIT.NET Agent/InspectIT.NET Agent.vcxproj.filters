@@ -76,6 +76,12 @@
     <Filter Include="Source Files\utils">
       <UniqueIdentifier>{e6d9751f-d566-4e9f-b4f6-aee95dbc42d2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\sampling.native">
+      <UniqueIdentifier>{f0e7076e-8aca-46f8-8595-b7ec5cf34c21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sampling.native">
+      <UniqueIdentifier>{fd3ab4ec-862c-4b5b-869a-9ee5902ae042}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Agent.h">
@@ -237,6 +243,15 @@
     <ClInclude Include="AssignmentHookStrategy.h">
       <Filter>Header Files\core</Filter>
     </ClInclude>
+    <ClInclude Include="ThreadHook.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="NativeStackProvider.h">
+      <Filter>Header Files\sampling.native</Filter>
+    </ClInclude>
+    <ClInclude Include="json_string_prep.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Agent.cpp">
@@ -337,6 +352,12 @@
     </ClCompile>
     <ClCompile Include="MethodSensorConfigJsonFactory.cpp">
       <Filter>Source Files\config.sensor</Filter>
+    </ClCompile>
+    <ClCompile Include="NativeStackProvider.cpp">
+      <Filter>Source Files\sampling.native</Filter>
+    </ClCompile>
+    <ClCompile Include="json_string_prep.cpp">
+      <Filter>Source Files\utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

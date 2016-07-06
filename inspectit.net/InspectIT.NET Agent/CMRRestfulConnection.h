@@ -15,11 +15,11 @@
 class CMRRestfulConnection : public CMRConnection
 {
 private:
-	LPWSTR baseUrl;
-	LPWSTR registrationPath;
-	LPWSTR connectionTestPath;
-	LPWSTR configPath;
-	LPWSTR storagePath;
+	std::wstring baseUrl;
+	std::wstring registrationPath;
+	std::wstring connectionTestPath;
+	std::wstring configPath;
+	std::wstring storagePath;
 
 	StrategyConfigJsonFactory strategyConfigFactory = StrategyConfigJsonFactory();
 	MethodSensorConfigJsonFactory sensorConfigFactory = MethodSensorConfigJsonFactory();

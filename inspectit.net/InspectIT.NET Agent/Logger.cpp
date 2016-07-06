@@ -11,6 +11,15 @@ Logger::Logger(char* name, LogLevel logLevel)
 {
 	this->name = name;
 	this->logLevel = logLevel;
+	this->toFile = false;
+}
+
+Logger::Logger(char* name, LogLevel logLevel, bool toFile, FILE *logFile)
+{
+	this->name = name;
+	this->logLevel = logLevel;
+	this->toFile = toFile;
+	this->logFile = logFile;	
 }
 
 
@@ -18,18 +27,30 @@ Logger::~Logger()
 {
 }
 
+void Logger::log(LogLevel level, char* message, va_list ap)
+{
+	if (logLevel >= level) {
+		if (toFile) {
+			fprintf(logFile, "%s %s - ", logLevelNames[level], name);
+			vfprintf(logFile, message, ap);
+			fprintf(logFile, "\n");
+			fflush(logFile);
+		}
+		else {
+			printf("%s %s - ", logLevelNames[level], name);
+			vprintf(message, ap);
+			printf("\n");
+		}
+	}
+}
+
 void Logger::debug(char* message, ...)
 {
 	if (logLevel >= LEVEL_DEBUG) {
 		va_list ap;
-
-		printf("DEBUG %s - ", name);
-
 		va_start(ap, message);
-		vprintf(message, ap);
+		log(LEVEL_DEBUG, message, ap);
 		va_end(ap);
-
-		printf("\n");
 	}
 }
 
@@ -37,14 +58,9 @@ void Logger::info(char* message, ...)
 {
 	if (logLevel >= LEVEL_INFO) {
 		va_list ap;
-
-		printf("INFO %s - ", name);
-
 		va_start(ap, message);
-		vprintf(message, ap);
+		log(LEVEL_INFO, message, ap);
 		va_end(ap);
-
-		printf("\n");
 	}
 }
 
@@ -52,14 +68,9 @@ void Logger::warn(char* message, ...)
 {
 	if (logLevel >= LEVEL_WARN) {
 		va_list ap;
-
-		printf("WARN %s - ", name);
-
 		va_start(ap, message);
-		vprintf(message, ap);
+		log(LEVEL_WARN, message, ap);
 		va_end(ap);
-
-		printf("\n");
 	}
 }
 
@@ -67,92 +78,172 @@ void Logger::error(char* message, ...)
 {
 	if (logLevel >= LEVEL_ERROR) {
 		va_list ap;
-
-		printf("ERROR %s - ", name);
-
 		va_start(ap, message);
-		vprintf(message, ap);
+		log(LEVEL_ERROR, message, ap);
 		va_end(ap);
-
-		printf("\n");
 	}
 }
 
 void Logger::log(LogLevel level, char* message, ...) {
 	if (logLevel >= level) {
 		va_list ap;
-
-		printf("%s: ? - ", name);
-
 		va_start(ap, message);
-		vprintf(message, ap);
+		log(level, message, ap);
 		va_end(ap);
-
-		printf("\n");
 	}
 }
 
 LoggerFactory::LoggerFactory()
 {
-	printf("Create LoggerFactory...\n");
+	printf("INFO LoggerFactory - Create LoggerFactory...\n");
 	updateLogLevel();
-	printf("LoggerFactory created\n");
+	printf("INFO LoggerFactory - LoggerFactory created\n");
 }
 
 LoggerFactory::~LoggerFactory()
 {
+	free(fileName);
+
+	if (logFile != NULL) {
+		fclose(logFile);
+	}
 }
 
 void LoggerFactory::updateLogLevel() {
+	// No new loggers should be created during execution of this method
+	std::unique_lock<std::shared_mutex> lock(mUpdate);
+
 	char *level;
 	size_t len;
 	errno_t err = _dupenv_s(&level, &len, "LOG_LEVEL");
 	if (err || len == 0) {
 		logLevel = LEVEL_INFO;
-		printf("No log level specified. Using INFO\n");
-		return;
-	}
-
-	bool found = false;
-	for (int i = 0; i < logLevelNames.size(); i++) {
-		if (strcmp(level, logLevelNames.at(i)) == 0) {
-			logLevel = static_cast<LogLevel>(i);
-			printf("Log level is %s\n", logLevelNames.at(i));
-			found = true;
-			break;
-		}
-	}
-
-	if (!found) {
-		printf("Unknown log level %s. Using INFO\n", level);
-		logLevel = LEVEL_INFO;
-	}
-
-	/*if (strcmp(level, "DEBUG") == 0) {
-		logLevel = LEVEL_DEBUG;
-		printf("Log level is DEBUG\n");
-	}
-	else if (strcmp(level, "INFO") == 0) {
-		logLevel = LEVEL_INFO;
-		printf("Log level is INFO\n");
-	}
-	else if (strcmp(level, "WARN") == 0) {
-		logLevel = LEVEL_WARN;
-		printf("Log level is WARN\n");
+		printf("WARN LoggerFactory - No log level specified. Using INFO\n");
 	}
 	else {
-		logLevel = LEVEL_ERROR;
-		printf("Log level is ERROR\n");
-	}*/
+		bool found = false;
+		for (int i = 0; i < logLevelNames.size(); i++) {
+			if (strcmp(level, logLevelNames.at(i)) == 0) {
+				logLevel = static_cast<LogLevel>(i);
+				printf("INFO LoggerFactory - Log level is %s\n", logLevelNames.at(i));
+				found = true;
+				break;
+			}
+		}
 
-	free(level);
+		if (!found) {
+			printf("WARN LoggerFactory - Unknown log level %s. Using INFO\n", level);
+			logLevel = LEVEL_INFO;
+		}
+
+		free(level);
+	}
+
+	char *logToFile;
+	err = _dupenv_s(&logToFile, &len, "LOG_TO_FILE");
+	if (err || len == 0 || strcmp(logToFile, "true") != 0) {
+		toFile = false;
+		printf("INFO LoggerFactory - Logging to console.\n");
+	}
+	else {
+		char* fileName;
+		err = _dupenv_s(&fileName, &len, "LOG_FILE_NAME");
+
+		if (err || len == 0) {
+			toFile = false;
+			printf("WARN LoggerFactory - No file name for logging specified. Logging to console.\n");
+		}
+		else {
+			toFile = true;
+			this->fileName = fileName;
+
+			errno_t err = fopen_s(&logFile, fileName, "ab+");
+			if (err || logFile == NULL) {
+				printf("WARN LoggerFactory - Cannot open file %s!\n", fileName);
+				printf("INFO LoggerFactory - Logging to console.\n");
+				this->toFile = false;
+			}
+
+			printf("INFO LoggerFactory - Logging to file %s", fileName);
+		}
+
+		// fileName need to be freed in destructor
+	}
+
+	free(logToFile);
 }
 
 Logger LoggerFactory::createLogger(char* name)
 {
-	return Logger(name, logLevel);
+	// Wait for termination of updateLockLevel() before creating new logger
+	std::shared_lock<std::shared_mutex> lock(mUpdate);
+
+	if (toFile) {
+		return Logger(name, logLevel, true, logFile);
+	}
+	else {
+		return Logger(name, logLevel);
+	}
 }
 
 LogLevel LoggerFactory::getLogLevel() {
 	return logLevel;
+}
+
+void LoggerFactory::staticLog(LogLevel level, char *loggerName, char *message, ...)
+{
+	if (logLevel >= level) {
+		va_list ap;
+		va_start(ap, message);
+
+		if (toFile) {
+			fprintf(logFile, "%s %s - ", logLevelNames[level], loggerName);
+			vfprintf(logFile, message, ap);
+			fprintf(logFile, "\n");
+			fflush(logFile);
+		}
+		else {
+			printf("%s %s - ", logLevelNames[level], loggerName);
+			vprintf(message, ap);
+			printf("\n");
+		}
+
+		va_end(ap);
+	}
+}
+
+void LoggerFactory::staticLogWithoutNewLine(LogLevel level, char *loggerName, char *message, ...)
+{
+	if (logLevel >= level) {
+		va_list ap;
+		va_start(ap, message);
+
+		if (toFile) {
+			fprintf(logFile, "%s %s - ", logLevelNames[level], loggerName);
+			vfprintf(logFile, message, ap);
+			fflush(logFile);
+		}
+		else {
+			printf("%s %s - ", logLevelNames[level], loggerName);
+			vprintf(message, ap);
+		}
+
+		va_end(ap);
+	}
+}
+
+void LoggerFactory::printf(char* message, ...)
+{
+	va_list ap;
+	va_start(ap, message);
+
+	if (toFile) {
+		vfprintf(logFile, message, ap);
+		fflush(logFile);
+	}
+	else {
+		vprintf(message, ap);
+	}
+
+	va_end(ap);
 }

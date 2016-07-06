@@ -2,6 +2,7 @@
 
 #include "MethodHook.h"
 #include "MethodSensorConfig.h"
+#include "ThreadHook.h"
 
 #include <memory>
 
@@ -21,6 +22,11 @@ public:
 
 	virtual bool hasHook() = 0;
 	virtual std::shared_ptr<MethodHook> getHook() = 0;
+
+	virtual bool hasThreadHook() = 0;
+	virtual std::shared_ptr<ThreadHook> getThreadHook() = 0;
+
+	virtual DWORD getSpecialMonitorFlags() = 0;
 
 	JAVA_LONG getSensorTypeId() { return sensorTypeId; }
 
