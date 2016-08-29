@@ -1,6 +1,7 @@
 #include "MethodSensorConfigJsonFactory.h"
 
 #include "StackTraceSensorConfig.h"
+#include "TimerSensorConfig.h"
 
 
 
@@ -35,6 +36,7 @@ std::shared_ptr<MethodSensorConfig> MethodSensorConfigJsonFactory::createFromJso
 		auto triggerIt = triggerTypes.find(triggerTypeName.c_str());
 		if (triggerIt != triggerTypes.end()) {
 			config->setTriggerType(triggerIt->second);
+			logger.debug("Using trigger %ls\n", triggerTypeName.c_str());
 		}
 		else {
 			logger.error("Could not find trigger type %ls", triggerTypeName.c_str());
@@ -51,6 +53,11 @@ std::shared_ptr<MethodSensorConfig> MethodSensorConfigJsonFactory::createFromJso
 		JAVA_LONG samplingInterval = jsonObject.at(L"samplingInterval").as_number().to_int64();
 		config->setSamplingInterval(samplingInterval);
 		logger.debug("Created.");
+		return config;
+	}
+	else if (className.compare(TimerSensorConfig::CLASS_NAME) == 0) {
+		logger.debug("Creating %ls...", TimerSensorConfig::CLASS_NAME);
+		std::shared_ptr<MethodSensorConfig> config = std::make_shared<TimerSensorConfig>();
 		return config;
 	}
 	else {

@@ -24,6 +24,7 @@ import rocks.inspectit.shared.cs.ci.AgentMappings;
 import rocks.inspectit.shared.cs.ci.Environment;
 import rocks.inspectit.shared.cs.ci.Profile;
 import rocks.inspectit.shared.cs.ci.assignment.impl.MethodSensorAssignment;
+import rocks.inspectit.shared.cs.ci.exclude.ExcludeRule;
 import rocks.inspectit.shared.cs.ci.sensor.method.IMethodSensorConfig;
 import rocks.inspectit.shared.cs.ci.strategy.IStrategyConfig;
 
@@ -63,6 +64,7 @@ public class DotNetAgentConfigRestfulService {
 		Environment env = getEnvironment(platformId);
 
 		if (env == null) {
+			System.out.println("Buffer strategy is null!");
 			return null;
 		}
 
@@ -120,11 +122,29 @@ public class DotNetAgentConfigRestfulService {
 			}
 		}
 
-		for (MethodSensorAssignment ass : assignments) {
-			System.out.println(ass.getClassName() + ": methodName = " + ass.getMethodName());
+		return assignments;
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "getExcludedClasses")
+	@ResponseBody
+	public List<String> getExcludedClasses(@RequestParam(required = true, value = "platformId") long platformId) {
+		List<Profile> profiles = getProfiles(platformId);
+
+		if (profiles == null) {
+			return null;
 		}
 
-		return assignments;
+		List<String> excludedClasses = new ArrayList<>();
+
+		for (Profile p : profiles) {
+			if (p.getExcludeRules() != null) {
+				for (ExcludeRule exclude : p.getExcludeRules()) {
+					excludedClasses.add(exclude.getClassName());
+				}
+			}
+		}
+
+		return excludedClasses;
 	}
 
 	private Environment getEnvironment(long platformId) {

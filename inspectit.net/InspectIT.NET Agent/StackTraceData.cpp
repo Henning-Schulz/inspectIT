@@ -20,6 +20,35 @@ ThreadID StackTraceData::getThreadId()
 	return threadId;
 }
 
+JAVA_LONG StackTraceData::getBaseMethodId() {
+	return baseMethodId;
+}
+
+void StackTraceData::setBaseMethodId(JAVA_LONG baseMethodId)
+{
+	this->baseMethodId = baseMethodId;
+}
+
+JAVA_LONG StackTraceData::getStartTime()
+{
+	return startTime;
+}
+
+void StackTraceData::setStartTime(JAVA_LONG startTime)
+{
+	this->startTime = startTime;
+}
+
+JAVA_LONG StackTraceData::getEndTime()
+{
+	return endTime;
+}
+
+void StackTraceData::setEndTime(JAVA_LONG endTime)
+{
+	this->endTime = endTime;
+}
+
 LPWSTR StackTraceData::getJavaTypeName()
 {
 	return L"StackTraceData";
@@ -34,6 +63,9 @@ web::json::value StackTraceData::toJson()
 {
 	web::json::value json = super::toJson();
 	json[L"threadId"] = web::json::value::number(threadId);
+	json[L"baseMethodId"] = web::json::value::number(baseMethodId);
+	json[L"startTime"] = web::json::value::number(startTime);
+	json[L"endTime"] = web::json::value::number(endTime);
 	
 	web::json::value tracesJson;
 	int i = 0;

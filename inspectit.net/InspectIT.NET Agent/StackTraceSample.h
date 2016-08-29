@@ -26,6 +26,7 @@ public:
 	JAVA_LONG getMethodAt(unsigned int position);
 	JAVA_LONG getHighestMethod();
 	JAVA_INT getOffset();
+	JAVA_LONG getTimestamp();
 
 	web::json::value toJson();
 };

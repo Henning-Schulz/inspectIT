@@ -29,6 +29,7 @@ public:
 	virtual std::shared_ptr<StrategyConfig> getBufferStrategyConfig(JAVA_LONG platformId) = 0;
 	virtual std::vector<std::shared_ptr<MethodSensorConfig>> getMethodSensorConfigs(JAVA_LONG platformId) = 0;
 	virtual std::vector<std::shared_ptr<MethodSensorAssignment>> getMethodSensorAssignments(JAVA_LONG platformId) = 0;
+	virtual std::vector<std::wstring> getExcludedClasses(JAVA_LONG platformId) = 0;
 
 	virtual void sendDataObjects(std::vector<std::shared_ptr<MethodSensorData>> dataObjects, bool waitForResponse) = 0;
 	virtual void sendKeepAlive(JAVA_LONG platformId, bool waitForResponse) = 0;

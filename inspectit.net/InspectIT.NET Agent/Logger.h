@@ -47,8 +47,8 @@ public:
 	Logger createLogger(char* name);
 	LogLevel getLogLevel();
 
-	void staticLogWithoutNewLine(LogLevel level, char *loggerName, char *message ...);
 	void staticLog(LogLevel level, char *loggerName, char *message, ...);
+	void staticLogWithoutNewLine(LogLevel level, char *loggerName, char *message, ...);
 	void printf(char* message, ...);
 };
 

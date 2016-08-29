@@ -10,13 +10,15 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
 
 import rocks.inspectit.shared.all.communication.DefaultData;
 import rocks.inspectit.shared.all.communication.MethodSensorData;
+import rocks.inspectit.shared.all.communication.data.InvocationSequenceData;
 
 /**
  * @author Henning Schulz
  *
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "objectType")
-@JsonSubTypes({ @JsonSubTypes.Type(name = "HelloData", value = DotNetHelloData.class), @JsonSubTypes.Type(name = "StackTraceData", value = DotNetStackTraceData.class) })
+@JsonSubTypes({ @JsonSubTypes.Type(name = "HelloData", value = DotNetHelloData.class), @JsonSubTypes.Type(name = "StackTraceData", value = DotNetStackTraceData.class),
+		@JsonSubTypes.Type(name = "TimerData", value = DotNetTimerData.class) })
 public abstract class DotNetMethodSensorData {
 
 	/**
@@ -132,6 +134,48 @@ public abstract class DotNetMethodSensorData {
 	 * @return a new {@link DefaultData} instance
 	 */
 	protected abstract MethodSensorData toNewDefaultData();
+
+	/**
+	 * Returns if this object can be converted into an {@link InvocationSequenceData}.
+	 *
+	 * @return if {@link DotNetMethodSensorData#toInvocationSequenceData()} is usable
+	 */
+	public abstract boolean isInvocationSequenceConvertible();
+
+	/**
+	 * Creates an {@link InvocationSequenceData} based on the represented data.<br>
+	 * <b>Note:</b> First check if this method is usable by calling
+	 * {@link DotNetMethodSensorData#isInvocationSequenceConvertible()}!
+	 *
+	 * @return an {@link InvocationSequenceData}
+	 */
+	public InvocationSequenceData toInvocationSequenceData() {
+		if (isInvocationSequenceConvertible()) {
+			InvocationSequenceData invocData = new InvocationSequenceData();
+			fillInvocationSequeneData(invocData);
+			return invocData;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Fills the passed an {@link InvocationSequenceData} with attributes. Should be overridden by
+	 * subclasses adding their attributes and calling {@code super.fillInvocationSequeneData(...)}.
+	 *
+	 * @param invocData
+	 *            the an {@link InvocationSequenceData} to be filled
+	 */
+	protected void fillInvocationSequeneData(InvocationSequenceData invocData) {
+		if (invocData == null) {
+			throw new IllegalArgumentException("DefaultData must not be null");
+		}
+
+		invocData.setTimeStamp(new Timestamp(timestamp));
+		invocData.setPlatformIdent(platformId);
+		invocData.setSensorTypeIdent(methodSensorId);
+		invocData.setMethodIdent(methodId);
+	}
 
 	/**
 	 * Adds all attributes to the passed {@link DefaultData}. Should be overridden by subclasses

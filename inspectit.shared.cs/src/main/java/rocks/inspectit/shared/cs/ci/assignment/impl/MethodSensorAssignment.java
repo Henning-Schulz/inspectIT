@@ -20,7 +20,7 @@ import rocks.inspectit.shared.cs.ci.sensor.method.IMethodSensorConfig;
  *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlSeeAlso({ TimerMethodSensorAssignment.class })
+@XmlSeeAlso({ TimerMethodSensorAssignment.class, DotNetStackTraceSensorAssignment.class })
 @XmlRootElement(name = "method-sensor-assignment")
 public class MethodSensorAssignment extends AbstractClassSensorAssignment<IMethodSensorConfig> {
 

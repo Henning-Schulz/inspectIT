@@ -1,6 +1,8 @@
 #include "MethodSensorAssignmentJsonFactory.h"
 
 #include "StackTraceSensorConfig.h"
+#include "StackTraceSensorAssignment.h"
+#include "TimerSensorConfig.h"
 
 
 
@@ -19,9 +21,35 @@ std::shared_ptr<MethodSensorAssignment> MethodSensorAssignmentJsonFactory::creat
 
 	logger.debug("Creating MethodSensorAssignment for sensor %ls", configClassName.c_str());
 
-	if (configClassName.compare(L"rocks.inspectit.shared.cs.ci.sensor.dotNet.DotNetStackTraceSensorConfig") == 0) {
-		std::shared_ptr<MethodSensorAssignment> assignment = std::make_shared<MethodSensorAssignment>();
-		assignment->setSensorClassName(StackTraceSensorConfig::CLASS_NAME);
+	bool isStackTraceConfig = configClassName.compare(L"rocks.inspectit.shared.cs.ci.sensor.dotNet.DotNetStackTraceSensorConfig") == 0;
+	bool isTimerConfig = configClassName.compare(L"rocks.inspectit.shared.cs.ci.sensor.method.impl.TimerSensorConfig") == 0;
+
+	if (isStackTraceConfig || isTimerConfig) {
+		std::shared_ptr<MethodSensorAssignment> assignment;
+
+		auto it = jsonObject.find(L"baseMethodAssignment");
+
+		if (it != jsonObject.end()) {
+			json::value baseMethodAssignmentVal = it->second;
+
+			std::shared_ptr<StackTraceSensorAssignment> stAssignment = std::make_shared<StackTraceSensorAssignment>();
+
+			json::object baseMethodAssignmentJson = baseMethodAssignmentVal.as_object();
+			std::shared_ptr<MethodSensorAssignment> baseMethodAssignment = createFromJson(baseMethodAssignmentJson);
+
+			stAssignment->setBaseMethodAssignment(baseMethodAssignment);
+			assignment = stAssignment;
+		}
+		else {
+			assignment = std::make_shared<MethodSensorAssignment>();
+		}
+
+		if (isStackTraceConfig) {
+			assignment->setSensorClassName(StackTraceSensorConfig::CLASS_NAME);
+		}
+		else {
+			assignment->setSensorClassName(TimerSensorConfig::CLASS_NAME);
+		}
 		utility::string_t className = jsonObject.at(L"className").as_string();
 		assignment->setClassName(className);
 		bool superclass = jsonObject.at(L"superclass").as_bool();
@@ -55,6 +83,7 @@ std::shared_ptr<MethodSensorAssignment> MethodSensorAssignmentJsonFactory::creat
 		assignment->setPrivateModifier(privateModifier);
 		bool defaultModifier = jsonObject.at(L"defaultModifier").as_bool();
 		assignment->setDefaultModifier(defaultModifier);
+
 		return assignment;
 	}
 	else {

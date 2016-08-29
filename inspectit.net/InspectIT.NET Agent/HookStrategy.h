@@ -1,6 +1,7 @@
 #pragma once
 
 #include "basehdr.h"
+#include "MethodHook.h"
 
 #include <vector>
 

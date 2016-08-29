@@ -10,7 +10,8 @@
 #include <memory>
 #include <shared_mutex>
 
-class ShadowStackProvider : public StackTraceProvider, public ShadowStackHolder
+class ShadowStackProvider : public StackTraceProvider, public ShadowStackHolder,
+	public std::enable_shared_from_this<ShadowStackProvider>
 {
 private:
 	std::map<ThreadID, std::shared_ptr<ShadowStack>> stacksPerThread;
@@ -24,11 +25,12 @@ public:
 	ShadowStackProvider();
 	~ShadowStackProvider();
 
+	void init();
+
+	void setHookStrategy(std::shared_ptr<HookStrategy> hookStrategy) {}
+
 	bool hasHook();
 	std::shared_ptr<MethodHook> getHook();
-
-	bool hasThreadHook();
-	std::shared_ptr<ThreadHook> getThreadHook();
 
 	/*
 	* Returns necessary monitor flags except for COR_PRF_MONITOR_ENTERLEAVE
@@ -39,6 +41,7 @@ public:
 	void popMethod(ThreadID threadId);
 
 	std::shared_ptr<StackTraceSample> getStackTrace(ThreadID threadId);
-	std::map<ThreadID, std::shared_ptr<StackTraceSample>> getAllStackTraces();
+
+	void addShadowStackListener(ThreadID threadId, std::shared_ptr<ShadowStackListener> listener);
 };
 

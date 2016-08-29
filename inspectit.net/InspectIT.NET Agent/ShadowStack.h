@@ -2,6 +2,7 @@
 
 #include "basehdr.h"
 #include "StackTraceSample.h"
+#include "ShadowStackListener.h"
 #include "Logger.h"
 
 #include <vector>
@@ -17,7 +18,12 @@ private:
 	std::vector<std::pair<METHOD_ID, bool>> stack;
 	std::mutex stackMutex;
 
+	std::vector<std::shared_ptr<ShadowStackListener>> listeners;
+
 	Logger logger = loggerFactory.createLogger("ShadowStack");
+
+	void notifyListenersBeforeChange(size_t newSize);
+	void notifyListenersAfterChange(size_t newSize);
 
 public:
 	ShadowStack(ThreadID threadId);
@@ -27,4 +33,7 @@ public:
 	void popMethod();
 
 	std::shared_ptr<StackTraceSample> doSnapshot();
+
+	void addListener(std::shared_ptr<ShadowStackListener> listener);
+	void removeListeners();
 };
