@@ -19,14 +19,13 @@ DataSendingService::DataSendingService(std::shared_ptr<BufferStrategy> bufferStr
 	this->sendingStrategy = sendingStrategy;
 	sendingStrategy->start();
 
-	measurements = std::make_shared<std::map<std::string, std::shared_ptr<MethodSensorData>>>();
-	measurementsPrepCopy = std::make_shared<std::map<std::string, std::shared_ptr<MethodSensorData>>>();
+	measurements = std::make_unique<std::map<std::string, std::shared_ptr<MethodSensorData>>>();
+	measurementsPrepCopy = std::make_unique<std::map<std::string, std::shared_ptr<MethodSensorData>>>();
 
-	storages = std::make_shared<std::map<std::string, std::shared_ptr<MeasurementStorage>>>();
-	storagesPrepCopy = std::make_shared<std::map<std::string, std::shared_ptr<MeasurementStorage>>>();
+	storages = std::make_unique<std::map<std::string, std::shared_ptr<MeasurementStorage>>>();
 
-	finishedStorages = std::make_shared<std::vector<std::shared_ptr<MeasurementStorage>>>();
-	finishedStoragesPrepCopy = std::make_shared<std::vector<std::shared_ptr<MeasurementStorage>>>();
+	finishedStorages = std::make_unique<std::vector<std::shared_ptr<MeasurementStorage>>>();
+	finishedStoragesPrepCopy = std::make_unique<std::vector<std::shared_ptr<MeasurementStorage>>>();
 
 	DataSendingService *that = this;
 
@@ -71,35 +70,74 @@ void DataSendingService::addMethodSensorData(std::shared_ptr<MethodSensorData> d
 
 std::shared_ptr<MeasurementStorage> DataSendingService::getMeasurementStorage(JAVA_LONG sensorTypeId, JAVA_LONG methodId, std::string prefix)
 {
-	std::shared_lock<std::shared_mutex> lock(mStorages);
+	std::shared_lock<std::shared_mutex> shared_lock(mStorages);
 	auto it = storages->find(createKey(sensorTypeId, methodId, prefix));
 
-	if (it == storages->end()) {
+	if (it == storages->end() || it->second->finished()) {
 		return nullptr;
-	} else {
+	}
+	else if (it->second->finished()) {
+		logger.debug("Measurement storage for method %i is already finished. Returning nullptr.", methodId);
+		return nullptr;
+	} 
+	else {
 		return it->second;
 	}
 }
 
 void DataSendingService::addMeasurementStorage(std::shared_ptr<MeasurementStorage> storage, std::string prefix)
 {
+	if (storage->finished()) {
+		std::unique_lock<std::shared_mutex> uniqueLock(mFinishedStorages);
+		finishedStorages->push_back(storage);
+		notifiyListSizeListeners();
+	}
+	else {
+		std::unique_lock<std::shared_mutex> lock(mStorages);
+
+		std::string key = createKey(storage->getMethodSensorId(), storage->getMethodId(), prefix);
+
+		{
+			// If a storage with the specified key already exists,
+			// it is moved to the finishedStorages list
+			std::unique_lock<std::shared_mutex> uniqueLock(mFinishedStorages);
+			auto it = storages->find(key);
+			if (it != storages->end()) {
+				finishedStorages->push_back(it->second);
+				storages->erase(key);
+				notifiyListSizeListeners();
+			}
+		}
+
+		storages->insert({ key, storage });
+	}
+}
+
+void DataSendingService::notifyStorageFinished(std::shared_ptr<MeasurementStorage> storage, std::string prefix)
+{
+	//logger.debug("notifyStorageFinished");
+
+	if (!storage->finished()) {
+		logger.error("Storage for sensor %lli, method %lli and prefix %s is not finished!", storage->getMethodSensorId(), storage->getMethodId(), prefix.c_str());
+		return;
+	}
+
 	std::unique_lock<std::shared_mutex> lock(mStorages);
 
 	std::string key = createKey(storage->getMethodSensorId(), storage->getMethodId(), prefix);
 
 	{
-		// If a storage with the specified key already exists,
-		// it is moved to the finishedStorages list
 		std::unique_lock<std::shared_mutex> uniqueLock(mFinishedStorages);
 		auto it = storages->find(key);
 		if (it != storages->end()) {
 			finishedStorages->push_back(it->second);
-			storages->erase(key);
+			storages->erase(it);
+			notifiyListSizeListeners();
+		}
+		else {
+			logger.error("Storage for sensor %lli, method %lli and prefix %s is not contained in the saved storages!", storage->getMethodSensorId(), storage->getMethodId(), prefix.c_str());
 		}
 	}
-
-	storages->insert({ key, storage });
-	notifiyListSizeListeners();
 }
 
 std::string DataSendingService::createKey(JAVA_LONG sensorTypeId, JAVA_LONG methodId, std::string prefix)
@@ -130,7 +168,19 @@ void DataSendingService::prepareData()
 			cvPrepare.wait(lock);
 		}
 
-		if (!measurements->empty() || !storages->empty())
+		bool empty = true;
+
+		{
+			std::shared_lock<std::shared_mutex> measurementsLock(mMeasurements);
+			empty = measurements->empty();
+		}
+
+		if (empty) {
+			std::shared_lock<std::shared_mutex> storagesLock(mFinishedStorages);
+			empty = finishedStorages->empty();
+		}
+
+		if (!empty)
 		{
 			logger.debug("Preparing data...");
 
@@ -140,16 +190,12 @@ void DataSendingService::prepareData()
 			}
 
 			{
-				std::unique_lock<std::shared_mutex> lock(mStorages);
-				std::swap(storages, storagesPrepCopy);
-			}
-
-			{
 				std::unique_lock<std::shared_mutex> lock(mFinishedStorages);
 				std::swap(finishedStorages, finishedStoragesPrepCopy);
 			}
 
 			logger.debug("Maps swapped");
+			logger.debug("finishedStoragesPrepCopy has size %i", finishedStoragesPrepCopy->size());
 
 			std::vector<std::shared_ptr<MethodSensorData>> dataObjects;
 			for (auto it = measurementsPrepCopy->begin(); it != measurementsPrepCopy->end(); it++) {
@@ -164,22 +210,11 @@ void DataSendingService::prepareData()
 					dataObjects.push_back(storage->finalizeData());
 				}
 				else {
-					logger.warn("Measurement storage for sensor %lli and method %i was not yet finished. Data are lost!", storage->getMethodSensorId(), storage->getMethodId());
+					logger.warn("Measurement storage for sensor %lli and method %i was not yet finished. Data is lost!", storage->getMethodSensorId(), storage->getMethodId());
 				}
 			}
 
-			finishedStorages->clear();
-
-			for (auto it = storagesPrepCopy->begin(); it != storagesPrepCopy->end(); ) {
-				if (it->second->finished()) {
-					logger.debug("Data finished. Preparing...");
-					dataObjects.push_back(it->second->finalizeData());
-					it = storagesPrepCopy->erase(it);
-				}
-				else {
-					++it;
-				}
-			}
+			finishedStoragesPrepCopy->clear();
 
 			logger.debug("dataObjects created");
 
@@ -225,7 +260,9 @@ void DataSendingService::sendData()
 void DataSendingService::notifiyListSizeListeners()
 {
 	for (auto it = listSizeListeners.begin(); it != listSizeListeners.end(); it++) {
-		(*it)->listSizeChanged(measurements->size());
+		logger.debug("List size is %i + %i = %i", measurements->size(), finishedStorages->size(), measurements->size() + finishedStorages->size());
+		// Pass the summarized sizes to the listeners.
+		(*it)->listSizeChanged(measurements->size() + finishedStorages->size());
 	}
 }
 

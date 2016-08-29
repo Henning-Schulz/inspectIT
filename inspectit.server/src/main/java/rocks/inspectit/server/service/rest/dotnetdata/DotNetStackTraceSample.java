@@ -3,6 +3,8 @@
  */
 package rocks.inspectit.server.service.rest.dotnetdata;
 
+import rocks.inspectit.shared.all.communication.data.StackTraceSample;
+
 /**
  * @author Henning Schulz
  *
@@ -93,6 +95,14 @@ public class DotNetStackTraceSample {
 	 */
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
+	}
+
+	public StackTraceSample toDefaultDataSample() {
+		StackTraceSample defSample = new StackTraceSample();
+		defSample.setOffset(offset);
+		defSample.setTimestamp(timestamp);
+		defSample.setTrace(trace);
+		return defSample;
 	}
 
 	/**

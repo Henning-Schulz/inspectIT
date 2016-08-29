@@ -17,8 +17,6 @@ private:
 
 	std::shared_ptr<StackTraceProvider> provider;
 
-	std::set<ThreadID> allThreads;
-
 	Logger logger = loggerFactory.createLogger("StackTraceSampler");
 
 	void storeTrace(ThreadID threadId, std::shared_ptr<StackTraceSample> trace, bool forceNewStorage);
@@ -33,9 +31,8 @@ public:
 	/*
 	 * Should be called by the trigger
 	 */
-	void doSampling(ThreadID threadId, bool forceNewStorage);
-	void doSamplingOfAllThreads(bool forceNewStorage);
+	bool doSampling(ThreadID threadId, bool forceNewStorage);
 
-	void notifyShutdown();
+	void finalizeThread(ThreadID threadId, METHOD_ID baseMethodId = 0, JAVA_LONG startTime = -1, JAVA_LONG endTime = -1);
 };
 

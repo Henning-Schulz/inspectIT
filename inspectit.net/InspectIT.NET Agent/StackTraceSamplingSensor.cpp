@@ -14,40 +14,36 @@ StackTraceSamplingSensor::StackTraceSamplingSensor()
 
 StackTraceSamplingSensor::~StackTraceSamplingSensor()
 {
-	logger.debug("Deconstructor");
+	logger.debug("Destructor");
 }
 
 void StackTraceSamplingSensor::init(std::shared_ptr<MethodSensorConfig> config, JAVA_LONG sensorTypeId, JAVA_LONG platformId, ICorProfilerInfo *profilerInfo)
 {
+	setSensorTypeId(sensorTypeId);
+
 	if (wcscmp(config->getClassName(), StackTraceSensorConfig::CLASS_NAME) != 0) {
-		logger.warn("Passed illegal sensor config %ls. Using TimedTrigger with sampling interval 200 ms and ShadowStackProvider.", config->getClassName());
-		trigger = std::make_shared<TimedTrigger>(200);
-		provider = std::make_shared<ShadowStackProvider>();
+		logger.warn("Passed illegal sensor config %ls. Disabling stack trace sampling.", config->getClassName());
+		return;
 	}
 	else {
 		std::shared_ptr<StackTraceSensorConfig> stsc = std::static_pointer_cast<StackTraceSensorConfig>(config);
 		logger.debug("Initializing StackTraceSamplingSensor");
 
-		switch (stsc->getTriggerType()) {
-		case TIMER:
-			trigger = std::make_shared<TimedTrigger>(stsc->getSamplingInterval());
-			break;
-		case RANDOMIZED_TIMER:
-		case STACK_SIZE_BASED:
-		default:
-			logger.warn("Unknown trigger! Using TimeTrigger with sampling interval 200 ms.");
-			trigger = std::make_shared<TimedTrigger>(200);
-			break;
-		}
+		samplingSwitch = std::make_shared<SamplingSwitch>(stsc);
+		samplingSwitch->setPlatformId(getPlatformId());
+		samplingSwitch->setSensorTypeId(getSensorTypeId());
+		samplingSwitch->init(profilerInfo);
 
 		logger.debug("Setting provider...");
 
 		switch (stsc->getProviderType()) {
-		case SHADOW_STACK:
+		case SHADOW:
 			provider = std::make_shared<ShadowStackProvider>();
+			samplingSwitch->setShadowStackProvider(std::static_pointer_cast<ShadowStackProvider>(provider));
 			break;
-		case SIMPLE:
-			logger.debug("Using native stack provider...");
+		case NATIVE:
+			
+			("Using native stack provider...");
 			if (static_cast<ICorProfilerInfo2*>(profilerInfo)) {
 				logger.debug("Creating provider...");
 				provider = std::make_shared<NativeStackProvider>(static_cast<ICorProfilerInfo2*>(profilerInfo));
@@ -55,6 +51,7 @@ void StackTraceSamplingSensor::init(std::shared_ptr<MethodSensorConfig> config, 
 			}
 			else {
 				logger.error("Passed ICorProfilerInfo is not an ICorProfilerInfo2, which is needed for the NativeStackProvider!");
+				// No break; run into default
 			}
 		default:
 			logger.warn("Unable to instantiate provider! Using ShadowStackProvider.");
@@ -65,6 +62,7 @@ void StackTraceSamplingSensor::init(std::shared_ptr<MethodSensorConfig> config, 
 		logger.debug("Provider set.");
 	}
 
+	provider->init();
 	sampler = std::make_shared<StackTraceSampler>(provider);
 	
 	if (provider->hasHook()) {
@@ -76,9 +74,18 @@ void StackTraceSamplingSensor::init(std::shared_ptr<MethodSensorConfig> config, 
 	sampler->setPlatformId(platformId);
 	sampler->setSensorTypeId(sensorTypeId);
 
-	trigger->start(sampler);
+	logger.debug("StackTraceSamlplingSensor initialized.");
+}
 
-	logger.debug("StackTraceSamlplerSensor initialized.");
+std::shared_ptr<StackTraceProvider> StackTraceSamplingSensor::getProvider()
+{
+	return provider;
+}
+
+void StackTraceSamplingSensor::notifyStartup()
+{
+	samplingSwitch->start(sampler);
+	logger.debug("StackTraceSampler started.");
 }
 
 void StackTraceSamplingSensor::notifyShutdown()
@@ -87,7 +94,7 @@ void StackTraceSamplingSensor::notifyShutdown()
 		getHook()->notifyShutdown();
 	}
 
-	trigger->stop();
+	samplingSwitch->stop();
 }
 
 bool StackTraceSamplingSensor::hasHook()
@@ -100,14 +107,24 @@ std::shared_ptr<MethodHook> StackTraceSamplingSensor::getHook()
 	return provider->getHook();
 }
 
+bool StackTraceSamplingSensor::hasBaseMethodHook()
+{
+	return true;
+}
+
+std::shared_ptr<MethodHook> StackTraceSamplingSensor::getBaseMethodHook()
+{
+	return samplingSwitch;
+}
+
 bool StackTraceSamplingSensor::hasThreadHook()
 {
-	return provider->hasThreadHook();
+	return true;
 }
 
 std::shared_ptr<ThreadHook> StackTraceSamplingSensor::getThreadHook()
 {
-	return provider->getThreadHook();
+	return samplingSwitch;
 }
 
 DWORD StackTraceSamplingSensor::getSpecialMonitorFlags()

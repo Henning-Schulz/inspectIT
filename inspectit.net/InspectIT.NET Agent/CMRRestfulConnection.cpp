@@ -54,6 +54,7 @@ CMRRestfulConnection::CMRRestfulConnection()
 
 CMRRestfulConnection::~CMRRestfulConnection()
 {
+	logger.info("Destructor");
 }
 
 bool CMRRestfulConnection::testConnection() {
@@ -302,7 +303,7 @@ std::shared_ptr<StrategyConfig> CMRRestfulConnection::getStrategyConfig(JAVA_LON
 		return strategyConfigFactory.createFromJson(obj);
 	}
 	else {
-		logger.error("Could not get sending strategy config. Response was %u!", c);
+		logger.error("Could not get strategy config. Response was %u!", c);
 		return nullptr;
 	}
 }
@@ -365,7 +366,7 @@ std::vector<std::shared_ptr<MethodSensorConfig>> CMRRestfulConnection::getMethod
 		return sensorConfigs;
 	}
 	else {
-		logger.error("Could not get sending strategy config. Response was %u!", c);
+		logger.error("Could not get method sensor config. Response was %u!", c);
 		return std::vector<std::shared_ptr<MethodSensorConfig>>();
 	}
 }
@@ -412,8 +413,43 @@ std::vector<std::shared_ptr<MethodSensorAssignment>> CMRRestfulConnection::getMe
 		return sensorAssignments;
 	}
 	else {
-		logger.error("Could not get sending strategy config. Response was %u!", c);
+		logger.error("Could not get method sensor assignment. Response was %u!", c);
 		return std::vector<std::shared_ptr<MethodSensorAssignment>>();
+	}
+}
+
+std::vector<std::wstring> CMRRestfulConnection::getExcludedClasses(JAVA_LONG platformId)
+{
+	std::wstringstream urlStream;
+	urlStream << baseUrl << configPath << "/getExcludedClasses";
+
+	std::wstringstream argsStream;
+	argsStream << "?platformId=" << platformId;
+
+	http_client client(urlStream.str().c_str());
+	http_response response;
+	try {
+		response = client.request(methods::GET, argsStream.str().c_str()).get();
+	}
+	catch (web::http::http_exception) {
+		logger.error("Could not connect to %ls", urlStream.str().c_str());
+		return std::vector<std::wstring>();
+	}
+
+	status_code c = response.status_code();
+	if (c == status_codes::OK) {
+		json::array arr = response.extract_json().get().as_array();
+		std::vector<std::wstring> excludedClasses;
+
+		for (auto it = arr.begin(); it != arr.end(); it++) {
+			excludedClasses.push_back(it->as_string());
+		}
+
+		return excludedClasses;
+	}
+	else {
+		logger.error("Could not get method sensor assignment. Response was %u!", c);
+		return std::vector<std::wstring>();
 	}
 }
 
@@ -432,11 +468,11 @@ void CMRRestfulConnection::sendDataObjects(std::vector<std::shared_ptr<MethodSen
 		i++;
 	}
 
-	Logger nestedLogger = logger;
+	Logger *nestedLogger = &logger;
 
 	http_client client(urlStream.str().c_str());
 	try {
-		auto stream = client.request(methods::POST, L"", objectsJson.serialize(), MIME_JSON).then([&nestedLogger](http_response response)
+		auto stream = client.request(methods::POST, L"", objectsJson.serialize(), MIME_JSON).then([nestedLogger](http_response response)
 		{
 			status_code c = response.status_code();
 			if (c == status_codes::OK) {
@@ -444,14 +480,14 @@ void CMRRestfulConnection::sendDataObjects(std::vector<std::shared_ptr<MethodSen
 				JAVA_INT succ = _wtoi(body.get().c_str());
 
 				if (succ < 0) {
-					nestedLogger.error("Server-side error when sending data objects! Ignoring...");
+					nestedLogger->error("Server-side error when sending data objects! Ignoring...");
 				}
 				else {
-					nestedLogger.debug("Data objects sent.");
+					nestedLogger->debug("Data objects sent.");
 				}
 			}
 			else {
-				nestedLogger.error("Could not send data objects. Response was %u!", c);
+				nestedLogger->error("Could not send data objects. Response was %u!", c);
 			}
 		});
 
@@ -475,11 +511,11 @@ void CMRRestfulConnection::sendKeepAlive(JAVA_LONG platformId, bool waitForRespo
 	std::wstringstream argsStream;
 	argsStream << "?platformId=" << platformId;
 
-	Logger nestedLogger = logger;
+	Logger *nestedLogger = &logger;
 
 	http_client client(urlStream.str().c_str());
 	try {
-		auto stream = client.request(methods::POST, argsStream.str().c_str(), MIME_JSON).then([&nestedLogger](http_response response)
+		auto stream = client.request(methods::POST, argsStream.str().c_str(), MIME_JSON).then([nestedLogger](http_response response)
 		{
 			status_code c = response.status_code();
 			if (c == status_codes::OK) {
@@ -487,14 +523,14 @@ void CMRRestfulConnection::sendKeepAlive(JAVA_LONG platformId, bool waitForRespo
 				JAVA_INT succ = _wtoi(body.get().c_str());
 
 				if (succ < 0) {
-					nestedLogger.error("Server-side error when sending keep alive signal! Ignoring...");
+					nestedLogger->error("Server-side error when sending keep alive signal! Ignoring...");
 				}
 				else {
-					nestedLogger.debug("Keep alive signal sent.");
+					nestedLogger->debug("Keep alive signal sent.");
 				}
 			}
 			else {
-				nestedLogger.error("Could not send keep alive signal. Response was %u!", c);
+				nestedLogger->error("Could not send keep alive signal. Response was %u!", c);
 			}
 		});
 

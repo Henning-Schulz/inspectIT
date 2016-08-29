@@ -83,6 +83,8 @@ import rocks.inspectit.shared.all.communication.data.ParameterContentData;
 import rocks.inspectit.shared.all.communication.data.ParameterContentType;
 import rocks.inspectit.shared.all.communication.data.RuntimeInformationData;
 import rocks.inspectit.shared.all.communication.data.SqlStatementData;
+import rocks.inspectit.shared.all.communication.data.StackTraceData;
+import rocks.inspectit.shared.all.communication.data.StackTraceSample;
 import rocks.inspectit.shared.all.communication.data.SystemInformationData;
 import rocks.inspectit.shared.all.communication.data.ThreadInformationData;
 import rocks.inspectit.shared.all.communication.data.TimerData;
@@ -322,6 +324,10 @@ public class SerializationManager implements ISerializer, IKryoProvider, Initial
 
 		// added with INSPECTIT-1849
 		kryo.register(HttpInfo.class, new CustomCompatibleFieldSerializer<HttpInfo>(kryo, HttpInfo.class, schemaManager));
+
+		// added in .NET Stack Trace Sampling branch
+		kryo.register(StackTraceData.class, new CustomCompatibleFieldSerializer<StackTraceData>(kryo, StackTraceData.class, schemaManager));
+		kryo.register(StackTraceSample.class, new CustomCompatibleFieldSerializer<StackTraceSample>(kryo, StackTraceSample.class, schemaManager));
 	}
 
 	/**

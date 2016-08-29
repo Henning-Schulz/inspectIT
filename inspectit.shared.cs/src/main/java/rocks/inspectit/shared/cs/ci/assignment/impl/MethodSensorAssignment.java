@@ -13,12 +13,12 @@ import rocks.inspectit.shared.cs.ci.sensor.method.IMethodSensorConfig;
 
 /**
  * Class for method sensor assignment.
- * 
+ *
  * @author Ivan Senic
- * 
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlSeeAlso({ TimerMethodSensorAssignment.class })
+@XmlSeeAlso({ TimerMethodSensorAssignment.class, DotNetStackTraceSensorAssignment.class })
 @XmlRootElement(name = "method-sensor-assignment")
 public class MethodSensorAssignment extends AbstractClassSensorAssignment<IMethodSensorConfig> {
 
@@ -27,7 +27,7 @@ public class MethodSensorAssignment extends AbstractClassSensorAssignment<IMetho
 	 */
 	@XmlAttribute(name = "sensor-config-class", required = true)
 	private Class<? extends IMethodSensorConfig> sensorConfig;
-	
+
 	/**
 	 * Method name/pattern.
 	 */
@@ -78,8 +78,9 @@ public class MethodSensorAssignment extends AbstractClassSensorAssignment<IMetho
 
 	/**
 	 * Default constructor.
-	 * 
-	 * @param sensorConfig Method sensor config class begin assigned.
+	 *
+	 * @param sensorConfig
+	 *            Method sensor config class begin assigned.
 	 */
 	public MethodSensorAssignment(Class<? extends IMethodSensorConfig> sensorConfig) {
 		this.sensorConfig = sensorConfig;
@@ -95,7 +96,7 @@ public class MethodSensorAssignment extends AbstractClassSensorAssignment<IMetho
 
 	/**
 	 * Gets {@link #methodName}.
-	 * 
+	 *
 	 * @return {@link #methodName}
 	 */
 	public String getMethodName() {
@@ -104,7 +105,7 @@ public class MethodSensorAssignment extends AbstractClassSensorAssignment<IMetho
 
 	/**
 	 * Sets {@link #methodName}.
-	 * 
+	 *
 	 * @param methodName
 	 *            New value for {@link #methodName}
 	 */
@@ -114,7 +115,7 @@ public class MethodSensorAssignment extends AbstractClassSensorAssignment<IMetho
 
 	/**
 	 * Gets {@link #parameters}.
-	 * 
+	 *
 	 * @return {@link #parameters}
 	 */
 	public List<String> getParameters() {
@@ -123,7 +124,7 @@ public class MethodSensorAssignment extends AbstractClassSensorAssignment<IMetho
 
 	/**
 	 * Sets {@link #parameters}.
-	 * 
+	 *
 	 * @param parameters
 	 *            New value for {@link #parameters}
 	 */
@@ -133,7 +134,7 @@ public class MethodSensorAssignment extends AbstractClassSensorAssignment<IMetho
 
 	/**
 	 * Gets {@link #constructor}.
-	 * 
+	 *
 	 * @return {@link #constructor}
 	 */
 	public boolean isConstructor() {
@@ -142,7 +143,7 @@ public class MethodSensorAssignment extends AbstractClassSensorAssignment<IMetho
 
 	/**
 	 * Sets {@link #constructor}.
-	 * 
+	 *
 	 * @param constructor
 	 *            New value for {@link #constructor}
 	 */
@@ -152,7 +153,7 @@ public class MethodSensorAssignment extends AbstractClassSensorAssignment<IMetho
 
 	/**
 	 * Gets {@link #publicModifier}.
-	 * 
+	 *
 	 * @return {@link #publicModifier}
 	 */
 	public boolean isPublicModifier() {
@@ -161,7 +162,7 @@ public class MethodSensorAssignment extends AbstractClassSensorAssignment<IMetho
 
 	/**
 	 * Sets {@link #publicModifier}.
-	 * 
+	 *
 	 * @param publicModifier
 	 *            New value for {@link #publicModifier}
 	 */
@@ -171,7 +172,7 @@ public class MethodSensorAssignment extends AbstractClassSensorAssignment<IMetho
 
 	/**
 	 * Gets {@link #protectedModifier}.
-	 * 
+	 *
 	 * @return {@link #protectedModifier}
 	 */
 	public boolean isProtectedModifier() {
@@ -180,7 +181,7 @@ public class MethodSensorAssignment extends AbstractClassSensorAssignment<IMetho
 
 	/**
 	 * Sets {@link #protectedModifier}.
-	 * 
+	 *
 	 * @param protectedModifier
 	 *            New value for {@link #protectedModifier}
 	 */
@@ -190,7 +191,7 @@ public class MethodSensorAssignment extends AbstractClassSensorAssignment<IMetho
 
 	/**
 	 * Gets {@link #privateModifier}.
-	 * 
+	 *
 	 * @return {@link #privateModifier}
 	 */
 	public boolean isPrivateModifier() {
@@ -199,7 +200,7 @@ public class MethodSensorAssignment extends AbstractClassSensorAssignment<IMetho
 
 	/**
 	 * Sets {@link #privateModifier}.
-	 * 
+	 *
 	 * @param privateModifier
 	 *            New value for {@link #privateModifier}
 	 */
@@ -209,7 +210,7 @@ public class MethodSensorAssignment extends AbstractClassSensorAssignment<IMetho
 
 	/**
 	 * Gets {@link #defaultModifier}.
-	 * 
+	 *
 	 * @return {@link #defaultModifier}
 	 */
 	public boolean isDefaultModifier() {
@@ -218,7 +219,7 @@ public class MethodSensorAssignment extends AbstractClassSensorAssignment<IMetho
 
 	/**
 	 * Sets {@link #defaultModifier}.
-	 * 
+	 *
 	 * @param defaultModifier
 	 *            New value for {@link #defaultModifier}
 	 */

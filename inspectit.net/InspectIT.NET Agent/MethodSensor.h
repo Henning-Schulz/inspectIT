@@ -13,11 +13,16 @@ private:
 	JAVA_LONG sensorTypeId;
 	JAVA_LONG platformId;
 
+protected:
+	void setSensorTypeId(JAVA_LONG sensorTypeId) { this->sensorTypeId = sensorTypeId; }
+	void setPlatformId(JAVA_LONG platformId) { this->platformId = platformId; }
+
 public:
 	MethodSensor() {}
 	virtual ~MethodSensor() {}
 
 	virtual void init(std::shared_ptr<MethodSensorConfig> config, JAVA_LONG sensorTypeId, JAVA_LONG platformId, ICorProfilerInfo *profilerInfo) = 0;
+	virtual void notifyStartup() = 0;
 	virtual void notifyShutdown() = 0;
 
 	virtual bool hasHook() = 0;

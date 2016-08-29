@@ -4,6 +4,7 @@
 package rocks.inspectit.server.service.rest.dotnetdata;
 
 import rocks.inspectit.shared.all.communication.MethodSensorData;
+import rocks.inspectit.shared.all.communication.data.InvocationSequenceData;
 
 /**
  * @author Henning Schulz
@@ -47,6 +48,21 @@ public class DotNetHelloData extends DotNetMethodSensorData {
 	protected MethodSensorData toNewDefaultData() {
 		// No matching MethodSensorData available
 		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean isInvocationSequenceConvertible() {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void fillInvocationSequeneData(InvocationSequenceData invocData) {
 	}
 
 }

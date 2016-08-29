@@ -28,6 +28,7 @@ import rocks.inspectit.shared.all.communication.data.HttpTimerData;
 import rocks.inspectit.shared.all.communication.data.InvocationSequenceData;
 import rocks.inspectit.shared.all.communication.data.MemoryInformationData;
 import rocks.inspectit.shared.all.communication.data.SqlStatementData;
+import rocks.inspectit.shared.all.communication.data.StackTraceData;
 import rocks.inspectit.shared.all.communication.data.SystemInformationData;
 import rocks.inspectit.shared.all.communication.data.ThreadInformationData;
 import rocks.inspectit.shared.all.communication.data.TimerData;
@@ -48,9 +49,9 @@ import rocks.inspectit.shared.cs.storage.recording.RecordingState;
 
 /**
  * Restful service provider for storages.
- * 
+ *
  * @author Ivan Senic
- * 
+ *
  */
 @Controller
 @RequestMapping(value = "/storage")
@@ -64,7 +65,7 @@ public class StorageRestfulService {
 
 	/**
 	 * Handling of all the exceptions happening in this controller.
-	 * 
+	 *
 	 * @param exception
 	 *            Exception being thrown
 	 * @return {@link ModelAndView}
@@ -78,7 +79,7 @@ public class StorageRestfulService {
 	 * Returns all storages.
 	 * <p>
 	 * <i> Example URL: /storage/all</i>
-	 * 
+	 *
 	 * @return List of all storages.
 	 */
 	@RequestMapping(method = RequestMethod.GET, value = "all")
@@ -92,7 +93,7 @@ public class StorageRestfulService {
 	 * Returns storage by ID.
 	 * <p>
 	 * <i> Example URL: /storage/get?id=1</i>
-	 * 
+	 *
 	 * @param id
 	 *            ID bounded from path.
 	 * @return One storage or <code>null</code> if the storage with given ID does not exists.
@@ -113,7 +114,7 @@ public class StorageRestfulService {
 	 * Creates a new storage with given name.
 	 * <p>
 	 * <i> Example URL: /storage/create?name=ViaRest</i>
-	 * 
+	 *
 	 * @param name
 	 *            Name of the storage.
 	 * @return Map containing message and created storage.
@@ -141,7 +142,7 @@ public class StorageRestfulService {
 	 * Finalize storage by ID.
 	 * <p>
 	 * <i> Example URL: /storage/finalize?id=1</i>
-	 * 
+	 *
 	 * @param id
 	 *            ID bounded from path.
 	 * @throws BusinessException
@@ -161,7 +162,7 @@ public class StorageRestfulService {
 	 * Deletes storage by ID.
 	 * <p>
 	 * <i> Example URL: /storage/delete?id=1</i>
-	 * 
+	 *
 	 * @param id
 	 *            ID bounded from path.
 	 * @throws BusinessException
@@ -181,7 +182,7 @@ public class StorageRestfulService {
 	 * Returns the current state of the recording.
 	 * <p>
 	 * <i> Example URL: /storage/recording-state</i>
-	 * 
+	 *
 	 * @return {@link RecordingState}.
 	 */
 	@RequestMapping(method = RequestMethod.GET, value = "recording-state")
@@ -216,7 +217,7 @@ public class StorageRestfulService {
 	 * Stops recording.
 	 * <p>
 	 * <i> Example URL: /storage/stop-recording</i>
-	 * 
+	 *
 	 * @throws BusinessException
 	 *             If {@link BusinessException} occurs.
 	 * @return Message for the user.
@@ -235,7 +236,7 @@ public class StorageRestfulService {
 	 * <p>
 	 * <i> Example URL: /storage/start-recording/?id=1&startDelay=30000&recordingDuration=60000
 	 * (makes a 30s delay and records for 60s)</i>
-	 * 
+	 *
 	 * @param id
 	 *            Storage ID.
 	 * @param startDelay
@@ -290,7 +291,7 @@ public class StorageRestfulService {
 	/**
 	 * Returns the recording properties with correctly set default set of
 	 * {@link AbstractDataProcessor}s.
-	 * 
+	 *
 	 * @param extractInvocations
 	 *            If invocations should be extracted.
 	 * @return {@link RecordingProperties}.
@@ -303,7 +304,7 @@ public class StorageRestfulService {
 		// data saver
 		List<Class<? extends DefaultData>> classesToSave = new ArrayList<Class<? extends DefaultData>>();
 		Collections.addAll(classesToSave, InvocationSequenceData.class, HttpTimerData.class, ExceptionSensorData.class, MemoryInformationData.class, CpuInformationData.class,
-				ClassLoadingInformationData.class, ThreadInformationData.class, SystemInformationData.class);
+				ClassLoadingInformationData.class, ThreadInformationData.class, SystemInformationData.class, StackTraceData.class);
 		DataSaverProcessor dataSaverProcessor = new DataSaverProcessor(classesToSave, true);
 		normalProcessors.add(dataSaverProcessor);
 

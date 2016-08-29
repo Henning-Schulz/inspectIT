@@ -2,6 +2,8 @@
 
 #include "basehdr.h"
 
+#include "MethodSensorConfig.h"
+
 /*
  * Interface for method sensors.
  */
@@ -10,10 +12,14 @@ class MethodHook {
 private:
 	JAVA_LONG sensorTypeId;
 	JAVA_LONG platformId;
+	MethodSensorPriority priority = MIN;
 
 public:
 	MethodHook() {}
 	virtual ~MethodHook() {}
+
+	MethodSensorPriority getPriority() { return priority; }
+	void setPriority(MethodSensorPriority priority) { this->priority = priority; }
 
 	virtual void init(ICorProfilerInfo *profilerInfo) = 0;
 	virtual void notifyShutdown() = 0;

@@ -1,5 +1,6 @@
 #include "StackTraceStorage.h"
 
+#include <map>
 
 /* 
  * The methodId is set to the threadId in order to use it for identification in DataSendingService
@@ -18,6 +19,35 @@ StackTraceStorage::~StackTraceStorage()
 ThreadID StackTraceStorage::getThreadId()
 {
 	return threadId;
+}
+
+METHOD_ID StackTraceStorage::getBaseMethodId() {
+	return baseMethodId;
+}
+
+void StackTraceStorage::setBaseMethodId(METHOD_ID baseMethodId)
+{
+	this->baseMethodId = baseMethodId;
+}
+
+JAVA_LONG StackTraceStorage::getStartTime()
+{
+	return startTime;
+}
+
+void StackTraceStorage::setStartTime(JAVA_LONG startTime)
+{
+	this->startTime = startTime;
+}
+
+JAVA_LONG StackTraceStorage::getEndTime()
+{
+	return endTime;
+}
+
+void StackTraceStorage::setEndTime(JAVA_LONG endTime)
+{
+	this->endTime = endTime;
 }
 
 std::vector<std::shared_ptr<StackTraceSample>> StackTraceStorage::getTraces()
@@ -52,5 +82,9 @@ bool StackTraceStorage::finished()
 
 std::shared_ptr<MethodSensorData> StackTraceStorage::finalizeData()
 {
-	return std::make_shared<StackTraceData>(traces, getPlatformId(), getMethodSensorId(), getHighestMethod(), getThreadId(), getTimestamp());
+	std::shared_ptr<StackTraceData> data = std::make_shared<StackTraceData>(traces, getPlatformId(), getMethodSensorId(), getHighestMethod(), getThreadId(), getTimestamp());
+	data->setBaseMethodId(baseMethodId);
+	data->setStartTime(startTime);
+	data->setEndTime(endTime);
+	return data;
 }

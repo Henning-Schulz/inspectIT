@@ -15,6 +15,8 @@
 
   <xs:element name="cpu-sensor-config" type="cpuSensorConfig"/>
 
+  <xs:element name="dot-net-stack-trace-sensor-assignment" type="dotNetStackTraceSensorAssignment"/>
+
   <xs:element name="dot-net-stack-trace-sensor-config" type="dotNetStackTraceSensorConfig"/>
 
   <xs:element name="environment" type="environment"/>
@@ -308,9 +310,9 @@
     <xs:complexContent>
       <xs:extension base="stringConstraintSensorConfig">
         <xs:sequence/>
-		<xs:attribute name="trigger-type" type="xs:string" use="required"/>
-		<xs:attribute name="provider-type" type="xs:string" use="required"/>
-		<xs:attribute name="sampling-interval" type="xs:long" use="required"/>
+        <xs:attribute name="trigger-type" type="triggerType" use="required"/>
+        <xs:attribute name="provider-type" type="stackTraceProviderType" use="required"/>
+        <xs:attribute name="sampling-interval" type="xs:long" use="required"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -329,6 +331,7 @@
       <xs:choice minOccurs="0" maxOccurs="unbounded">
         <xs:element ref="method-sensor-assignment"/>
         <xs:element ref="timer-method-sensor-assignment"/>
+        <xs:element ref="dot-net-stack-trace-sensor-assignment"/>
       </xs:choice>
       <xs:element ref="exception-sensor-assignment" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element ref="exclude-rule" minOccurs="0" maxOccurs="unbounded"/>
@@ -366,7 +369,7 @@
 
   <xs:complexType name="abstractClassSensorAssignment" abstract="true">
     <xs:sequence/>
-    <xs:attribute name="class-name" type="xs:string" use="required"/>
+    <xs:attribute name="class-name" type="xs:string" use="optional"/>
     <xs:attribute name="superclass" type="xs:boolean" use="optional"/>
     <xs:attribute name="interface" type="xs:boolean" use="optional"/>
     <xs:attribute name="annotation" type="xs:string"/>
@@ -442,6 +445,16 @@
     </xs:complexContent>
   </xs:complexType>
 
+  <xs:complexType name="dotNetStackTraceSensorAssignment">
+    <xs:complexContent>
+      <xs:extension base="methodSensorAssignment">
+        <xs:sequence>
+          <xs:element name="base-method-assignment" type="methodSensorAssignment" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
   <xs:complexType name="excludeRule">
     <xs:sequence/>
     <xs:attribute name="class-name" type="xs:string" use="required"/>
@@ -450,5 +463,31 @@
   <xs:complexType name="configurationDefaultsFactory" final="extension restriction">
     <xs:sequence/>
   </xs:complexType>
+
+  <xs:simpleType name="triggerType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="TIMER"/>
+      <xs:enumeration value="RANDOMIZED_TIMER"/>
+      <xs:enumeration value="STACK_SIZE_BASED"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="stackTraceProviderType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="NATIVE"/>
+      <xs:enumeration value="SHADOW"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="methodSensorPriorityEnum">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="INVOC"/>
+      <xs:enumeration value="MIN"/>
+      <xs:enumeration value="LOW"/>
+      <xs:enumeration value="NORMAL"/>
+      <xs:enumeration value="HIGH"/>
+      <xs:enumeration value="MAX"/>
+    </xs:restriction>
+  </xs:simpleType>
 </xs:schema>
 

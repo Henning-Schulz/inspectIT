@@ -4,13 +4,17 @@
 
 ShadowStackProvider::ShadowStackProvider()
 {
-	std::shared_ptr<ShadowStackHolder> thisHolder(this);
-	hook = std::make_shared<ShadowStackHook>(thisHolder);
 }
 
 
 ShadowStackProvider::~ShadowStackProvider()
 {
+	logger.debug("Destructor");
+}
+
+void ShadowStackProvider::init() {
+	hook = std::make_shared<ShadowStackHook>(shared_from_this());
+	hook->setPriority(NORMAL);
 }
 
 bool ShadowStackProvider::hasHook()
@@ -21,16 +25,6 @@ bool ShadowStackProvider::hasHook()
 std::shared_ptr<MethodHook> ShadowStackProvider::getHook()
 {
 	return hook;
-}
-
-bool ShadowStackProvider::hasThreadHook()
-{
-	return false;
-}
-
-std::shared_ptr<ThreadHook> ShadowStackProvider::getThreadHook()
-{
-	return std::shared_ptr<ThreadHook>();
 }
 
 DWORD ShadowStackProvider::getSpecialMonitorFlags()
@@ -48,6 +42,10 @@ void ShadowStackProvider::pushMethod(ThreadID threadId, METHOD_ID methodId)
 		std::shared_lock<std::shared_mutex> sharedLock(stacksMutex);
 		it = stacksPerThread.find(threadId);
 		end = stacksPerThread.end();
+
+		if (it != end) {
+			stack = it->second;
+		}
 	}
 
 	if (it == end) {
@@ -58,11 +56,8 @@ void ShadowStackProvider::pushMethod(ThreadID threadId, METHOD_ID methodId)
 			if (it == stacksPerThread.end()) {
 				stack = std::make_shared<ShadowStack>(threadId);
 				stacksPerThread.insert(std::make_pair(threadId, stack));
-				logger.debug("Created new shadow stack for thread %i", threadId);
 			}
 		}
-	} else {
-		stack = it->second;
 	}
 
 	stack->pushMethod(methodId);
@@ -70,6 +65,7 @@ void ShadowStackProvider::pushMethod(ThreadID threadId, METHOD_ID methodId)
 
 void ShadowStackProvider::popMethod(ThreadID threadId)
 {
+	std::shared_ptr<ShadowStack> stack;
 	std::map<ThreadID, std::shared_ptr<ShadowStack>>::iterator  it;
 	std::map<ThreadID, std::shared_ptr<ShadowStack>>::iterator end;
 
@@ -77,12 +73,16 @@ void ShadowStackProvider::popMethod(ThreadID threadId)
 		std::shared_lock<std::shared_mutex> sharedLock(stacksMutex);
 		it = stacksPerThread.find(threadId);
 		end = stacksPerThread.end();
+
+		if (it != end) {
+			stack = it->second;
+		}
 	}
 
 	if (it == end) {
 		logger.warn("No stack for thread %i present. Cannot pop method.", threadId);
 	} else {
-		it->second->popMethod();
+		stack->popMethod();
 	}
 }
 
@@ -106,15 +106,33 @@ std::shared_ptr<StackTraceSample> ShadowStackProvider::getStackTrace(ThreadID th
 	}
 }
 
-std::map<ThreadID, std::shared_ptr<StackTraceSample>> ShadowStackProvider::getAllStackTraces()
+void ShadowStackProvider::addShadowStackListener(ThreadID threadId, std::shared_ptr<ShadowStackListener> listener)
 {
-	std::shared_lock<std::shared_mutex> lock(stacksMutex);
+	std::shared_ptr<ShadowStack> stack;
+	std::map<ThreadID, std::shared_ptr<ShadowStack>>::iterator  it;
+	std::map<ThreadID, std::shared_ptr<ShadowStack>>::iterator end;
 
-	std::map<ThreadID, std::shared_ptr<StackTraceSample>> allTraces;
+	{
+		std::shared_lock<std::shared_mutex> sharedLock(stacksMutex);
+		it = stacksPerThread.find(threadId);
+		end = stacksPerThread.end();
 
-	for (auto it = stacksPerThread.begin(); it != stacksPerThread.end(); it++) {
-		allTraces.insert(std::make_pair(it->first, it->second->doSnapshot()));
+		if (it != end) {
+			stack = it->second;
+		}
 	}
 
-	return allTraces;
+	if (it == end) {
+		{
+			std::unique_lock<std::shared_mutex> uniqueLock(stacksMutex);
+
+			it = stacksPerThread.find(threadId);
+			if (it == stacksPerThread.end()) {
+				stack = std::make_shared<ShadowStack>(threadId);
+				stacksPerThread.insert(std::make_pair(threadId, stack));
+			}
+		}
+	}
+
+	stack->addListener(listener);
 }

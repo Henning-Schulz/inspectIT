@@ -398,7 +398,7 @@ public final class ImageFormatter {
 		} else if (ObjectUtils.equals(sensorClass, ThreadSensorConfig.class)) {
 			return InspectIT.getDefault().getImage(InspectITImages.IMG_THREADS_OVERVIEW);
 		} else if (ObjectUtils.equals(sensorClass, DotNetStackTraceSensorConfig.class)) {
-			return InspectIT.getDefault().getImage(InspectITImages.IMG_COUNTER);
+			return InspectIT.getDefault().getImage(InspectITImages.IMG_CALL_HIERARCHY);
 		}
 		return null;
 	}

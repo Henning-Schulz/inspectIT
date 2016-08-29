@@ -81,11 +81,14 @@
       <PreprocessorDefinitions>UNICODE;WIN32;_DEBUG;_WINDOWS;_USRDLL;PROFILEROBJ_EXPORTS;_SAMPLES_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <CallingConvention>StdCall</CallingConvention>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <AdditionalDependencies>corguids.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>agent.def</ModuleDefinitionFile>
       <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -153,23 +156,29 @@
     <ClInclude Include="MethodSensorData.h" />
     <ClInclude Include="NativeStackProvider.h" />
     <ClInclude Include="NoHookStrategy.h" />
+    <ClInclude Include="RandomizedTimedTrigger.h" />
     <ClInclude Include="regutil.h" />
     <ClInclude Include="regutil.hpp" />
+    <ClInclude Include="SamplingSwitch.h" />
     <ClInclude Include="SamplingTrigger.h" />
+    <ClInclude Include="SamplingTriggerFactory.h" />
     <ClInclude Include="SendingStrategy.h" />
     <ClInclude Include="ShadowStack.h" />
     <ClInclude Include="ShadowStackHolder.h" />
+    <ClInclude Include="ShadowStackListener.h" />
     <ClInclude Include="ShadowStackProvider.h" />
     <ClInclude Include="ShadowStackHook.h" />
     <ClInclude Include="SimpleBufferStrategy.h" />
     <ClInclude Include="SimpleBufferStrategyConfig.h" />
     <ClInclude Include="SingleClassHookStrategy.h" />
     <ClInclude Include="SizeBufferStrategyConfig.h" />
+    <ClInclude Include="StackSizeBasedTrigger.h" />
     <ClInclude Include="StackTraceData.h" />
     <ClInclude Include="StackTraceProvider.h" />
     <ClInclude Include="StackTraceSample.h" />
     <ClInclude Include="StackTraceSampler.h" />
     <ClInclude Include="StackTraceSamplingSensor.h" />
+    <ClInclude Include="StackTraceSensorAssignment.h" />
     <ClInclude Include="StackTraceSensorConfig.h" />
     <ClInclude Include="StackTraceStorage.h" />
     <ClInclude Include="StrategyConfig.h" />
@@ -177,6 +186,11 @@
     <ClInclude Include="stringutils.h" />
     <ClInclude Include="ThreadHook.h" />
     <ClInclude Include="TimedTrigger.h" />
+    <ClInclude Include="TimerData.h" />
+    <ClInclude Include="TimerHook.h" />
+    <ClInclude Include="TimerSensor.h" />
+    <ClInclude Include="TimerSensorConfig.h" />
+    <ClInclude Include="TimerStorage.h" />
     <ClInclude Include="TimeStrategyConfig.h" />
   </ItemGroup>
   <ItemGroup>
@@ -198,6 +212,9 @@
     <ClCompile Include="MethodSensorConfigJsonFactory.cpp" />
     <ClCompile Include="NativeStackProvider.cpp" />
     <ClCompile Include="NoHookStrategy.cpp" />
+    <ClCompile Include="RandomizedTimedTrigger.cpp" />
+    <ClCompile Include="SamplingSwitch.cpp" />
+    <ClCompile Include="SamplingTriggerFactory.cpp" />
     <ClCompile Include="ShadowStack.cpp" />
     <ClCompile Include="ShadowStackProvider.cpp" />
     <ClCompile Include="ShadowStackHook.cpp" />
@@ -205,20 +222,30 @@
     <ClCompile Include="SimpleBufferStrategyConfig.cpp" />
     <ClCompile Include="SingleClassHookStrategy.cpp" />
     <ClCompile Include="SizeBufferStrategyConfig.cpp" />
+    <ClCompile Include="StackSizeBasedTrigger.cpp" />
     <ClCompile Include="StackTraceData.cpp" />
     <ClCompile Include="StackTraceSample.cpp" />
     <ClCompile Include="StackTraceSampler.cpp" />
     <ClCompile Include="StackTraceSamplingSensor.cpp" />
+    <ClCompile Include="StackTraceSensorAssignment.cpp" />
     <ClCompile Include="StackTraceSensorConfig.cpp" />
     <ClCompile Include="StackTraceStorage.cpp" />
     <ClCompile Include="StrategyConfigJsonFactory.cpp" />
     <ClCompile Include="stringutils.cpp" />
     <ClCompile Include="TimedTrigger.cpp" />
+    <ClCompile Include="TimerData.cpp" />
+    <ClCompile Include="TimerHook.cpp" />
+    <ClCompile Include="TimerSensor.cpp" />
+    <ClCompile Include="TimerSensorConfig.cpp" />
+    <ClCompile Include="TimerStorage.cpp" />
     <ClCompile Include="TimeStrategyConfig.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="agent.def" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="enable_vector.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

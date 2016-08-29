@@ -19,7 +19,7 @@ Logger::Logger(char* name, LogLevel logLevel, bool toFile, FILE *logFile)
 	this->name = name;
 	this->logLevel = logLevel;
 	this->toFile = toFile;
-	this->logFile = logFile;	
+	this->logFile = logFile;
 }
 
 
@@ -102,9 +102,7 @@ LoggerFactory::LoggerFactory()
 
 LoggerFactory::~LoggerFactory()
 {
-	free(fileName);
-
-	if (logFile != NULL) {
+	if (logFile) {
 		fclose(logFile);
 	}
 }
@@ -164,7 +162,8 @@ void LoggerFactory::updateLogLevel() {
 				this->toFile = false;
 			}
 
-			printf("INFO LoggerFactory - Logging to file %s", fileName);
+			printf("INFO LoggerFactory - Logging to file %s\n", fileName);
+			free(fileName);
 		}
 
 		// fileName need to be freed in destructor

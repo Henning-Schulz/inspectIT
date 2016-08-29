@@ -30,7 +30,7 @@ public class DotNetStackTraceSensorConfig extends StringConstraintSensorConfig i
 	private long samplingInterval;
 
 	public DotNetStackTraceSensorConfig() {
-		this(TriggerType.TIMER, StackTraceProviderType.SHADOW_STACK, 50);
+		this(TriggerType.TIMER, StackTraceProviderType.SHADOW, 50);
 	}
 
 	public DotNetStackTraceSensorConfig(TriggerType triggerType, StackTraceProviderType providerType, long samplingInterval) {
@@ -195,7 +195,7 @@ public class DotNetStackTraceSensorConfig extends StringConstraintSensorConfig i
 	}
 
 	public static enum TriggerType {
-		TIMER("Timer", true), RANDOMIZED_TIMER("Randomized Timer", true), STACK_SIZE_BASED("Stack Size Based", false);
+		TIMER("Timer", true), RANDOMIZED_TIMER("Randomized Timer", true), STACK_SIZE_BASED("Stack Size Based", true);
 
 		private final String name;
 
@@ -221,7 +221,7 @@ public class DotNetStackTraceSensorConfig extends StringConstraintSensorConfig i
 	}
 
 	public static enum StackTraceProviderType {
-		SIMPLE("Native Stack"), SHADOW_STACK("Shadow Stack");
+		NATIVE("Native Stack"), SHADOW("Shadow Stack");
 
 		private final String name;
 

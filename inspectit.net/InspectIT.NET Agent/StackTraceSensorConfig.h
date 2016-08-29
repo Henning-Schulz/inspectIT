@@ -5,8 +5,8 @@
 
 enum TriggerType { TIMER, RANDOMIZED_TIMER, STACK_SIZE_BASED };
 static std::map<const wchar_t*, TriggerType, cmp_wstr> triggerTypes({ { L"TIMER", TIMER },{ L"RANDOMIZED_TIMER", RANDOMIZED_TIMER },{ L"STACK_SIZE_BASED", STACK_SIZE_BASED } });
-enum ProviderType { SIMPLE, SHADOW_STACK };
-static std::map<const wchar_t*, ProviderType, cmp_wstr> providerTypes({ { L"SIMPLE", SIMPLE },{ L"SHADOW_STACK", SHADOW_STACK } });
+enum ProviderType { NATIVE, SHADOW };
+static std::map<const wchar_t*, ProviderType, cmp_wstr> providerTypes({ { L"NATIVE", NATIVE },{ L"SHADOW", SHADOW } });
 
 class StackTraceSensorConfig : public MethodSensorConfig
 {

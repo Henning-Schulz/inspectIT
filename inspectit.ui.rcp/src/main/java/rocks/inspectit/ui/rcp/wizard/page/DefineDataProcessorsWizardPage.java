@@ -37,6 +37,7 @@ import rocks.inspectit.shared.all.communication.data.InvocationSequenceData;
 import rocks.inspectit.shared.all.communication.data.JmxSensorValueData;
 import rocks.inspectit.shared.all.communication.data.MemoryInformationData;
 import rocks.inspectit.shared.all.communication.data.SqlStatementData;
+import rocks.inspectit.shared.all.communication.data.StackTraceData;
 import rocks.inspectit.shared.all.communication.data.SystemInformationData;
 import rocks.inspectit.shared.all.communication.data.ThreadInformationData;
 import rocks.inspectit.shared.all.communication.data.TimerData;
@@ -53,9 +54,9 @@ import rocks.inspectit.ui.rcp.InspectITImages;
 
 /**
  * Wizard page where data that will be saved in the storage is saved.
- * 
+ *
  * @author Ivan Senic
- * 
+ *
  */
 public class DefineDataProcessorsWizardPage extends WizardPage {
 
@@ -107,12 +108,12 @@ public class DefineDataProcessorsWizardPage extends WizardPage {
 	/**
 	 * Input list for table containing all the classes.
 	 */
-	private Set<Class<?>> inputList = new HashSet<Class<?>>();
+	private final Set<Class<?>> inputList = new HashSet<Class<?>>();
 
 	/**
 	 * Style for providing different selection possibilities.
 	 */
-	private int selectionStyle;
+	private final int selectionStyle;
 
 	/**
 	 * Table where all data types are displayed.
@@ -127,7 +128,7 @@ public class DefineDataProcessorsWizardPage extends WizardPage {
 	/**
 	 * Page completed listener.
 	 */
-	private Listener pageCompleteListener = new Listener() {
+	private final Listener pageCompleteListener = new Listener() {
 		@Override
 		public void handleEvent(Event event) {
 			setPageComplete(isPageComplete());
@@ -136,7 +137,7 @@ public class DefineDataProcessorsWizardPage extends WizardPage {
 
 	/**
 	 * Default constructor.
-	 * 
+	 *
 	 * @param selectionStyle
 	 *            Combination of styles for this page in the SWT way.
 	 * @see #BUFFER_DATA
@@ -154,6 +155,7 @@ public class DefineDataProcessorsWizardPage extends WizardPage {
 			inputList.add(SqlStatementData.class);
 			inputList.add(InvocationSequenceData.class);
 			inputList.add(ExceptionSensorData.class);
+			inputList.add(StackTraceData.class);
 		}
 		if (isStyleApplied(ONLY_TIMERS)) {
 			inputList.add(TimerData.class);
@@ -185,6 +187,7 @@ public class DefineDataProcessorsWizardPage extends WizardPage {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		final Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(4, false));
@@ -254,7 +257,8 @@ public class DefineDataProcessorsWizardPage extends WizardPage {
 
 		Label info = new Label(main, SWT.WRAP);
 		info.setImage(JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_INFO));
-		info.setToolTipText("All Timer and SQL Statement Data objects need to be aggregated before saved to the storage, because the amount of objects to be saved is in most cases too high and can impose performance problems while writing to disk. Thus, please select the aggregation period for these two data types.");
+		info.setToolTipText(
+				"All Timer and SQL Statement Data objects need to be aggregated before saved to the storage, because the amount of objects to be saved is in most cases too high and can impose performance problems while writing to disk. Thus, please select the aggregation period for these two data types.");
 
 		new Label(main, SWT.NONE).setText("Aggregation period for Timer and SQL Statement Data:");
 		aggregationPeriodSpiner = new Spinner(main, SWT.BORDER);
@@ -366,7 +370,7 @@ public class DefineDataProcessorsWizardPage extends WizardPage {
 
 	/**
 	 * Tests if specific style is applied.
-	 * 
+	 *
 	 * @param style
 	 *            Style to test.
 	 * @return True if style is part of style with which view was instantiated.
@@ -377,7 +381,7 @@ public class DefineDataProcessorsWizardPage extends WizardPage {
 
 	/**
 	 * Returns if at least one item in the table is selected.
-	 * 
+	 *
 	 * @return Returns if at least one item in the table is selected.
 	 */
 	private boolean atLeastOneTypeSelected() {
@@ -391,7 +395,7 @@ public class DefineDataProcessorsWizardPage extends WizardPage {
 
 	/**
 	 * Returns list of selected classes in table.
-	 * 
+	 *
 	 * @return Returns list of selected classes in table.
 	 */
 	@SuppressWarnings("unchecked")
@@ -407,7 +411,7 @@ public class DefineDataProcessorsWizardPage extends WizardPage {
 
 	/**
 	 * Returns if the class is selected in the table.
-	 * 
+	 *
 	 * @param clazz
 	 *            Class to check.
 	 * @return True if class is selected, otherwise false.
@@ -423,9 +427,9 @@ public class DefineDataProcessorsWizardPage extends WizardPage {
 
 	/**
 	 * Label provider for only column in the table.
-	 * 
+	 *
 	 * @author Ivan Senic
-	 * 
+	 *
 	 */
 	private static class DataColumnLabelProvider extends ColumnLabelProvider {
 
@@ -458,7 +462,10 @@ public class DefineDataProcessorsWizardPage extends WizardPage {
 				return "Compilation Information Data";
 			} else if (ObjectUtils.equals(element, JmxSensorValueData.class)) {
 				return "JMX Data";
+			} else if (ObjectUtils.equals(element, StackTraceData.class)) {
+				return "Stack Trace Data";
 			}
+
 			return super.getText(element);
 		}
 
@@ -491,6 +498,8 @@ public class DefineDataProcessorsWizardPage extends WizardPage {
 				return InspectIT.getDefault().getImage(InspectITImages.IMG_COMPILATION_OVERVIEW);
 			} else if (ObjectUtils.equals(element, JmxSensorValueData.class)) {
 				return InspectIT.getDefault().getImage(InspectITImages.IMG_BEAN);
+			} else if (ObjectUtils.equals(element, StackTraceData.class)) {
+				return InspectIT.getDefault().getImage(InspectITImages.IMG_CALL_HIERARCHY);
 			}
 			return super.getImage(element);
 		}

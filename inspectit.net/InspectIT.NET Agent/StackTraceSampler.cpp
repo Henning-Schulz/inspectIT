@@ -12,7 +12,7 @@ StackTraceSampler::StackTraceSampler(std::shared_ptr<StackTraceProvider> provide
 
 StackTraceSampler::~StackTraceSampler()
 {
-	logger.debug("Deconstructor");
+	logger.debug("Destructor");
 }
 
 void StackTraceSampler::setSensorTypeId(JAVA_LONG sensorTypeId)
@@ -25,46 +25,50 @@ void StackTraceSampler::setPlatformId(JAVA_LONG platformId)
 	this->platformId = platformId;
 }
 
-void StackTraceSampler::doSampling(ThreadID threadId, bool forceNewStorage)
+bool StackTraceSampler::doSampling(ThreadID threadId, bool forceNewStorage)
 {
 	std::shared_ptr<StackTraceSample> trace = provider->getStackTrace(threadId);
-	storeTrace(threadId, trace, forceNewStorage);
-}
 
-void StackTraceSampler::doSamplingOfAllThreads(bool forceNewStorage)
-{
-	std::map<ThreadID, std::shared_ptr<StackTraceSample>> allTraces = provider->getAllStackTraces();
-	logger.debug("Retrieved %i traces", allTraces.size());
-	for (auto it = allTraces.begin(); it != allTraces.end(); it++) {
-		storeTrace(it->first, it->second, forceNewStorage);
+	if (!trace) {
+		return false;
+	}
+	else {
+		storeTrace(threadId, trace, forceNewStorage);
+		return true;
 	}
 }
 
-void StackTraceSampler::notifyShutdown()
+void StackTraceSampler::finalizeThread(ThreadID threadId, METHOD_ID baseMethodId, JAVA_LONG startTime, JAVA_LONG endTime)
 {
-	logger.debug("Finishing storages...");
+	std::shared_ptr<MeasurementStorage> uncastedStorage = dataSendingService->getMeasurementStorage(sensorTypeId, threadId, PREFIX);
+	std::shared_ptr<StackTraceStorage> storage;
 
-	for (auto ptid = allThreads.begin(); ptid != allThreads.end(); ptid++) {
-		std::shared_ptr<MeasurementStorage> uncastedStorage = dataSendingService->getMeasurementStorage(sensorTypeId, *ptid, PREFIX);
-		std::shared_ptr<StackTraceStorage> storage;
+	if (uncastedStorage != nullptr) {
+		storage = std::static_pointer_cast<StackTraceStorage>(uncastedStorage);
 
-		if (uncastedStorage != nullptr) {
-			storage = std::static_pointer_cast<StackTraceStorage>(uncastedStorage);
-			storage->finish();
-			logger.debug("Storage for thread %i finished.", *ptid);
-		} else {
-			logger.debug("No storage for thread %i existing.", *ptid);
+		if (baseMethodId > 0) {
+			storage->setBaseMethodId(baseMethodId);
 		}
-	}
 
-	logger.debug("All storages finished.");
+		if (startTime >= 0) {
+			storage->setStartTime(startTime);
+		}
+
+		if (endTime >= 0) {
+			storage->setEndTime(endTime);
+		}
+
+		storage->finish();
+		dataSendingService->notifyStorageFinished(storage, PREFIX);
+	}
 }
 
 void StackTraceSampler::storeTrace(ThreadID threadId, std::shared_ptr<StackTraceSample> trace, bool forceNewStorage)
 {
-	logger.debug("Storing trace for thread %i...", threadId);
-
-	allThreads.insert(threadId);
+	if (!trace) {
+		logger.warn("Passed trace for thread %i was NULL. It will not be stored.", threadId);
+		return;
+	}
 
 	std::shared_ptr<MeasurementStorage> uncastedStorage = dataSendingService->getMeasurementStorage(sensorTypeId, threadId, PREFIX);
 	std::shared_ptr<StackTraceStorage> storage;
@@ -82,24 +86,41 @@ void StackTraceSampler::storeTrace(ThreadID threadId, std::shared_ptr<StackTrace
 	}
 
 	if (!isNew) {
-		JAVA_INT lastStoredOffset = storage->getTraces().back()->getOffset();
-		size_t lastStoredSize = storage->getTraces().back()->getTrace().size();
+		std::shared_ptr<StackTraceSample> storedTrace = storage->getTraces().back();
+		JAVA_INT lastStoredOffset = storedTrace->getOffset();
+		size_t lastStoredSize = storedTrace->getTrace().size();
 
 		// new storage is forced OR
+		// storage is already finished OR
 		// passed trace is not empty AND has offset 0 AND
 		//     last stored trace has no explicitly stored methods OR
 		//     passed trace's highest method differs from the storage's
 
-		if (forceNewStorage || (trace->getTrace().size() > 0 && trace->getOffset() == 0 && (lastStoredSize == 0 || storage->getHighestMethod() != trace->getHighestMethod()))) {
-			logger.debug("Creating new storage. (forceNewStorage = %i, trace->getOffset() = %ld, trace->getHighestMethod() = %lld, storage->getHighestMethod() = %lld)", forceNewStorage, trace->getOffset(), trace->getHighestMethod(), storage->getHighestMethod());
+		if (forceNewStorage || storage->finished() || (trace->getTrace().size() > 0 && trace->getOffset() == 0 && (lastStoredSize == 0 || storage->getHighestMethod() != trace->getHighestMethod()))) {
+			if (loggerFactory.getLogLevel() >= LEVEL_DEBUG) {
+				if (forceNewStorage) {
+					logger.debug("Creating new storage (was forced).");
+				}
+				else if (storage->finished()) {
+					logger.debug("Creating new storage (stored storage is finished).");
+				}
+				else {
+					logger.debug("Creating new storage (new base method).");
+					logger.debug("trace->getTrace().size() = %i", trace->getTrace().size());
+					logger.debug("trace->getOffset() = %li", trace->getOffset());
+					logger.debug("lastStoredSize = %i", lastStoredSize);
+					logger.debug("storage->getHighestMethod() = %lli", storage->getHighestMethod());
+					logger.debug("trace->getHighestMethod() = %lli", trace->getHighestMethod());
+				}
+			}
 
 			// Finish the last storage and create new one
 			storage->finish();
+			dataSendingService->notifyStorageFinished(storage, PREFIX);
 			storage = std::make_shared<StackTraceStorage>(platformId, sensorTypeId, threadId);
 			dataSendingService->addMeasurementStorage(storage, PREFIX);
 		}
 	}
 
 	storage->addTrace(trace);
-	logger.debug("Trace for thread %i added.", threadId);
 }

@@ -46,6 +46,11 @@ JAVA_INT StackTraceSample::getOffset()
 	return offset;
 }
 
+JAVA_LONG StackTraceSample::getTimestamp()
+{
+	return this->timestamp;
+}
+
 web::json::value StackTraceSample::toJson()
 {
 	web::json::value json;

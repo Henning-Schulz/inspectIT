@@ -13,7 +13,7 @@ SingleClassHookStrategy::~SingleClassHookStrategy()
 {
 }
 
-bool SingleClassHookStrategy::hook(LPWSTR className, LPWSTR methodName, std::vector<LPWSTR> parameters, JAVA_INT modifiers)
+bool SingleClassHookStrategy::hook(LPWSTR sensorClassName, LPWSTR className, LPWSTR methodName, std::vector<LPWSTR> parameters, JAVA_INT modifiers)
 {
 	return wcscmp(this->className, className) == 0;
 }

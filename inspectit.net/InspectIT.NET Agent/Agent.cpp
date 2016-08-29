@@ -24,6 +24,9 @@
 #include "MethodSensorAssignment.h"
 #include "StackTraceSamplingSensor.h"
 #include "AssignmentHookStrategy.h"
+#include "StackTraceSensorAssignment.h"
+#include "TimerSensorConfig.h"
+#include "TimerSensor.h"
 
 Agent *globalAgentInstance;
 
@@ -35,19 +38,45 @@ Agent::Agent()
 Agent::~Agent()
 {
 	logger.debug("Deconstructor...");
-	delete hookStrategy;
 	logger.debug("Deconstructor finished.");
 }
 
-
-void Agent::addMethodHook(std::shared_ptr<MethodHook> hook)
+std::shared_ptr<std::unique_lock<std::mutex>> Agent::getFunctionMapperLock(ThreadID theThreadId)
 {
-	methodHookList.push_back(hook);
+	ThreadID threadId = 0;
+	if (theThreadId == 0) {
+		HRESULT hr = profilerInfo3->GetCurrentThreadID(&threadId);
+		if (FAILED(hr)) {
+			logger.error("Could not get thread id!");
+		}
+	}
+	else {
+		threadId = theThreadId;
+	}
+	logger.debug("Get FunctionMapper lock for thread %i.", threadId);
+
+	auto mut = functionMapperMutexMap[threadId];
+
+	std::shared_ptr<std::unique_lock<std::mutex>> lock = std::make_shared<std::unique_lock<std::mutex>>(*mut);
+	return lock;
+}
+
+void Agent::addMethodHook(std::shared_ptr<MethodHook> hook, std::shared_ptr<HookStrategy> hookStrategy)
+{
+	methodHookList.push_back(std::make_pair(hook, hookStrategy));
 }
 
 void Agent::removeMethodHook(std::shared_ptr<MethodHook> hook)
 {
-	methodHookList.remove(hook);
+	for (auto it = methodHookList.begin(); it != methodHookList.end(); ) {
+		if (it->first == hook) {
+			it = methodHookList.erase(it);
+			break;
+		}
+		else {
+			it++;
+		}
+	}
 }
 
 void Agent::removeAllMethodHooks()
@@ -55,14 +84,34 @@ void Agent::removeAllMethodHooks()
 	methodHookList.clear();
 }
 
-HookStrategy* Agent::getHookStrategy()
-{
-	return hookStrategy;
-}
-
 size_t Agent::getNumberOfMethodHooks()
 {
 	return methodHookList.size();
+}
+
+std::list<std::pair<std::shared_ptr<MethodHook>, std::shared_ptr<HookStrategy>>> Agent::getMethodHooksWithStrategies()
+{
+	return methodHookList;
+}
+
+void Agent::assignHookToMethod(METHOD_ID methodId, std::shared_ptr<MethodHook> hook)
+{
+	std::unique_lock<std::shared_mutex> lock(mHookAssignment);
+
+	auto it = hookAssignment.find(methodId);
+
+	if (it == hookAssignment.end()) {
+		auto pair = hookAssignment.emplace(methodId, std::vector<std::shared_ptr<MethodHook>>());
+		it = pair.first;
+	}
+
+	auto hit = it->second.begin();
+	while (hit != it->second.end() && (*hit)->getPriority() >= hook->getPriority()) {
+		hit++;
+	}
+
+	it->second.insert(hit, hook);
+	logger.debug("There are now %i hooks assigned to this method.", hookAssignment.find(methodId)->second.size());
 }
 
 
@@ -72,23 +121,29 @@ size_t Agent::getNumberOfMethodHooks()
 
 void Agent::Enter(METHOD_ID methodID)
 {
-	if (methodHookList.empty()) {
+	std::shared_lock<std::shared_mutex> lock(mHookAssignment);
+	auto it = hookAssignment.find(methodID);
+	if (it == hookAssignment.end()) {
 		return;
 	}
 
-	for (std::list<std::shared_ptr<MethodHook>>::iterator it = methodHookList.begin(); it != methodHookList.end(); it++) {
-		(*it)->beforeBody(methodID);
+	// Highest priority first
+	for (auto hit = it->second.begin(); hit != it->second.end(); hit++) {
+		(*hit)->beforeBody(methodID);
 	}
 }
 
 void Agent::Leave(METHOD_ID methodID)
 {
-	if (methodHookList.empty()) {
+	std::shared_lock<std::shared_mutex> lock(mHookAssignment);
+	auto it = hookAssignment.find(methodID);
+	if (it == hookAssignment.end()) {
 		return;
 	}
 
-	for (std::list<std::shared_ptr<MethodHook>>::iterator it = methodHookList.begin(); it != methodHookList.end(); it++) {
-		(*it)->afterBody(methodID);
+	// Highest priority last
+	for (auto hit = it->second.rbegin(); hit != it->second.rend(); hit++) {
+		(*hit)->afterBody(methodID);
 	}
 }
 
@@ -163,6 +218,8 @@ void __declspec(naked) TailcallNaked3(FunctionIDOrClientID functionIDOrClientID)
 
 UINT_PTR  FunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
 {
+	auto functionMapperLock = globalAgentInstance->getFunctionMapperLock();
+
 	if (globalAgentInstance->getNumberOfMethodHooks() == 0) {
 		*pbHookFunction = 0;
 		return functionID;
@@ -175,50 +232,67 @@ UINT_PTR  FunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
 	std::vector<LPWSTR> parameterTypes; // elements will be created on the heap --> need to delete them afterwards
 	globalAgentInstance->getMethodSpecifics(functionID, className, methodName, returnType, &javaModifiers, &parameterTypes);
 
-	if (globalAgentInstance->getHookStrategy()->hook(className, methodName, parameterTypes, javaModifiers)) {
-		LogLevel level = loggerFactory.getLogLevel();
+	auto methodHooksAndStrategies = globalAgentInstance->getMethodHooksWithStrategies();
 
-		if (level >= LEVEL_DEBUG) {
-			loggerFactory.staticLogWithoutNewLine(LEVEL_DEBUG, "FunctionMapper", "Hook 0x%03x %ls %ls.%ls(", javaModifiers, returnType, className, methodName);
-			bool first = true;
-			for (std::vector<LPWSTR>::iterator it = parameterTypes.begin(); it != parameterTypes.end(); it++) {
-				if (first) {
-					first = false;
+	boolean hookRegistered = false;
+	METHOD_ID methodId = functionID;
+
+	for (auto it = methodHooksAndStrategies.begin(); it != methodHooksAndStrategies.end(); it++) {
+		if (it->second->hook(className, methodName, parameterTypes, javaModifiers)) {
+			if (!hookRegistered) {
+				LogLevel level = loggerFactory.getLogLevel();
+
+				if (level >= LEVEL_DEBUG) {
+					loggerFactory.staticLogWithoutNewLine(LEVEL_DEBUG, "FunctionMapper", "Hook 0x%03x %ls %ls.%ls(", javaModifiers, returnType, className, methodName);
+					bool first = true;
+					for (std::vector<LPWSTR>::iterator it = parameterTypes.begin(); it != parameterTypes.end(); it++) {
+						if (first) {
+							first = false;
+						}
+						else {
+							loggerFactory.printf(", ");
+						}
+						loggerFactory.printf("%ls", *it);
+					}
+					loggerFactory.printf(")\n");
+				}
+
+				methodId = cmrConnection->registerMethod(globalAgentInstance->platformID, className, methodName, returnType, parameterTypes, javaModifiers);
+
+				if (methodId > UINT_MAX) {
+					loggerFactory.staticLog(LEVEL_ERROR, "FunctionMapper", "methodId %lld is greater than maximum value of unsigned int (%u)! Disabling hook.\n", methodId, UINT_MAX);
+					*pbHookFunction = 0;
+					break;
+				}
+				else if (methodId < 0) {
+					loggerFactory.staticLog(LEVEL_ERROR, "FunctionMapper", "methodId %lld is less than zero! Disabling hook.\n", methodId);
+					*pbHookFunction = 0;
+					break;
 				}
 				else {
-					loggerFactory.printf(", ");
+					*pbHookFunction = 1;
 				}
-				loggerFactory.printf("%ls", *it);
+
+				hookRegistered = true;
 			}
-			loggerFactory.printf(")\n");
-		}
 
-		JAVA_LONG methodId = cmrConnection->registerMethod(globalAgentInstance->platformID, className, methodName, returnType, parameterTypes, javaModifiers);
-
-		if (methodId > UINT_MAX) {
-			loggerFactory.staticLog(LEVEL_ERROR, "FunctionMapper", "methodId %lld is greater than maximum value of unsigned int (%u)! Disabling hook.\n", methodId, UINT_MAX);
-			*pbHookFunction = 0;
+			// Function hook is activated and method is registered
+			
+			loggerFactory.staticLog(LEVEL_DEBUG, "FunctionMapper", "Assigning method %i to hook of sensor %lli", methodId, it->first->getSensorTypeId());
+			globalAgentInstance->assignHookToMethod(methodId, it->first);
 		}
-		else if (methodId < 0) {
-			loggerFactory.staticLog(LEVEL_ERROR, "FunctionMapper", "methodId %lld is less than zero! Disabling hook.\n", methodId);
-			*pbHookFunction = 0;
-		}
-		else {
-			*pbHookFunction = 1;
-		}
-
-		return methodId;
 	}
-	else {
+
+	if (!hookRegistered) {
 		*pbHookFunction = 0;
 	}
-
-	// TODO
 
 	// delete the elements on the heap
 	parameterTypes.clear();
 
-	return (UINT_PTR)functionID;
+	functionMapperLock->unlock();
+
+	return methodId;
 }
 
 //
@@ -229,19 +303,18 @@ HRESULT Agent::ThreadCreated(ThreadID threadID)
 {
 	logger.debug("Thread %i created", threadID);
 
-	if (initializationFinished) {
-		if (threadHookList.empty()) {
-			return S_OK;
-		}
-
-		for (auto it = threadHookList.begin(); it != threadHookList.end(); it++) {
-			(*it)->threadCreated(threadID);
-		}
+	std::shared_ptr<std::mutex> mut = std::make_shared<std::mutex>();
+	{
+		std::unique_lock<std::mutex> uniqueLock(mFunctionMapperMutexMap);
+		functionMapperMutexMap.emplace(threadID, mut);
 	}
-	else {
-		std::unique_lock<std::mutex> lock(mCreatedThreads);
 
-		createdThreads.push_back(threadID);
+	if (threadHookList.empty()) {
+		return S_OK;
+	}
+
+	for (auto it = threadHookList.begin(); it != threadHookList.end(); it++) {
+		(*it)->threadCreated(threadID);
 	}
 
 	return S_OK;
@@ -249,27 +322,19 @@ HRESULT Agent::ThreadCreated(ThreadID threadID)
 
 HRESULT Agent::ThreadDestroyed(ThreadID threadID)
 {
-	printf("Thread destroyed\n");
 	logger.debug("Thread %i destroyed", threadID);
 
-	if (initializationFinished) {
-		if (threadHookList.empty()) {
-			return S_OK;
-		}
-
-		for (auto it = threadHookList.begin(); it != threadHookList.end(); it++) {
-			(*it)->threadDestroyed(threadID);
-		}
+	if (threadHookList.empty()) {
+		return S_OK;
 	}
-	else {
-		std::unique_lock<std::mutex> lock(mCreatedThreads);
 
-		for (auto ptid = createdThreads.begin(); ptid != createdThreads.end(); ptid++) {
-			if (*ptid == threadID) {
-				createdThreads.erase(ptid);
-				break;
-			}
-		}
+	for (auto it = threadHookList.begin(); it != threadHookList.end(); it++) {
+		(*it)->threadDestroyed(threadID);
+	}
+
+	{
+		std::unique_lock<std::mutex> uniqueLock(mFunctionMapperMutexMap);
+		functionMapperMutexMap.erase(threadID);
 	}
 
 	return S_OK;
@@ -345,8 +410,7 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 	}
 
 	std::vector<std::shared_ptr<MethodSensorAssignment>> sensorAssignements = cmrConnection->getMethodSensorAssignments(platformID);
-	AssignmentHookStrategy *ahs = new AssignmentHookStrategy();
-	hookStrategy = ahs;
+	logger.debug("Sensor assignments retrieved.");
 
 	HRESULT hr;
 	hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo3,
@@ -355,67 +419,111 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 		logger.error("Could not query interface ICorProfilerInfo3!");
 		return hr;
 	}
+	else {
+		logger.debug("profilerIfo set.");
+	}
 
-	bool stackTraceSensorCreated = false;
-	DWORD eventMask = COR_PRF_MONITOR_ENTERLEAVE;
+	DWORD eventMask = COR_PRF_MONITOR_ENTERLEAVE | COR_PRF_MONITOR_THREADS;
 
-	for (auto it = sensorAssignements.begin(); it != sensorAssignements.end(); it++) {
-		std::shared_ptr<MethodSensorAssignment> ass = *it;
-		logger.debug("Using sensor assignment for sensor %ls with parameters:", ass->getSensorClassName());
-		logger.debug("\tclassName: %ls", ass->getClassName().c_str());
-		logger.debug("\tsuperclass: %s", (ass->isSuperclass() ? "true" : "false"));
-		logger.debug("\tinterface: %s", (ass->isInterface() ? "true" : "false"));
-		logger.debug("\tmethodName: %ls", ass->getMethodName().c_str());
-		logger.debug("\tparameters: %s", (ass->getParameters().empty() ? "*" : "..."));
-		logger.debug("\tconstructor: %s", (ass->isConstructor() ? "true" : "false"));
-		logger.debug("\tpublicModifier: %s", (ass->isPublicModifier() ? "true" : "false"));
-		logger.debug("\tprotectedModifier: %s", (ass->isProtectedModifier() ? "true" : "false"));
-		logger.debug("\tprivateModifier: %s", (ass->isPrivateModifier() ? "true" : "false"));
-		logger.debug("\tdefaultModifier: %s", (ass->isDefaultModifier() ? "true" : "false"));
+	std::vector<std::wstring> excludedClasses = cmrConnection->getExcludedClasses(platformID);
 
-		std::shared_ptr<MethodSensor> sensor;
-		std::shared_ptr<MethodSensorConfig> config;
+	logger.debug("Excluded classes are:");
+	for (auto it = excludedClasses.begin(); it != excludedClasses.end(); it++) {
+		printf("%ls, ", it->c_str());
+	}
+	printf("\n");
 
-		if (wcscmp(ass->getSensorClassName(), StackTraceSensorConfig::CLASS_NAME) == 0) {
-			if (!stackTraceSensorCreated) {
-				for (auto it = sensorConfigs.begin(); it != sensorConfigs.end(); it++) {
-					if (wcscmp((*it)->getClassName(), ass->getSensorClassName()) == 0) {
-						config = *it;
-						break;
-					}
-				}
+	for (auto it = sensorConfigs.begin(); it != sensorConfigs.end(); it++) {
+		logger.debug("Creating sensor %ls...", (*it)->getClassName());
 
-				sensor = std::make_shared<StackTraceSamplingSensor>();
-				stackTraceSensorCreated = true;
-				logger.debug("Created StackTraceSamplingSensor.");
+		bool isStackTraceSensor = wcscmp((*it)->getClassName(), StackTraceSensorConfig::CLASS_NAME) == 0;
+		bool isTimerSensor = wcscmp((*it)->getClassName(), TimerSensorConfig::CLASS_NAME) == 0;
+
+		if (isStackTraceSensor || isTimerSensor) {
+			std::shared_ptr<StackTraceSensorConfig> config = std::static_pointer_cast<StackTraceSensorConfig>(*it);
+
+			std::shared_ptr<AssignmentHookStrategy> hookStrategy = std::make_shared<AssignmentHookStrategy>();
+			hookStrategy->setExcludedClasses(excludedClasses);
+
+			// StackTraceSamplingSensor
+			std::shared_ptr<AssignmentHookStrategy> baseMethodHookStrategy;
+			if (isStackTraceSensor) {
+				baseMethodHookStrategy = std::make_shared<AssignmentHookStrategy>();
+				baseMethodHookStrategy->setExcludedClasses(excludedClasses);
 			}
 
-			ahs->addAssignment(ass);
-			logger.debug("Added assignment for %ls", ass->getSensorClassName());
+			for (auto ait = sensorAssignements.begin(); ait != sensorAssignements.end(); ait++) {
+				if (wcscmp((*it)->getClassName(), (*ait)->getSensorClassName()) == 0) {
+					std::shared_ptr<MethodSensorAssignment> ass = *ait;
+					logger.debug("Using sensor assignment for sensor %ls with parameters:", ass->getSensorClassName());
+					logger.debug("\tclassName: %ls", ass->getClassName().c_str());
+					logger.debug("\tsuperclass: %s", (ass->isSuperclass() ? "true" : "false"));
+					logger.debug("\tinterface: %s", (ass->isInterface() ? "true" : "false"));
+					logger.debug("\tmethodName: %ls", ass->getMethodName().c_str());
+					logger.debug("\tparameters: %s", (ass->getParameters().empty() ? "*" : "..."));
+					logger.debug("\tconstructor: %s", (ass->isConstructor() ? "true" : "false"));
+					logger.debug("\tpublicModifier: %s", (ass->isPublicModifier() ? "true" : "false"));
+					logger.debug("\tprotectedModifier: %s", (ass->isProtectedModifier() ? "true" : "false"));
+					logger.debug("\tprivateModifier: %s", (ass->isPrivateModifier() ? "true" : "false"));
+					logger.debug("\tdefaultModifier: %s", (ass->isDefaultModifier() ? "true" : "false"));
+
+					hookStrategy->addAssignment(ass);
+
+					// StackTraceSamplingSensor
+					if (isStackTraceSensor) {
+						std::shared_ptr<StackTraceSensorAssignment> stsConfig = std::static_pointer_cast<StackTraceSensorAssignment>(ass);
+						baseMethodHookStrategy->addAssignment(stsConfig->getBaseMethodAssignment());
+					}
+				}
+			}
+
+			if (!hookStrategy->isEmpty()) {
+				// Only create sensor if there is an assigment
+				std::shared_ptr<MethodSensor> sensor;
+
+				if (isStackTraceSensor) {
+					sensor = std::make_shared<StackTraceSamplingSensor>();
+					logger.debug("Created StackTraceSamplingSensor.");
+				}
+				else {
+					sensor = std::make_shared<TimerSensor>();
+					logger.debug("Created TimerSensor.");
+				}
+
+				JAVA_LONG sensorTypeId = cmrConnection->registerMethodSensorType(platformID, config->getClassName());
+				logger.debug("Sensor %ls has id %lli", config->getClassName(), sensorTypeId);
+				sensor->init(config, sensorTypeId, platformID, profilerInfo3);
+				methodSensorList.push_back(sensor);
+
+				// StackTraceSamplingSensor
+				if (isStackTraceSensor) {
+					std::static_pointer_cast<StackTraceSamplingSensor>(sensor)->getProvider()->setHookStrategy(hookStrategy);
+				}
+
+				if (sensor->hasHook()) {
+					methodHookList.push_back(std::make_pair(sensor->getHook(), hookStrategy));
+					logger.debug("Added hook.");
+				}
+
+				// StackTraceSamplingSensor
+				if (isStackTraceSensor && std::static_pointer_cast<StackTraceSamplingSensor>(sensor)->hasBaseMethodHook()) {
+					methodHookList.push_back(std::make_pair(std::static_pointer_cast<StackTraceSamplingSensor>(sensor)->getBaseMethodHook(), baseMethodHookStrategy));
+					logger.debug("Added base method hook.");
+				}
+
+				if (sensor->hasThreadHook()) {
+					threadHookList.push_back(sensor->getThreadHook());
+					//eventMask |= COR_PRF_MONITOR_THREADS; is always activated
+					logger.debug("Adding thread hook");
+				}
+
+				eventMask |= sensor->getSpecialMonitorFlags();
+			}
 		}
 		else {
-			logger.warn("Sensor %ls is not supported!", ass->getSensorClassName());
+			logger.warn("Sensor %ls is currently not supported!", (*it)->getClassName());
 			continue;
 		}
-
-		WCHAR className[MAX_BUFFERSIZE];
-		getMethodSensorClassName(sensor, className);
-		JAVA_LONG sensorTypeId = cmrConnection->registerMethodSensorType(platformID, className);
-		logger.debug("Sensor %ls has id %lli", className, sensorTypeId);
-		sensor->init(config, sensorTypeId, platformID, profilerInfo3);
-		methodSensorList.push_back(sensor);
-
-		if (sensor->hasHook()) {
-			methodHookList.push_back(sensor->getHook());
-		}
-
-		if (sensor->hasThreadHook()) {
-			threadHookList.push_back(sensor->getThreadHook());
-			eventMask |= COR_PRF_MONITOR_THREADS;
-			logger.debug("Adding thread hook");
-		}
-
-		eventMask |= sensor->getSpecialMonitorFlags();
 	}
 
 	hr = profilerInfo3->SetEventMask(eventMask);
@@ -440,14 +548,9 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 	alive = true;
 	keepAliveThread = std::thread([this]() { keepAlive(); });
 
-	{
-		std::unique_lock<std::mutex> lock(mCreatedThreads);
-
-		for (auto pth = threadHookList.begin(); pth != threadHookList.end(); pth++) {
-			for (auto ptid = createdThreads.begin(); ptid != createdThreads.end(); ptid++) {
-				(*pth)->threadCreated(*ptid, true);
-			}
-		}
+	for (auto it = methodSensorList.begin(); it != methodSensorList.end(); it++) {
+		logger.debug("Call notifyStartup() on sensor %lli", (*it)->getSensorTypeId());
+		(*it)->notifyStartup();
 	}
 
 	initializationFinished = true;
@@ -459,6 +562,7 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 
 HRESULT Agent::Shutdown()
 {
+	logger.debug("Shutdown...");
 	shutdownCounter++;
 
 	for (auto it = methodSensorList.begin(); it != methodSensorList.end(); it++) {
@@ -470,11 +574,13 @@ HRESULT Agent::Shutdown()
 	alive = false;
 	keepAliveThread.join();
 	shutdownCMRConnection();
+	logger.debug("Shutdown finished.");
 	return S_OK;
 }
 
 HRESULT Agent::DllDetachShutdown()
 {
+	logger.debug("DllDetachShutdown...");
 	//
 	// If no shutdown occurs during DLL_DETACH, release the callback
 	// interface pointer. This scenario will more than likely occur
@@ -484,9 +590,13 @@ HRESULT Agent::DllDetachShutdown()
 	shutdownCounter++;
 	if ((shutdownCounter == 1) && (globalAgentInstance != NULL))
 	{
+		logger.debug("Release global agent instance...");
 		globalAgentInstance->Release();
 		globalAgentInstance = NULL;
+		logger.debug("Released.");
 	}
+
+	logger.debug("DllDetachShutdown finished.");
 
 	return S_OK;
 }

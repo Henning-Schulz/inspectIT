@@ -24,16 +24,15 @@ class DataSendingService : public ListSizeListenable
 private:
 	std::shared_ptr<BufferStrategy> bufferStrategy;
 	std::shared_ptr<SendingStrategy> sendingStrategy;
-	std::shared_ptr<std::map<std::string, std::shared_ptr<MethodSensorData>>> measurements;
-	std::shared_ptr<std::map<std::string, std::shared_ptr<MethodSensorData>>> measurementsPrepCopy;
+	std::unique_ptr<std::map<std::string, std::shared_ptr<MethodSensorData>>> measurements;
+	std::unique_ptr<std::map<std::string, std::shared_ptr<MethodSensorData>>> measurementsPrepCopy;
 	std::shared_mutex mMeasurements;
 
-	std::shared_ptr<std::map<std::string, std::shared_ptr<MeasurementStorage>>> storages;
-	std::shared_ptr<std::map<std::string, std::shared_ptr<MeasurementStorage>>> storagesPrepCopy;
+	std::unique_ptr<std::map<std::string, std::shared_ptr<MeasurementStorage>>> storages;
 	std::shared_mutex mStorages;
 
-	std::shared_ptr<std::vector<std::shared_ptr<MeasurementStorage>>> finishedStorages;
-	std::shared_ptr<std::vector<std::shared_ptr<MeasurementStorage>>> finishedStoragesPrepCopy;
+	std::unique_ptr<std::vector<std::shared_ptr<MeasurementStorage>>> finishedStorages;
+	std::unique_ptr<std::vector<std::shared_ptr<MeasurementStorage>>> finishedStoragesPrepCopy;
 	std::shared_mutex mFinishedStorages;
 
 	std::thread preparingThread;
@@ -65,6 +64,7 @@ public:
 
 	std::shared_ptr<MeasurementStorage> getMeasurementStorage(JAVA_LONG sensorTypeId, JAVA_LONG methodId, std::string prefix = "");
 	void addMeasurementStorage(std::shared_ptr<MeasurementStorage> storage, std::string prefix = "");
+	void notifyStorageFinished(std::shared_ptr<MeasurementStorage> storage, std::string prefix = "");
 
 	void send();
 

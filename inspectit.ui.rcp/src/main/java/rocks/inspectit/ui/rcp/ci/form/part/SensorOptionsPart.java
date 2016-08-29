@@ -345,8 +345,8 @@ public class SensorOptionsPart extends SectionPart implements IPropertyListener 
 			}
 
 			if (!buttonSelected) {
-				sensorConfig.setProviderType(StackTraceProviderType.SHADOW_STACK);
-				providerButtons.get(StackTraceProviderType.SHADOW_STACK).setSelection(true);
+				sensorConfig.setProviderType(StackTraceProviderType.SHADOW);
+				providerButtons.get(StackTraceProviderType.SHADOW).setSelection(true);
 			}
 
 			createInfoLabel(parent, toolkit, "Defines the stack trace provider. Besides retrieving the native stack of the CLR, alternatives like shadow stacks could be used.");

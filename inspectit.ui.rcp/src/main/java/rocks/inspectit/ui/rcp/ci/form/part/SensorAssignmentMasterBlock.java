@@ -3,7 +3,6 @@ package rocks.inspectit.ui.rcp.ci.form.part;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -59,6 +58,7 @@ import org.eclipse.ui.forms.widgets.Section;
 
 import rocks.inspectit.shared.cs.ci.Profile;
 import rocks.inspectit.shared.cs.ci.assignment.AbstractClassSensorAssignment;
+import rocks.inspectit.shared.cs.ci.assignment.impl.DotNetStackTraceSensorAssignment;
 import rocks.inspectit.shared.cs.ci.assignment.impl.ExceptionSensorAssignment;
 import rocks.inspectit.shared.cs.ci.assignment.impl.MethodSensorAssignment;
 import rocks.inspectit.shared.cs.ci.assignment.impl.TimerMethodSensorAssignment;
@@ -74,9 +74,9 @@ import rocks.inspectit.ui.rcp.validation.ValidationControlDecoration;
 
 /**
  * Tree master block for the sensor definition form page.
- * 
+ *
  * @author Ivan Senic
- * 
+ *
  */
 public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements IFormPart, IPartSelectionListener, ISelectionChangedListener, IPropertyListener {
 
@@ -93,28 +93,28 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 	/**
 	 * Map of assignments.
 	 */
-	private Map<Class<? extends ISensorConfig>, List<AbstractClassSensorAssignment<?>>> configToAssignmentMap = new HashMap<>();
+	private final Map<Class<? extends ISensorConfig>, List<AbstractClassSensorAssignment<?>>> configToAssignmentMap = new HashMap<>();
 
 	/**
 	 * Map of sensors to the CTabItem.
 	 */
-	private Map<Class<? extends ISensorConfig>, CTabItem> sensorToTabMap = new HashMap<>();
+	private final Map<Class<? extends ISensorConfig>, CTabItem> sensorToTabMap = new HashMap<>();
 
 	/**
 	 * List of all currently invalid assignments in the page with connection to the full error
 	 * message.
 	 */
-	private Map<AbstractClassSensorAssignment<?>, String> invalidAssignments = new IdentityHashMap<>();
+	private final Map<AbstractClassSensorAssignment<?>, String> invalidAssignments = new IdentityHashMap<>();
 
 	/**
 	 * List of created {@link TableViewer}.
 	 */
-	private List<TableViewer> tableViewers = new ArrayList<>();
+	private final List<TableViewer> tableViewers = new ArrayList<>();
 
 	/**
 	 * {@link TableEditor}s to handle the validation decoration on table rows.
 	 */
-	private List<TableItemControlDecoration> tableItemControlDecorations = new ArrayList<>();
+	private final List<TableItemControlDecoration> tableItemControlDecorations = new ArrayList<>();
 
 	/**
 	 * Assignment currently being edited or <code>null</code> if no edit is done in the moment.
@@ -129,7 +129,7 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 	/**
 	 * Form page block belongs to.
 	 */
-	private FormPage formPage;
+	private final FormPage formPage;
 
 	/**
 	 * Managed form to report to.
@@ -158,7 +158,7 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 
 	/**
 	 * Composite to be displayed when no assignment is existing in the profile.
-	 * 
+	 *
 	 * @see {@link #createEmptyInputHint()}
 	 */
 	private Composite emptyHintComposite;
@@ -196,6 +196,7 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 		detailsPart.registerPage(MethodSensorAssignment.class, new MethodSensorAssignmentDetailsPage(masterBlockListener, !profile.isCommonProfile()));
 		detailsPart.registerPage(TimerMethodSensorAssignment.class, new TimerSensorAssignmentDetailsPage(masterBlockListener, !profile.isCommonProfile()));
 		detailsPart.registerPage(ExceptionSensorAssignment.class, new ExceptionSensorAssignmentDetailsPage(masterBlockListener, !profile.isCommonProfile()));
+		detailsPart.registerPage(DotNetStackTraceSensorAssignment.class, new DotNetStackTraceSensorAssignmentDetailsPage(masterBlockListener, !profile.isCommonProfile()));
 	}
 
 	/**
@@ -412,7 +413,7 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 
 	/**
 	 * Creates new tab item with the list of assignments to be used as input.
-	 * 
+	 *
 	 * @param sensorClass
 	 *            sensor class
 	 * @param assignments
@@ -452,7 +453,7 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 
 	/**
 	 * Removes a {@link CTabItem} for the sensor class.
-	 * 
+	 *
 	 * @param sensorClass
 	 *            sensor class
 	 */
@@ -509,7 +510,7 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 
 	/**
 	 * To be called when add is requested to the tree.
-	 * 
+	 *
 	 * @return Returns new {@link AbstractClassSensorAssignment} with the correctly set sensor type.
 	 */
 	private AbstractClassSensorAssignment<?> addRequested() {
@@ -575,7 +576,7 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 
 	/**
 	 * Creates input map and returns the input.
-	 * 
+	 *
 	 * @return Input for the tree
 	 */
 	private Map<Class<? extends ISensorConfig>, List<AbstractClassSensorAssignment<?>>> getInput() {
@@ -595,7 +596,7 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 
 	/**
 	 * Adds one {@link AbstractClassSensorAssignment} to the input map.
-	 * 
+	 *
 	 * @param assignment
 	 *            {@link AbstractClassSensorAssignment}
 	 */
@@ -611,7 +612,7 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 
 	/**
 	 * Removes one {@link AbstractClassSensorAssignment} from the input map.
-	 * 
+	 *
 	 * @param assignment
 	 *            {@link AbstractClassSensorAssignment}
 	 */
@@ -630,7 +631,7 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 
 	/**
 	 * Updates the state of the remove button depending on the current selection.
-	 * 
+	 *
 	 * @param selection
 	 *            Current selection.
 	 */
@@ -647,7 +648,7 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 
 	/**
 	 * Fires edit option on the selection.
-	 * 
+	 *
 	 * @param selection
 	 *            {@link ISelection}
 	 */
@@ -674,7 +675,7 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 
 	/**
 	 * Removes the error decoration for the sensor assignment.
-	 * 
+	 *
 	 * @param sensorAssignment
 	 *            {@link AbstractClassSensorAssignment}.
 	 * @param message
@@ -711,7 +712,7 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 
 	/**
 	 * Removes the error decoration for the sensor assignment.
-	 * 
+	 *
 	 * @param sensorAssignment
 	 *            {@link AbstractClassSensorAssignment}.
 	 */
@@ -722,8 +723,7 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 		}
 
 		// remove if it's there
-		for (Iterator<TableItemControlDecoration> it = tableItemControlDecorations.iterator(); it.hasNext();) {
-			TableItemControlDecoration decoration = it.next();
+		for (TableItemControlDecoration decoration : tableItemControlDecorations) {
 			if (sensorAssignment == decoration.getAssignment()) { // NOPMD == on purpose
 				decoration.hide();
 				return;
@@ -734,7 +734,7 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 	/**
 	 * Returns message key to be used with the {@link IMessageManager} when reporting errors with
 	 * provided assignment.
-	 * 
+	 *
 	 * @param sensorAssignment
 	 *            Assignment
 	 * @return Object to be used as a key
@@ -826,7 +826,7 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 	 */
 	@Override
 	public void selectionChanged(IFormPart part, ISelection selection) {
-		updateButtonsState((StructuredSelection) selection);
+		updateButtonsState(selection);
 		fireEdit(selection);
 	}
 
@@ -844,7 +844,7 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 
 	/**
 	 * Returns short (1 line) error message for the assignment based on the validation decorations.
-	 * 
+	 *
 	 * @param sensorAssignment
 	 *            assignment
 	 * @param validationDecorations
@@ -875,7 +875,7 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 	 * Returns full error message for the assignment based on the validation decorations. In this
 	 * message each line will contain error reported by any invalid
 	 * {@link ValidationControlDecoration}
-	 * 
+	 *
 	 * @param sensorAssignment
 	 *            assignment
 	 * @param validationDecorations
@@ -904,15 +904,15 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 
 	/**
 	 * Helper selection class to denote remove was executed.
-	 * 
+	 *
 	 * @author Ivan Senic
-	 * 
+	 *
 	 */
 	public static class RemoveSelection extends StructuredSelection {
 
 		/**
 		 * Constructor.
-		 * 
+		 *
 		 * @param elements
 		 *            removed elements
 		 */
@@ -924,30 +924,30 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 
 	/**
 	 * Class to help with displaying control decorations on the table rows.
-	 * 
+	 *
 	 * @author Ivan Senic
-	 * 
+	 *
 	 */
 	private class TableItemControlDecoration extends ControlDecoration {
 
 		/**
 		 * TableItem to create decoration for.
 		 */
-		private TableItem tableItem;
+		private final TableItem tableItem;
 
 		/**
 		 * Internal {@link TableEditor} to show decoration.
 		 */
-		private TableEditor tableEditor;
+		private final TableEditor tableEditor;
 
 		/**
 		 * Assignment being connected to the table item.
 		 */
-		private AbstractClassSensorAssignment<?> assignment;
+		private final AbstractClassSensorAssignment<?> assignment;
 
 		/**
 		 * Constructor.
-		 * 
+		 *
 		 * @param tableItem
 		 *            TableItem to create decoration for.
 		 */
@@ -979,7 +979,7 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 
 		/**
 		 * Gets {@link #assignment}.
-		 * 
+		 *
 		 * @return {@link #assignment}
 		 */
 		public AbstractClassSensorAssignment<?> getAssignment() {
@@ -1007,9 +1007,9 @@ public class SensorAssignmentMasterBlock extends MasterDetailsBlock implements I
 
 	/**
 	 * {@link ISensorAssignmentUpdateListener} to handle the validations in the master view.
-	 * 
+	 *
 	 * @author Ivan Senic
-	 * 
+	 *
 	 */
 	private class MasterBlockValidationListener implements ISensorAssignmentUpdateListener {
 

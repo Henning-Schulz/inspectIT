@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import rocks.inspectit.shared.cs.ci.assignment.impl.DotNetStackTraceSensorAssignment;
 import rocks.inspectit.shared.cs.ci.assignment.impl.ExceptionSensorAssignment;
 import rocks.inspectit.shared.cs.ci.assignment.impl.MethodSensorAssignment;
 import rocks.inspectit.shared.cs.ci.assignment.impl.TimerMethodSensorAssignment;
@@ -17,9 +18,9 @@ import rocks.inspectit.shared.cs.ci.exclude.ExcludeRule;
 
 /**
  * Profile defines sensor assignments and exclude rules.
- * 
+ *
  * @author Ivan Senic
- * 
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "profile")
@@ -83,7 +84,7 @@ public class Profile {
 	/**
 	 * {@link MethodSensorAssignment}s.
 	 */
-	@XmlElementRefs({ @XmlElementRef(type = MethodSensorAssignment.class), @XmlElementRef(type = TimerMethodSensorAssignment.class) })
+	@XmlElementRefs({ @XmlElementRef(type = MethodSensorAssignment.class), @XmlElementRef(type = TimerMethodSensorAssignment.class), @XmlElementRef(type = DotNetStackTraceSensorAssignment.class) })
 	private List<MethodSensorAssignment> methodSensorAssignments;
 
 	/**
@@ -100,7 +101,7 @@ public class Profile {
 
 	/**
 	 * Gets {@link #id}.
-	 * 
+	 *
 	 * @return {@link #id}
 	 */
 	public String getId() {
@@ -109,7 +110,7 @@ public class Profile {
 
 	/**
 	 * Sets {@link #id}.
-	 * 
+	 *
 	 * @param id
 	 *            New value for {@link #id}
 	 */
@@ -121,7 +122,7 @@ public class Profile {
 	 * Gets {@link #name}.
 	 * <p>
 	 * If is common profile adds the prefix [Common] to the defined profile name.
-	 * 
+	 *
 	 * @return {@link #name}
 	 */
 	public String getName() {
@@ -134,7 +135,7 @@ public class Profile {
 
 	/**
 	 * Sets {@link #name}.
-	 * 
+	 *
 	 * @param name
 	 *            New value for {@link #name}
 	 */
@@ -144,7 +145,7 @@ public class Profile {
 
 	/**
 	 * Gets {@link #description}.
-	 * 
+	 *
 	 * @return {@link #description}
 	 */
 	public String getDescription() {
@@ -153,7 +154,7 @@ public class Profile {
 
 	/**
 	 * Sets {@link #description}.
-	 * 
+	 *
 	 * @param description
 	 *            New value for {@link #description}
 	 */
@@ -163,7 +164,7 @@ public class Profile {
 
 	/**
 	 * Gets {@link #createdDate}.
-	 * 
+	 *
 	 * @return {@link #createdDate}
 	 */
 	public Date getCreatedDate() {
@@ -172,7 +173,7 @@ public class Profile {
 
 	/**
 	 * Sets {@link #createdDate}.
-	 * 
+	 *
 	 * @param createdDate
 	 *            New value for {@link #createdDate}
 	 */
@@ -182,7 +183,7 @@ public class Profile {
 
 	/**
 	 * Gets {@link #updatedDate}.
-	 * 
+	 *
 	 * @return {@link #updatedDate}
 	 */
 	public Date getUpdatedDate() {
@@ -191,7 +192,7 @@ public class Profile {
 
 	/**
 	 * Sets {@link #updatedDate}.
-	 * 
+	 *
 	 * @param updatedDate
 	 *            New value for {@link #updatedDate}
 	 */
@@ -201,7 +202,7 @@ public class Profile {
 
 	/**
 	 * Gets {@link #commonProfile}.
-	 * 
+	 *
 	 * @return {@link #commonProfile}
 	 */
 	public boolean isCommonProfile() {
@@ -210,7 +211,7 @@ public class Profile {
 
 	/**
 	 * Gets {@link #active}.
-	 * 
+	 *
 	 * @return {@link #active}
 	 */
 	public boolean isActive() {
@@ -219,7 +220,7 @@ public class Profile {
 
 	/**
 	 * Sets {@link #active}.
-	 * 
+	 *
 	 * @param active
 	 *            New value for {@link #active}
 	 */
@@ -229,7 +230,7 @@ public class Profile {
 
 	/**
 	 * Gets {@link #defaultProfile}.
-	 * 
+	 *
 	 * @return {@link #defaultProfile}
 	 */
 	public boolean isDefaultProfile() {
@@ -238,7 +239,7 @@ public class Profile {
 
 	/**
 	 * Sets {@link #defaultProfile}.
-	 * 
+	 *
 	 * @param defaultProfile
 	 *            New value for {@link #defaultProfile}
 	 */
@@ -248,7 +249,7 @@ public class Profile {
 
 	/**
 	 * Gets {@link #revision}.
-	 * 
+	 *
 	 * @return {@link #revision}
 	 */
 	public int getRevision() {
@@ -257,7 +258,7 @@ public class Profile {
 
 	/**
 	 * Sets {@link #revision}.
-	 * 
+	 *
 	 * @param revision
 	 *            New value for {@link #revision}
 	 */
@@ -267,7 +268,7 @@ public class Profile {
 
 	/**
 	 * Gets {@link #methodSensorAssignments}.
-	 * 
+	 *
 	 * @return {@link #methodSensorAssignments}
 	 */
 	public List<MethodSensorAssignment> getMethodSensorAssignments() {
@@ -276,7 +277,7 @@ public class Profile {
 
 	/**
 	 * Sets {@link #methodSensorAssignments}.
-	 * 
+	 *
 	 * @param methodSensorAssignments
 	 *            New value for {@link #methodSensorAssignments}
 	 */
@@ -286,7 +287,7 @@ public class Profile {
 
 	/**
 	 * Gets {@link #exceptionSensorAssignments}.
-	 * 
+	 *
 	 * @return {@link #exceptionSensorAssignments}
 	 */
 	public List<ExceptionSensorAssignment> getExceptionSensorAssignments() {
@@ -295,7 +296,7 @@ public class Profile {
 
 	/**
 	 * Sets {@link #exceptionSensorAssignments}.
-	 * 
+	 *
 	 * @param exceptionSensorAssignments
 	 *            New value for {@link #exceptionSensorAssignments}
 	 */
@@ -305,7 +306,7 @@ public class Profile {
 
 	/**
 	 * Gets {@link #excludeRules}.
-	 * 
+	 *
 	 * @return {@link #excludeRules}
 	 */
 	public List<ExcludeRule> getExcludeRules() {
@@ -314,7 +315,7 @@ public class Profile {
 
 	/**
 	 * Sets {@link #excludeRules}.
-	 * 
+	 *
 	 * @param excludeRules
 	 *            New value for {@link #excludeRules}
 	 */

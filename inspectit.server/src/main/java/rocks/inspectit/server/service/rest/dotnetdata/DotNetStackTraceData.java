@@ -5,11 +5,15 @@ package rocks.inspectit.server.service.rest.dotnetdata;
 
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import rocks.inspectit.shared.all.communication.MethodSensorData;
 import rocks.inspectit.shared.all.communication.data.InvocationSequenceData;
+import rocks.inspectit.shared.all.communication.data.StackTraceData;
+import rocks.inspectit.shared.all.communication.data.StackTraceSample;
 import rocks.inspectit.shared.all.communication.data.TimerData;
 
 /**
@@ -19,6 +23,10 @@ import rocks.inspectit.shared.all.communication.data.TimerData;
 public class DotNetStackTraceData extends DotNetMethodSensorData {
 
 	private long threadId;
+
+	private long baseMethodId;
+	private long startTime;
+	private long endTime;
 
 	private DotNetStackTraceSample[] traces;
 
@@ -39,6 +47,63 @@ public class DotNetStackTraceData extends DotNetMethodSensorData {
 	 */
 	public void setThreadId(long threadId) {
 		this.threadId = threadId;
+	}
+
+	/**
+	 * Gets {@link #baseMethodId}.
+	 *
+	 * @return {@link #baseMethodId}
+	 */
+	public long getBaseMethodId() {
+		return baseMethodId;
+	}
+
+	/**
+	 * Sets {@link #baseMethodId}.
+	 *
+	 * @param baseMethodId
+	 *            New value for {@link #baseMethodId}
+	 */
+	public void setBaseMethodId(long baseMethodId) {
+		this.baseMethodId = baseMethodId;
+	}
+
+	/**
+	 * Gets {@link #startTime}.
+	 *
+	 * @return {@link #startTime}
+	 */
+	public long getStartTime() {
+		return startTime;
+	}
+
+	/**
+	 * Sets {@link #startTime}.
+	 *
+	 * @param startTime
+	 *            New value for {@link #startTime}
+	 */
+	public void setStartTime(long startTime) {
+		this.startTime = startTime;
+	}
+
+	/**
+	 * Gets {@link #endTime}.
+	 *
+	 * @return {@link #endTime}
+	 */
+	public long getEndTime() {
+		return endTime;
+	}
+
+	/**
+	 * Sets {@link #endTime}.
+	 *
+	 * @param endTime
+	 *            New value for {@link #endTime}
+	 */
+	public void setEndTime(long endTime) {
+		this.endTime = endTime;
 	}
 
 	/**
@@ -65,7 +130,7 @@ public class DotNetStackTraceData extends DotNetMethodSensorData {
 	 */
 	@Override
 	protected MethodSensorData toNewDefaultData() {
-		return new InvocationSequenceData();
+		return new StackTraceData();
 	}
 
 	/**
@@ -73,27 +138,25 @@ public class DotNetStackTraceData extends DotNetMethodSensorData {
 	 */
 	@Override
 	protected void addAttributesToDefaultData(MethodSensorData defaultData) {
-		if (!(defaultData instanceof InvocationSequenceData)) {
-			throw new IllegalArgumentException("Requires InvocationSequenceData, but was " + defaultData.getClass().getName());
+		if (!(defaultData instanceof StackTraceData)) {
+			throw new IllegalArgumentException("Requires StackTraceData, but was " + defaultData.getClass().getName());
 		}
 
 		super.addAttributesToDefaultData(defaultData);
-		InvocationSequenceData invocData = (InvocationSequenceData) defaultData;
+		StackTraceData stackTraceData = (StackTraceData) defaultData;
+		StackTraceSample[] traces = new StackTraceSample[getTraces().length];
 
-		if (traces[0].size() == 0) {
-			invocData.setMethodIdent(-1);
-			return;
+		int i = 0;
+		for (DotNetStackTraceSample dotNetSample : getTraces()) {
+			traces[i] = dotNetSample.toDefaultDataSample();
+			i++;
 		}
 
-		double start = getAsStartTime(0);
-		double end = getAsEndTime(traces.length - 1);
-		invocData.setMethodIdent(traces[0].at(0));
-		invocData.setStart(start);
-		invocData.setEnd(end);
-		invocData.setDuration(end - start);
-
-		addNestedSequences(invocData, 1, 0, traces.length);
-		addTimerData(invocData);
+		stackTraceData.setThreadId(getThreadId());
+		stackTraceData.setBaseMethodId(getBaseMethodId());
+		stackTraceData.setStartTime(getStartTime());
+		stackTraceData.setEndTime(getEndTime());
+		stackTraceData.setTraces(traces);
 	}
 
 	private double getAsStartTime(int index) {
@@ -237,9 +300,41 @@ public class DotNetStackTraceData extends DotNetMethodSensorData {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public boolean isInvocationSequenceConvertible() {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void fillInvocationSequeneData(InvocationSequenceData invocData) {
+		super.fillInvocationSequeneData(invocData);
+
+		if (traces[0].size() == 0) {
+			invocData.setMethodIdent(-1);
+			return;
+		}
+
+		double start = getAsStartTime(0);
+		double end = getAsEndTime(traces.length - 1);
+		invocData.setMethodIdent(traces[0].at(0));
+		invocData.setStart(start);
+		invocData.setEnd(end);
+		invocData.setDuration(end - start);
+
+		addNestedSequences(invocData, 1, 0, traces.length);
+		addTimerData(invocData);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		DecimalFormat format = new DecimalFormat("00000");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy, HH:mm:ss.SSS");
 
 		builder.append("Stack traces for platform ");
 		builder.append(getPlatformId());
@@ -247,12 +342,22 @@ public class DotNetStackTraceData extends DotNetMethodSensorData {
 		builder.append(threadId);
 		builder.append("\n");
 
+		builder.append("Base method is ");
+		builder.append(baseMethodId);
+		builder.append(", duration from ");
+		builder.append(dateFormat.format(new Date(startTime / 1000000)));
+		builder.append(" to ");
+		builder.append(dateFormat.format(new Date(endTime / 1000000)));
+		builder.append(". Overall duration is ");
+		builder.append((endTime - startTime) / 1000000);
+		builder.append(" ms.\n");
+
 		builder.append("Timestamps: ");
 		long startTime = traces[0].getTimestamp();
 
 		for (DotNetStackTraceSample trace : traces) {
 			builder.append(" ");
-			builder.append(format.format(trace.getTimestamp() - startTime));
+			builder.append(format.format((trace.getTimestamp() - startTime) / 1000000));
 			builder.append(" ");
 		}
 
@@ -272,11 +377,12 @@ public class DotNetStackTraceData extends DotNetMethodSensorData {
 					builder.append("     ");
 				} else {
 					builder.append(format.format(trace.at(depth)));
-
-					if (trace.size() > depth + 1) {
-						stop = false;
-					}
 				}
+
+				if (trace.size() > depth + 1) {
+					stop = false;
+				}
+
 				builder.append(" ");
 			}
 

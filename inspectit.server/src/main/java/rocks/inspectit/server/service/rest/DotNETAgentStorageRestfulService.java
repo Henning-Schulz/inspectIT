@@ -47,17 +47,29 @@ public class DotNETAgentStorageRestfulService {
 	@RequestMapping(method = RequestMethod.POST, value = "addDataObjects")
 	@ResponseBody
 	public int addDataObjects(@RequestBody(required = true) DotNetMethodSensorData[] dataObjects) {
-		System.out.println("Data received. Size was " + dataObjects.length + " and the content is:");
+		System.out.println("Data recieved. Size is " + dataObjects.length + ".");
 		List<DefaultData> defaultDataList = new ArrayList<>();
 
 		for (DotNetMethodSensorData data : dataObjects) {
 			System.out.println(data);
-
-			System.out.println("As InvocationSequenceData:");
-			printInvocData((InvocationSequenceData) data.toDefaultData(), "");
-			System.out.println();
-
 			defaultDataList.add(data.toDefaultData());
+
+			// if (data.isInvocationSequenceConvertible()) {
+			// InvocationSequenceData invocData;
+			// try {
+			// invocData = data.toInvocationSequenceData();
+			// } catch (IllegalArgumentException e) {
+			// e.printStackTrace();
+			// invocData = null;
+			// }
+			// if (invocData != null) {
+			// System.out.println("As InvocationSequenceData:");
+			// printInvocData(invocData, "");
+			// System.out.println();
+			// // defaultDataList.add(invocData);
+			// }
+			// }
+
 		}
 
 		agentStorageService.addDataObjects(defaultDataList);
@@ -68,7 +80,7 @@ public class DotNETAgentStorageRestfulService {
 	@RequestMapping(method = RequestMethod.POST, value = "keepAlive")
 	@ResponseBody
 	public int keepAlive(@RequestParam(value = "platformId", required = true) long platformId) {
-		System.out.println("Keep platform " + platformId + " alive");
+		// System.out.println("Keep platform " + platformId + " alive");
 		keepAliveService.sendKeepAlive(platformId);
 		return 1;
 	}

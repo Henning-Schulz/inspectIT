@@ -14,6 +14,10 @@ private:
 
 	ThreadID threadId;
 
+	METHOD_ID baseMethodId = 0;
+	JAVA_LONG startTime = -1;
+	JAVA_LONG endTime = -1;
+
 	bool isFinished = false;
 	std::vector<std::shared_ptr<StackTraceSample>> traces;
 
@@ -22,6 +26,13 @@ public:
 	~StackTraceStorage();
 
 	ThreadID getThreadId();
+
+	METHOD_ID getBaseMethodId();
+	void setBaseMethodId(METHOD_ID baseMethodId);
+	JAVA_LONG getStartTime();
+	void setStartTime(JAVA_LONG startTime);
+	JAVA_LONG getEndTime();
+	void setEndTime(JAVA_LONG endTime);
 
 	std::vector<std::shared_ptr<StackTraceSample>> getTraces();
 	JAVA_LONG getHighestMethod();

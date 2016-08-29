@@ -2,21 +2,21 @@
 
 #include "StackTraceProvider.h"
 #include "Logger.h"
-#include "ThreadHook.h"
 
 #include <vector>
 #include <map>
 #include <shared_mutex>
 
-class NativeStackProvider : public StackTraceProvider, public ThreadHook
+class NativeStackProvider : public StackTraceProvider, public std::enable_shared_from_this<NativeStackProvider>
 {
 private:
 	ICorProfilerInfo2 *profilerInfo;
 
 	Logger logger = loggerFactory.createLogger("NativeStackProvider");
 
-	std::vector<ThreadID> createdThreads;
-	std::shared_mutex mCreatedThreads;
+	size_t maximumTraceSize;
+
+	std::shared_ptr<HookStrategy> hookStrategy;
 
 	std::map<FunctionID, METHOD_ID> functionToMethodId;
 
@@ -32,24 +32,21 @@ public:
 	NativeStackProvider(ICorProfilerInfo2 *profilerInfo);
 	~NativeStackProvider();
 
+	void init();
+
+	void setHookStrategy(std::shared_ptr<HookStrategy> hookStrategy);
+
 	bool hasHook();
 	std::shared_ptr<MethodHook> getHook();
-
-	bool hasThreadHook();
-	std::shared_ptr<ThreadHook> getThreadHook();
-
-	void threadCreated(ThreadID threadId, bool delayed);
-	void threadDestroyed(ThreadID threadId, bool delayed);
 
 	/*
 	* Returns necessary monitor flags except for COR_PRF_MONITOR_ENTERLEAVE
 	*/
 	DWORD getSpecialMonitorFlags();
 
-	void nextStackFrame(FunctionID functionId, std::vector<JAVA_LONG> *trace);
+	void nextStackFrame(FunctionID functionId, std::vector<FunctionID> *trace);
 
 	std::shared_ptr<StackTraceSample> getStackTrace(ThreadID threadId);
-	std::map<ThreadID, std::shared_ptr<StackTraceSample>> getAllStackTraces();
 };
 
 extern std::shared_ptr<NativeStackProvider> providerInstance;

@@ -82,6 +82,12 @@
     <Filter Include="Header Files\sampling.native">
       <UniqueIdentifier>{fd3ab4ec-862c-4b5b-869a-9ee5902ae042}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\timer">
+      <UniqueIdentifier>{25f6e2ef-8c11-4133-b990-b0056beacbcf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\timer">
+      <UniqueIdentifier>{c6e50440-75e2-497e-836d-cf7831c499e8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Agent.h">
@@ -252,6 +258,39 @@
     <ClInclude Include="json_string_prep.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
+    <ClInclude Include="SamplingSwitch.h">
+      <Filter>Header Files\sampling.core</Filter>
+    </ClInclude>
+    <ClInclude Include="SamplingTriggerFactory.h">
+      <Filter>Header Files\sampling.trigger</Filter>
+    </ClInclude>
+    <ClInclude Include="StackTraceSensorAssignment.h">
+      <Filter>Header Files\config.sensor</Filter>
+    </ClInclude>
+    <ClInclude Include="RandomizedTimedTrigger.h">
+      <Filter>Header Files\sampling.trigger</Filter>
+    </ClInclude>
+    <ClInclude Include="StackSizeBasedTrigger.h">
+      <Filter>Header Files\sampling.trigger</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowStackListener.h">
+      <Filter>Header Files\sampling.shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerData.h">
+      <Filter>Header Files\timer</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerHook.h">
+      <Filter>Header Files\timer</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerStorage.h">
+      <Filter>Header Files\timer</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerSensor.h">
+      <Filter>Header Files\timer</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerSensorConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Agent.cpp">
@@ -359,11 +398,44 @@
     <ClCompile Include="json_string_prep.cpp">
       <Filter>Source Files\utils</Filter>
     </ClCompile>
+    <ClCompile Include="SamplingSwitch.cpp">
+      <Filter>Source Files\sampling.core</Filter>
+    </ClCompile>
+    <ClCompile Include="SamplingTriggerFactory.cpp">
+      <Filter>Source Files\sampling.trigger</Filter>
+    </ClCompile>
+    <ClCompile Include="StackTraceSensorAssignment.cpp">
+      <Filter>Source Files\config.sensor</Filter>
+    </ClCompile>
+    <ClCompile Include="RandomizedTimedTrigger.cpp">
+      <Filter>Source Files\sampling.trigger</Filter>
+    </ClCompile>
+    <ClCompile Include="StackSizeBasedTrigger.cpp">
+      <Filter>Source Files\sampling.trigger</Filter>
+    </ClCompile>
+    <ClCompile Include="TimerData.cpp">
+      <Filter>Source Files\timer</Filter>
+    </ClCompile>
+    <ClCompile Include="TimerHook.cpp">
+      <Filter>Source Files\timer</Filter>
+    </ClCompile>
+    <ClCompile Include="TimerStorage.cpp">
+      <Filter>Source Files\timer</Filter>
+    </ClCompile>
+    <ClCompile Include="TimerSensor.cpp">
+      <Filter>Source Files\timer</Filter>
+    </ClCompile>
+    <ClCompile Include="TimerSensorConfig.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="agent.def">
       <Filter>Source Files\core</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="enable_vector.natvis" />
   </ItemGroup>
 </Project>

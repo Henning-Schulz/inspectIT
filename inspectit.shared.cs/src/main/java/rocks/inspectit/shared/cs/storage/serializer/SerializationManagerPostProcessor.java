@@ -16,6 +16,7 @@ import rocks.inspectit.shared.cs.ci.AgentMapping;
 import rocks.inspectit.shared.cs.ci.AgentMappings;
 import rocks.inspectit.shared.cs.ci.Environment;
 import rocks.inspectit.shared.cs.ci.Profile;
+import rocks.inspectit.shared.cs.ci.assignment.impl.DotNetStackTraceSensorAssignment;
 import rocks.inspectit.shared.cs.ci.assignment.impl.ExceptionSensorAssignment;
 import rocks.inspectit.shared.cs.ci.assignment.impl.MethodSensorAssignment;
 import rocks.inspectit.shared.cs.ci.assignment.impl.TimerMethodSensorAssignment;
@@ -283,6 +284,7 @@ public class SerializationManagerPostProcessor implements BeanPostProcessor {
 		kryo.register(ExceptionSensorAssignment.class, new FieldSerializer<ExceptionSensorAssignment>(kryo, ExceptionSensorAssignment.class), nextRegistrationId++);
 		kryo.register(MethodSensorAssignment.class, new FieldSerializer<MethodSensorAssignment>(kryo, MethodSensorAssignment.class), nextRegistrationId++);
 		kryo.register(TimerMethodSensorAssignment.class, new FieldSerializer<TimerMethodSensorAssignment>(kryo, TimerMethodSensorAssignment.class), nextRegistrationId++);
+		kryo.register(DotNetStackTraceSensorAssignment.class, new FieldSerializer<DotNetStackTraceSensorAssignment>(kryo, DotNetStackTraceSensorAssignment.class), nextRegistrationId++);
 		// context capture
 		kryo.register(FieldContextCapture.class, new FieldSerializer<FieldContextCapture>(kryo, FieldContextCapture.class), nextRegistrationId++);
 		kryo.register(ParameterContextCapture.class, new FieldSerializer<ParameterContextCapture>(kryo, ParameterContextCapture.class), nextRegistrationId++);

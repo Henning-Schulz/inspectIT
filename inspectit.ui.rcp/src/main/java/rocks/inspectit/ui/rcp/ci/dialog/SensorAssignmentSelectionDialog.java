@@ -19,11 +19,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ListDialog;
 
 import rocks.inspectit.shared.cs.ci.assignment.AbstractClassSensorAssignment;
+import rocks.inspectit.shared.cs.ci.assignment.impl.DotNetStackTraceSensorAssignment;
 import rocks.inspectit.shared.cs.ci.assignment.impl.ExceptionSensorAssignment;
 import rocks.inspectit.shared.cs.ci.assignment.impl.MethodSensorAssignment;
 import rocks.inspectit.shared.cs.ci.assignment.impl.TimerMethodSensorAssignment;
 import rocks.inspectit.shared.cs.ci.factory.ConfigurationDefaultsFactory;
 import rocks.inspectit.shared.cs.ci.sensor.ISensorConfig;
+import rocks.inspectit.shared.cs.ci.sensor.dotNet.DotNetStackTraceSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.exception.IExceptionSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.method.IMethodSensorConfig;
 import rocks.inspectit.shared.cs.ci.sensor.method.impl.TimerSensorConfig;
@@ -32,9 +34,9 @@ import rocks.inspectit.ui.rcp.formatter.TextFormatter;
 
 /**
  * Dialog for the selecting the sensor type for the sensor assignment.
- * 
+ *
  * @author Ivan Senic
- * 
+ *
  */
 public class SensorAssignmentSelectionDialog extends ListDialog {
 
@@ -50,7 +52,7 @@ public class SensorAssignmentSelectionDialog extends ListDialog {
 
 	/**
 	 * Default constructor.
-	 * 
+	 *
 	 * @param parentShell
 	 *            Shell
 	 */
@@ -86,7 +88,7 @@ public class SensorAssignmentSelectionDialog extends ListDialog {
 
 	/**
 	 * Creates input for the dialog.
-	 * 
+	 *
 	 * @param showAdvanced
 	 *            If advanced types of {@link IMethodSensorConfig}s should be included in the input.
 	 * @return Input for dialog.
@@ -125,18 +127,20 @@ public class SensorAssignmentSelectionDialog extends ListDialog {
 				return new ExceptionSensorAssignment();
 			} else if (sensorConfig instanceof TimerSensorConfig) {
 				return new TimerMethodSensorAssignment();
+			} else if (sensorConfig instanceof DotNetStackTraceSensorConfig) {
+				return new DotNetStackTraceSensorAssignment();
 			} else if (sensorConfig instanceof IMethodSensorConfig) {
 				return new MethodSensorAssignment((Class<? extends IMethodSensorConfig>) sensorConfig.getClass());
-			} 
+			}
 		}
 		return null;
 	}
 
 	/**
 	 * Simple {@link LabelProvider} for the dialog.
-	 * 
+	 *
 	 * @author Ivan Senic
-	 * 
+	 *
 	 */
 	private static class SensorConfigLabelProvider extends LabelProvider {
 
