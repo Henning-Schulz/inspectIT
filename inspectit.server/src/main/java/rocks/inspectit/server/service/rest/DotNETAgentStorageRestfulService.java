@@ -47,11 +47,11 @@ public class DotNETAgentStorageRestfulService {
 	@RequestMapping(method = RequestMethod.POST, value = "addDataObjects")
 	@ResponseBody
 	public int addDataObjects(@RequestBody(required = true) DotNetMethodSensorData[] dataObjects) {
-		System.out.println("Data recieved. Size is " + dataObjects.length + ".");
+		// System.out.println("Data recieved. Size is " + dataObjects.length + ".");
 		List<DefaultData> defaultDataList = new ArrayList<>();
 
 		for (DotNetMethodSensorData data : dataObjects) {
-			System.out.println(data);
+			// System.out.println(data);
 			defaultDataList.add(data.toDefaultData());
 
 			// if (data.isInvocationSequenceConvertible()) {

@@ -43,3 +43,4 @@ schema/JmxSensorValueData.sch
 schema/HttpInfo.sch
 schema/StackTraceData.sch
 schema/StackTraceSample.sch
+schema/SingleTimerData.sch

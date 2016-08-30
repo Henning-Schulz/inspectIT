@@ -27,6 +27,7 @@ import rocks.inspectit.shared.all.communication.data.ExceptionSensorData;
 import rocks.inspectit.shared.all.communication.data.HttpTimerData;
 import rocks.inspectit.shared.all.communication.data.InvocationSequenceData;
 import rocks.inspectit.shared.all.communication.data.MemoryInformationData;
+import rocks.inspectit.shared.all.communication.data.SingleTimerData;
 import rocks.inspectit.shared.all.communication.data.SqlStatementData;
 import rocks.inspectit.shared.all.communication.data.StackTraceData;
 import rocks.inspectit.shared.all.communication.data.SystemInformationData;
@@ -304,7 +305,7 @@ public class StorageRestfulService {
 		// data saver
 		List<Class<? extends DefaultData>> classesToSave = new ArrayList<Class<? extends DefaultData>>();
 		Collections.addAll(classesToSave, InvocationSequenceData.class, HttpTimerData.class, ExceptionSensorData.class, MemoryInformationData.class, CpuInformationData.class,
-				ClassLoadingInformationData.class, ThreadInformationData.class, SystemInformationData.class, StackTraceData.class);
+				ClassLoadingInformationData.class, ThreadInformationData.class, SystemInformationData.class, StackTraceData.class, SingleTimerData.class);
 		DataSaverProcessor dataSaverProcessor = new DataSaverProcessor(classesToSave, true);
 		normalProcessors.add(dataSaverProcessor);
 
