@@ -4,7 +4,7 @@
 package rocks.inspectit.server.service.rest.dotnetdata;
 
 import rocks.inspectit.shared.all.communication.MethodSensorData;
-import rocks.inspectit.shared.all.communication.data.TimerData;
+import rocks.inspectit.shared.all.communication.data.SingleTimerData;
 
 /**
  * @author Henning Schulz
@@ -78,7 +78,7 @@ public class DotNetTimerData extends DotNetMethodSensorData {
 	 */
 	@Override
 	protected MethodSensorData toNewDefaultData() {
-		return new TimerData();
+		return new SingleTimerData();
 	}
 
 	/**
@@ -86,15 +86,17 @@ public class DotNetTimerData extends DotNetMethodSensorData {
 	 */
 	@Override
 	protected void addAttributesToDefaultData(MethodSensorData defaultData) {
-		if (!(defaultData instanceof TimerData)) {
-			throw new IllegalArgumentException("Requires TimerData, but was " + defaultData.getClass().getName());
+		if (!(defaultData instanceof SingleTimerData)) {
+			throw new IllegalArgumentException("Requires SingleTimerData, but was " + defaultData.getClass().getName());
 		}
 
-		TimerData timerData = (TimerData) defaultData;
+		SingleTimerData timerData = (SingleTimerData) defaultData;
 
 		super.addAttributesToDefaultData(timerData);
 
-		timerData.set
+		timerData.setThreadId(threadId);
+		timerData.setStartTime(startTime);
+		timerData.setEndTime(endTime);
 	}
 
 	/**
@@ -103,6 +105,14 @@ public class DotNetTimerData extends DotNetMethodSensorData {
 	@Override
 	public boolean isInvocationSequenceConvertible() {
 		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String toString() {
+		return "Method " + getMethodId() + " on thread " + threadId + ": " + startTime + " - " + endTime + " (" + (endTime - startTime) + " ns)";
 	}
 
 }
