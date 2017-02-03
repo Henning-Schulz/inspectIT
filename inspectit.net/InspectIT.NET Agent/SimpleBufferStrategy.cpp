@@ -15,6 +15,7 @@ void SimpleBufferStrategy::addMeasurements(std::vector<std::shared_ptr<MethodSen
 {
 	// Creates a unique lock on the mutex
 	std::unique_lock<std::mutex> lock(measurementsMutex);
+
 	this->newMeasurements = true;
 	this->measurements = data;
 	// The mutex is automaticly freed, since the lock reference is only valid

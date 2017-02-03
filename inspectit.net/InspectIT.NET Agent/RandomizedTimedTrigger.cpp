@@ -67,7 +67,7 @@ void RandomizedTimedTrigger::workerMethod()
 
 		if (retryCount > 0) {
 			logger.debug("Retried %i times", retryCount);
-			if (!succeeded) {
+			if (!succeeded && !stopped) {
 				logger.warn("Could not retrieve stack trace within %i tries!", retryCount + 1);
 			}
 		}

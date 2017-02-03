@@ -16,6 +16,8 @@ void TimerSensor::init(std::shared_ptr<MethodSensorConfig> config, JAVA_LONG sen
 {
 	setSensorTypeId(sensorTypeId);
 	setPlatformId(platformId);
+	hook->setPlatformId(platformId);
+	hook->setSensorTypeId(sensorTypeId);
 	hook->init(profilerInfo);
 }
 

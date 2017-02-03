@@ -43,9 +43,11 @@ bool HelloSensorData::finished()
 	return bFinished;
 }
 
-std::shared_ptr<MethodSensorData> HelloSensorData::finalizeData()
+std::vector<std::shared_ptr<MethodSensorData>> HelloSensorData::finalizeData()
 {
-	return std::make_shared<HelloSensorData>(greeting, 0, 0, 0);
+	std::vector<std::shared_ptr<MethodSensorData>> result;
+	result.push_back(std::make_shared<HelloSensorData>(greeting, 0, 0, 0));
+	return result;
 }
 
 int HelloSensorData::getCounter()

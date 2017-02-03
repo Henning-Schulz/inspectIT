@@ -4,7 +4,6 @@
 #include "DataSendingService.h"
 #include "TimerStorage.h"
 
-
 TimerHook::TimerHook()
 {
 }
@@ -23,6 +22,8 @@ void TimerHook::notifyShutdown()
 {
 }
 
+thread_local std::vector<std::shared_ptr<TimerStorage>> storages;
+
 void TimerHook::beforeBody(METHOD_ID methodID)
 {
 	ThreadID threadId = 0;
@@ -30,8 +31,21 @@ void TimerHook::beforeBody(METHOD_ID methodID)
 
 	auto startNanos = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch());
 
-	std::shared_ptr<MeasurementStorage> storage = std::make_shared<TimerStorage>(getPlatformId(), getSensorTypeId(), methodID, threadId, startNanos);
-	dataSendingService->addMeasurementStorage(storage, std::to_string(threadId));
+	std::shared_ptr<MeasurementStorage> uncastedStorage = dataSendingService->getMeasurementStorage(getSensorTypeId(), threadId);
+	std::shared_ptr<TimerStorage> storage;
+
+	if (uncastedStorage == nullptr) {
+		storage = std::make_shared<TimerStorage>(getPlatformId(), getSensorTypeId(), threadId, startNanos);
+	}
+	else {
+		storage = std::static_pointer_cast<TimerStorage>(uncastedStorage);
+	}
+
+	storage->newEntry(methodID, startNanos);
+
+	if (uncastedStorage == nullptr) {
+		dataSendingService->addMeasurementStorage(storage);
+	}
 }
 
 void TimerHook::afterBody(METHOD_ID methodID)
@@ -41,8 +55,7 @@ void TimerHook::afterBody(METHOD_ID methodID)
 	ThreadID threadId = 0;
 	profilerInfo->GetCurrentThreadID(&threadId);
 
-	std::shared_ptr<MeasurementStorage> uncastedStorage = dataSendingService->getMeasurementStorage(getSensorTypeId(), methodID, std::to_string(threadId));
-
+	std::shared_ptr<MeasurementStorage> uncastedStorage = dataSendingService->getMeasurementStorage(getSensorTypeId(), threadId);
 	std::shared_ptr<TimerStorage> storage;
 
 	if (uncastedStorage == nullptr) {
@@ -50,7 +63,10 @@ void TimerHook::afterBody(METHOD_ID methodID)
 	}
 	else {
 		storage = std::static_pointer_cast<TimerStorage>(uncastedStorage);
+		storage->finishCurrentEntry(endNanos);
 
-		storage->setEndTime(endNanos);
+		if (storage->finished()) {
+			dataSendingService->notifyStorageFinished(storage);
+		}
 	}
 }

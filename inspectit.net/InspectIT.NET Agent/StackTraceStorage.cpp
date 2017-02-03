@@ -80,11 +80,13 @@ bool StackTraceStorage::finished()
 	return isFinished;
 }
 
-std::shared_ptr<MethodSensorData> StackTraceStorage::finalizeData()
+std::vector<std::shared_ptr<MethodSensorData>> StackTraceStorage::finalizeData()
 {
+	std::vector<std::shared_ptr<MethodSensorData>> result;
 	std::shared_ptr<StackTraceData> data = std::make_shared<StackTraceData>(traces, getPlatformId(), getMethodSensorId(), getHighestMethod(), getThreadId(), getTimestamp());
 	data->setBaseMethodId(baseMethodId);
 	data->setStartTime(startTime);
 	data->setEndTime(endTime);
-	return data;
+	result.push_back(data);
+	return result;
 }

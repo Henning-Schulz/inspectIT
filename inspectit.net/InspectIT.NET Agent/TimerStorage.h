@@ -1,5 +1,6 @@
 #pragma once
 #include "MeasurementStorage.h"
+#include "TimerStorageEntry.h"
 
 #include <chrono>
 
@@ -9,16 +10,19 @@ class TimerStorage :
 private:
 	ThreadID threadId;
 
-	JAVA_LONG startNanos = -1;
-	JAVA_LONG endNanos = -1;
+	int32_t started = false;
+
+	std::vector<TimerStorageEntry> entries;
+	std::vector<TimerStorageEntry> finishedEntries;
 
 public:
-	TimerStorage(JAVA_LONG platformId, JAVA_LONG methodSensorId, JAVA_LONG methodId, ThreadID threadId, std::chrono::duration<long long, std::nano> startNanos);
+	TimerStorage(JAVA_LONG platformId, JAVA_LONG methodSensorId, ThreadID threadId, std::chrono::duration<long long, std::nano> timestamp);
 	~TimerStorage();
 
-	void setEndTime(std::chrono::duration<long long, std::nano> endNanos);
+	void newEntry(JAVA_LONG methodId, std::chrono::duration<long long, std::nano> startNanos);
+	void finishCurrentEntry(std::chrono::duration<long long, std::nano> endNanos);
 
 	bool finished();
-	std::shared_ptr<MethodSensorData> finalizeData();
+	std::vector<std::shared_ptr<MethodSensorData>> finalizeData();
 };
 

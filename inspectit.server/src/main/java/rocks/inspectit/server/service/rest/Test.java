@@ -25,6 +25,7 @@ public class Test {
 	@RequestMapping(method = RequestMethod.GET, value = "test")
 	@ResponseBody
 	public String test(@RequestParam(value = "id", required = true) int value) {
+		System.out.println("Id is " + value);
 		return "My Id was:" + value;
 	}
 

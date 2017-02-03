@@ -28,6 +28,6 @@ public:
 	int getCounter();
 	void finish();
 	bool finished();
-	std::shared_ptr<MethodSensorData> finalizeData();
+	std::vector<std::shared_ptr<MethodSensorData>> finalizeData();
 };
 
