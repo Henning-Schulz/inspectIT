@@ -80,4 +80,7 @@
 		<property name="uncaughtExceptionHandler" ref="forkJoinPoolExceptionHandler" />
 	</bean>
 	
+	<bean id="storageReaderTest" class="rocks.inspectit.server.service.rest.StorageReaderTest">
+	</bean>
+	
 </beans>

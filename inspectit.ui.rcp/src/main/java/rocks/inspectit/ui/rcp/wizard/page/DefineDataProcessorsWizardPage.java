@@ -36,6 +36,7 @@ import rocks.inspectit.shared.all.communication.data.HttpTimerData;
 import rocks.inspectit.shared.all.communication.data.InvocationSequenceData;
 import rocks.inspectit.shared.all.communication.data.JmxSensorValueData;
 import rocks.inspectit.shared.all.communication.data.MemoryInformationData;
+import rocks.inspectit.shared.all.communication.data.SingleTimerData;
 import rocks.inspectit.shared.all.communication.data.SqlStatementData;
 import rocks.inspectit.shared.all.communication.data.StackTraceData;
 import rocks.inspectit.shared.all.communication.data.SystemInformationData;
@@ -156,10 +157,12 @@ public class DefineDataProcessorsWizardPage extends WizardPage {
 			inputList.add(InvocationSequenceData.class);
 			inputList.add(ExceptionSensorData.class);
 			inputList.add(StackTraceData.class);
+			inputList.add(SingleTimerData.class);
 		}
 		if (isStyleApplied(ONLY_TIMERS)) {
 			inputList.add(TimerData.class);
 			inputList.add(InvocationSequenceData.class);
+			inputList.add(SingleTimerData.class);
 		}
 		if (isStyleApplied(ONLY_SQL_STATEMENTS)) {
 			inputList.add(SqlStatementData.class);
@@ -464,6 +467,8 @@ public class DefineDataProcessorsWizardPage extends WizardPage {
 				return "JMX Data";
 			} else if (ObjectUtils.equals(element, StackTraceData.class)) {
 				return "Stack Trace Data";
+			} else if (ObjectUtils.equals(element, SingleTimerData.class)) {
+				return "Single Timer Data";
 			}
 
 			return super.getText(element);
@@ -500,6 +505,8 @@ public class DefineDataProcessorsWizardPage extends WizardPage {
 				return InspectIT.getDefault().getImage(InspectITImages.IMG_BEAN);
 			} else if (ObjectUtils.equals(element, StackTraceData.class)) {
 				return InspectIT.getDefault().getImage(InspectITImages.IMG_CALL_HIERARCHY);
+			} else if (ObjectUtils.equals(element, SingleTimerData.class)) {
+				return InspectIT.getDefault().getImage(InspectITImages.IMG_TIMER);
 			}
 			return super.getImage(element);
 		}

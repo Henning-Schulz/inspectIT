@@ -4,10 +4,9 @@
 
 
 
-TimerStorage::TimerStorage(JAVA_LONG platformId, JAVA_LONG methodSensorId, JAVA_LONG methodId, ThreadID threadId, std::chrono::duration<long long, std::nano> startNanos)
-	: MeasurementStorage(platformId, methodSensorId, methodId, std::chrono::duration_cast<std::chrono::milliseconds>(startNanos).count())
+TimerStorage::TimerStorage(JAVA_LONG platformId, JAVA_LONG methodSensorId, ThreadID threadId, std::chrono::duration<long long, std::nano> timestamp)
+	: MeasurementStorage(platformId, methodSensorId, threadId, std::chrono::duration_cast<std::chrono::milliseconds>(timestamp).count())
 {
-	this->startNanos = std::chrono::duration_cast<std::chrono::nanoseconds>(startNanos).count();
 	this->threadId = threadId;
 }
 
@@ -16,18 +15,34 @@ TimerStorage::~TimerStorage()
 {
 }
 
-void TimerStorage::setEndTime(std::chrono::duration<long long, std::nano> endNanos)
+void TimerStorage::newEntry(JAVA_LONG methodId, std::chrono::duration<long long, std::nano> startNanos)
 {
-	this->endNanos = std::chrono::duration_cast<std::chrono::nanoseconds>(endNanos).count();
+	TimerStorageEntry entry(methodId, startNanos);
+	entries.push_back(entry);
+	started = true;
+}
+
+void TimerStorage::finishCurrentEntry(std::chrono::duration<long long, std::nano> endNanos)
+{
+	TimerStorageEntry entry = entries.back();
+	entry.setEndTime(endNanos);
+	finishedEntries.push_back(entry);
+	entries.pop_back();
 }
 
 bool TimerStorage::finished()
 {
-	return endNanos > 0;
+	return started && entries.size() == 0;
 }
 
-std::shared_ptr<MethodSensorData> TimerStorage::finalizeData()
+std::vector<std::shared_ptr<MethodSensorData>> TimerStorage::finalizeData()
 {
-	std::shared_ptr<TimerData> timerData = std::make_shared<TimerData>(getPlatformId(), getMethodSensorId(), getMethodId(), threadId, getTimestamp(), startNanos, endNanos);
-	return timerData;
+	std::vector<std::shared_ptr<MethodSensorData>> result;
+
+	for (auto it = finishedEntries.begin(); it != finishedEntries.end(); it++) {
+		std::shared_ptr<TimerData> timerData = std::make_shared<TimerData>(getPlatformId(), getMethodSensorId(), it->getMethodId(), threadId, getTimestamp(), it->getStartNanos(), it->getEndNanos());
+		result.push_back(timerData);
+	}
+
+	return result;
 }

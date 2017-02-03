@@ -129,7 +129,9 @@ public class DotNETRegistrationRestfulService {
 			@RequestParam(value = "fullyQualifiedClassName", required = true) String fullyQualifiedClassName) {
 		System.out.println("registerMethodSensorTypeIdent(platformId = " + platformId + ", fullyQualifiedClassName = " + fullyQualifiedClassName + ")");
 
-		return registrationService.registerMethodSensorTypeIdent(platformId, fullyQualifiedClassName, null);
+		long id = registrationService.registerMethodSensorTypeIdent(platformId, fullyQualifiedClassName, null);
+		System.out.println("ID is " + id);
+		return id;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "addSensorTypeToMethod")

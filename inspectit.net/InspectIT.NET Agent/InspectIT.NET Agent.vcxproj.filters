@@ -291,6 +291,9 @@
     <ClInclude Include="TimerSensorConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TimerStorageEntry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Agent.cpp">
@@ -426,6 +429,9 @@
       <Filter>Source Files\timer</Filter>
     </ClCompile>
     <ClCompile Include="TimerSensorConfig.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TimerStorageEntry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

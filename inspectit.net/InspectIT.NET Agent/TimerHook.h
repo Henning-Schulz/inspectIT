@@ -1,7 +1,6 @@
 #pragma once
 
 #include "MethodHook.h"
-
 #include "Logger.h"
 
 class TimerHook : public MethodHook
@@ -20,6 +19,5 @@ public:
 
 	void beforeBody(METHOD_ID methodID);
 	void afterBody(METHOD_ID methodID);
-
 };
 

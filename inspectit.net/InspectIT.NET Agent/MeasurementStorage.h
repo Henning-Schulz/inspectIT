@@ -36,5 +36,5 @@ public:
 	JAVA_LONG getMethodId() { return methodId; }
 
 	virtual bool finished() = 0;
-	virtual std::shared_ptr<MethodSensorData> finalizeData() = 0;
+	virtual std::vector<std::shared_ptr<MethodSensorData>> finalizeData() = 0;
 };

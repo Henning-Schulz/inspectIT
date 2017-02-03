@@ -88,7 +88,7 @@
       <AdditionalDependencies>corguids.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>agent.def</ModuleDefinitionFile>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -191,6 +191,7 @@
     <ClInclude Include="TimerSensor.h" />
     <ClInclude Include="TimerSensorConfig.h" />
     <ClInclude Include="TimerStorage.h" />
+    <ClInclude Include="TimerStorageEntry.h" />
     <ClInclude Include="TimeStrategyConfig.h" />
   </ItemGroup>
   <ItemGroup>
@@ -238,6 +239,7 @@
     <ClCompile Include="TimerSensor.cpp" />
     <ClCompile Include="TimerSensorConfig.cpp" />
     <ClCompile Include="TimerStorage.cpp" />
+    <ClCompile Include="TimerStorageEntry.cpp" />
     <ClCompile Include="TimeStrategyConfig.cpp" />
   </ItemGroup>
   <ItemGroup>

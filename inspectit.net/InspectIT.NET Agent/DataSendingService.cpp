@@ -207,7 +207,10 @@ void DataSendingService::prepareData()
 			for (auto it = finishedStoragesPrepCopy->begin(); it != finishedStoragesPrepCopy->end(); it++) {
 				std::shared_ptr<MeasurementStorage> storage = *it;
 				if (storage->finished()) {
-					dataObjects.push_back(storage->finalizeData());
+					auto finalized = storage->finalizeData();
+					for (auto finIt = finalized.begin(); finIt != finalized.end(); finIt++) {
+						dataObjects.push_back(*finIt);
+					}
 				}
 				else {
 					logger.warn("Measurement storage for sensor %lli and method %i was not yet finished. Data is lost!", storage->getMethodSensorId(), storage->getMethodId());
