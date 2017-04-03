@@ -7,3 +7,6 @@ build/
 /bin/
 *.VC.db
 *.VC.opendb
+inspectit.server/src/main/external-resources/ci-old/*
+**/gradle/org.springsource.ide.eclipse.gradle.core.prefs
+.classpath
