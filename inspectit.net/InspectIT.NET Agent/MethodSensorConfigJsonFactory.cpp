@@ -1,6 +1,5 @@
 #include "MethodSensorConfigJsonFactory.h"
 
-#include "StackTraceSensorConfig.h"
 #include "TimerSensorConfig.h"
 
 

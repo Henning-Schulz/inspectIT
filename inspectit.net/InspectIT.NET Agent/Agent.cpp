@@ -20,11 +20,8 @@
 #include "SimpleBufferStrategyConfig.h"
 #include "SizeBufferStrategyConfig.h"
 #include "MethodSensorConfig.h"
-#include "StackTraceSensorConfig.h"
 #include "MethodSensorAssignment.h"
-#include "StackTraceSamplingSensor.h"
 #include "AssignmentHookStrategy.h"
-#include "StackTraceSensorAssignment.h"
 #include "TimerSensorConfig.h"
 #include "TimerSensor.h"
 

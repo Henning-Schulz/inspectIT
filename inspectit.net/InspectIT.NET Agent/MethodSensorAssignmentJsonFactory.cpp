@@ -1,10 +1,8 @@
 #include "MethodSensorAssignmentJsonFactory.h"
 
-#include "StackTraceSensorConfig.h"
-#include "StackTraceSensorAssignment.h"
 #include "TimerSensorConfig.h"
 
-
+std::map<std::string, S
 
 MethodSensorAssignmentJsonFactory::MethodSensorAssignmentJsonFactory()
 {

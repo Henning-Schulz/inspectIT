@@ -3,6 +3,8 @@
 #include "MethodSensorAssignment.h"
 #include "Logger.h"
 
+#include <map>
+#include <string>
 #include <memory>
 #include <cpprest\json.h>
 
