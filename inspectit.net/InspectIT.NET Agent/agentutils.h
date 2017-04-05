@@ -14,5 +14,3 @@ PCCOR_SIGNATURE parseMethodSignature(IMetaDataImport *metaDataImport, PCCOR_SIGN
 JAVA_INT convertMethodModifiersToJava(DWORD netModifiers);
 
 void getMethodSensorClassName(std::shared_ptr<MethodSensor> sensor, LPWSTR className);
-
-std::vector<std::string> __cdecl getAllDefinedIPs();

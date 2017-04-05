@@ -4,16 +4,25 @@
 package rocks.inspectit.server.service.rest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.codehaus.jackson.annotate.JsonSubTypes;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import rocks.inspectit.server.service.rest.data.TransferClassType;
+import rocks.inspectit.server.service.rest.data.TransferType;
 
 /**
  * @author Henning Schulz
@@ -31,9 +40,35 @@ public class Test {
 
 	@RequestMapping(method = RequestMethod.GET, value = "bla")
 	@ResponseBody
-	public ClassA bla(@RequestParam(value = "aval", required = true) ClassA a) {
-		System.out.println("Class of a is " + a.getClass().getName());
+	public ClassA bla() {
+		ClassA a = new ClassA();
+		a.setId(42);
+		a.setName("aName");
 		return a;
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "hi/{name}")
+	@ResponseBody
+	public String sayHiTo(@PathVariable String name) {
+		return "Hi " + name;
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "hipo/{name}")
+	@ResponseBody
+	public String postHiTo(@RequestBody String[] names, @PathVariable String name) {
+		return "Hi " + name + " and " + Arrays.toString(names);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "type")
+	@ResponseBody
+	public String postType(@RequestBody TransferType type) {
+		return type.getClass().getName();
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "getType")
+	@ResponseBody
+	public TransferType getType() {
+		return new TransferClassType("my.package.Class", "42", 3);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "postTest")
@@ -45,6 +80,7 @@ public class Test {
 	@RequestMapping(method = RequestMethod.POST, value = "another")
 	@ResponseBody
 	public List<Object> anotherTest(@RequestBody String[] values) {
+		System.out.println("anotherTest");
 		List<Object> result = new ArrayList<>();
 		result.add(values[0]);
 		result.add("Additional value");
@@ -67,7 +103,34 @@ public class Test {
 		return result;
 	}
 
-	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "objectType")
+	@RequestMapping(method = RequestMethod.GET, value = "map")
+	@ResponseBody
+	public Map<Collection<String>, String> getMap() {
+		Map<Collection<String>, String> map = new HashMap<>();
+		Collection<String> firstKey = new ArrayList<>();
+		firstKey.add("Hi");
+		firstKey.add("how are you");
+		map.put(firstKey, "Fine");
+
+		Collection<String> secondKey = new HashSet<>();
+		secondKey.add("pi");
+		map.put(secondKey, "3.1415");
+
+		return map;
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "long-map")
+	@ResponseBody
+	public Map<Long, List<String>> getLongMap() {
+		Map<Long, List<String>> map = new HashMap<>();
+
+		map.put(42L, Arrays.asList("Hi", "there"));
+		map.put(1L, Arrays.asList("Foo"));
+
+		return map;
+	}
+
+	@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "objectType")
 	@JsonSubTypes({ @JsonSubTypes.Type(name = "ClassB", value = ClassB.class), @JsonSubTypes.Type(name = "ClassA", value = ClassA.class) })
 	public static class ClassA {
 		String name;

@@ -125,7 +125,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AbstractSensorTypeConfig.h" />
     <ClInclude Include="Agent.h" />
+    <ClInclude Include="AgentConfig.h" />
     <ClInclude Include="AgentConfiguration.h" />
     <ClInclude Include="agentutils.h" />
     <ClInclude Include="AssignmentHookStrategy.h" />
@@ -137,33 +139,37 @@
     <ClInclude Include="CorProfilerCallbackDefaultImpl.h" />
     <ClInclude Include="DataSendingService.h" />
     <ClInclude Include="dllmain.hpp" />
+    <ClInclude Include="ExceptionSensorTypeConfig.h" />
     <ClInclude Include="HelloSensor.h" />
     <ClInclude Include="HelloSensorData.h" />
     <ClInclude Include="HookStrategy.h" />
+    <ClInclude Include="InstrumentationDefinition.h" />
+    <ClInclude Include="ip_calculation.h" />
+    <ClInclude Include="JsonReceivable.h" />
     <ClInclude Include="json_string_prep.h" />
     <ClInclude Include="ListSizeListener.h" />
     <ClInclude Include="ListSizeStrategy.h" />
-    <ClInclude Include="ListSizeStrategyConfig.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="MeasurementStorage.h" />
     <ClInclude Include="MethodHook.h" />
     <ClInclude Include="CMRRestfulConnection.h" />
+    <ClInclude Include="MethodInstrumentationConfig.h" />
     <ClInclude Include="MethodSensor.h" />
     <ClInclude Include="MethodSensorAssignment.h" />
     <ClInclude Include="MethodSensorAssignmentJsonFactory.h" />
     <ClInclude Include="MethodSensorConfig.h" />
     <ClInclude Include="MethodSensorConfigJsonFactory.h" />
     <ClInclude Include="MethodSensorData.h" />
+    <ClInclude Include="MethodSensorTypeConfig.h" />
     <ClInclude Include="NoHookStrategy.h" />
+    <ClInclude Include="PlatformSensorTypeConfig.h" />
     <ClInclude Include="regutil.h" />
     <ClInclude Include="regutil.hpp" />
     <ClInclude Include="SendingStrategy.h" />
+    <ClInclude Include="SensorInstrumentationPoint.h" />
     <ClInclude Include="SimpleBufferStrategy.h" />
-    <ClInclude Include="SimpleBufferStrategyConfig.h" />
     <ClInclude Include="SingleClassHookStrategy.h" />
-    <ClInclude Include="SizeBufferStrategyConfig.h" />
     <ClInclude Include="StrategyConfig.h" />
-    <ClInclude Include="StrategyConfigJsonFactory.h" />
     <ClInclude Include="stringutils.h" />
     <ClInclude Include="ThreadHook.h" />
     <ClInclude Include="TimerData.h" />
@@ -172,31 +178,36 @@
     <ClInclude Include="TimerSensorConfig.h" />
     <ClInclude Include="TimerStorage.h" />
     <ClInclude Include="TimerStorageEntry.h" />
-    <ClInclude Include="TimeStrategyConfig.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AbstractSensorTypeConfig.cpp" />
     <ClCompile Include="Agent.cpp" />
+    <ClCompile Include="AgentConfig.cpp" />
     <ClCompile Include="AgentConfiguration.cpp" />
     <ClCompile Include="agentutils.cpp" />
     <ClCompile Include="AssignmentHookStrategy.cpp" />
     <ClCompile Include="CorProfilerCallbackDefaultImpl.cpp" />
     <ClCompile Include="DataSendingService.cpp" />
+    <ClCompile Include="ExceptionSensorTypeConfig.cpp" />
     <ClCompile Include="HelloSensor.cpp" />
     <ClCompile Include="HelloSensorData.cpp" />
+    <ClCompile Include="InstrumentationDefinition.cpp" />
+    <ClCompile Include="ip_calculation.cpp" />
     <ClCompile Include="json_string_prep.cpp" />
     <ClCompile Include="ListSizeStrategy.cpp" />
-    <ClCompile Include="ListSizeStrategyConfig.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="CMRRestfulConnection.cpp" />
+    <ClCompile Include="MethodInstrumentationConfig.cpp" />
     <ClCompile Include="MethodSensorAssignment.cpp" />
     <ClCompile Include="MethodSensorAssignmentJsonFactory.cpp" />
     <ClCompile Include="MethodSensorConfigJsonFactory.cpp" />
+    <ClCompile Include="MethodSensorTypeConfig.cpp" />
     <ClCompile Include="NoHookStrategy.cpp" />
+    <ClCompile Include="PlatformSensorTypeConfig.cpp" />
+    <ClCompile Include="SensorInstrumentationPoint.cpp" />
     <ClCompile Include="SimpleBufferStrategy.cpp" />
-    <ClCompile Include="SimpleBufferStrategyConfig.cpp" />
     <ClCompile Include="SingleClassHookStrategy.cpp" />
-    <ClCompile Include="SizeBufferStrategyConfig.cpp" />
-    <ClCompile Include="StrategyConfigJsonFactory.cpp" />
+    <ClCompile Include="StrategyConfig.cpp" />
     <ClCompile Include="stringutils.cpp" />
     <ClCompile Include="TimerData.cpp" />
     <ClCompile Include="TimerHook.cpp" />
@@ -204,7 +215,6 @@
     <ClCompile Include="TimerSensorConfig.cpp" />
     <ClCompile Include="TimerStorage.cpp" />
     <ClCompile Include="TimerStorageEntry.cpp" />
-    <ClCompile Include="TimeStrategyConfig.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="agent.def" />

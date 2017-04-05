@@ -1,14 +1,22 @@
 #pragma once
-
-#include "basehdr.h"
+#include "JsonReceivable.h"
 
 #include <map>
 
-class StrategyConfig
+class StrategyConfig :
+	public JsonReceivable
 {
-public:
-	StrategyConfig() {}
-	virtual ~StrategyConfig() {}
+private:
+	std::wstring className;
+	std::map<std::wstring, std::wstring> settings;
 
-	virtual LPWSTR getClassName() = 0;
+public:
+	StrategyConfig();
+	~StrategyConfig();
+
+	std::wstring getClassName();
+	std::map<std::wstring, std::wstring> getSettings();
+
+	void fromJson(json::object json);
 };
+

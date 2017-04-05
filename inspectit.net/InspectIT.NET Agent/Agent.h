@@ -92,6 +92,12 @@ public:
 	COM_METHOD(HRESULT) Shutdown();
 
 	//
+	// Class events
+	//
+	COM_METHOD(HRESULT) ClassLoadFinished(ClassID classID,
+		HRESULT hrStatus);
+
+	//
 	// Method callbacks
 	//
 	void Enter(METHOD_ID functionID);

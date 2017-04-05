@@ -15,15 +15,11 @@
 #include "ListSizeStrategy.h"
 #include "ShadowStackHook.h"
 #include "StrategyConfig.h"
-#include "ListSizeStrategyConfig.h"
-#include "TimeStrategyConfig.h"
-#include "SimpleBufferStrategyConfig.h"
-#include "SizeBufferStrategyConfig.h"
-#include "MethodSensorConfig.h"
-#include "MethodSensorAssignment.h"
 #include "AssignmentHookStrategy.h"
 #include "TimerSensorConfig.h"
 #include "TimerSensor.h"
+#include "ClassType.h"
+#include "AgentConfig.h"
 
 Agent *globalAgentInstance;
 
@@ -567,12 +563,113 @@ HRESULT Agent::Shutdown()
 	}
 
 	shutdownDataSendingService();
-	cmrConnection->unregisterPlatform(getAllDefinedIPs(), L".NET agent");
+	cmrConnection->unregisterPlatform(platformID);
 	alive = false;
 	keepAliveThread.join();
 	shutdownCMRConnection();
 	logger.debug("Shutdown finished.");
 	return S_OK;
+}
+
+HRESULT Agent::ClassLoadFinished(ClassID classId, HRESULT hrStatus)
+{
+	if (FAILED(hrStatus)) {
+		logger.warn("Class with id %i was not properly loaded!", classId);
+		return S_OK;
+	}
+
+	std::shared_ptr<ClassType> classType = std::make_shared<ClassType>();
+
+	ModuleID moduleId;
+	mdTypeDef typeDefToken;
+	ClassID parentClassId;
+	mdTypeDef parentTypeDefToken;
+
+	HRESULT hr = profilerInfo3->GetClassIDInfo2(classId, &moduleId, &typeDefToken, &parentClassId, 0, 0, 0);
+	if (FAILED(hr)) {
+		logger.error("Failed to retrieve information for class with id %i. Aborting.", classId);
+		return;
+	}
+
+	hr = profilerInfo3->GetClassIDInfo(parentClassId, 0, &parentTypeDefToken);
+	if (FAILED(hr)) {
+		logger.error("Failed to retrieve information for parent class with id %i. Aborting.", parentClassId);
+		return;
+	}
+
+	IMetaDataImport* metaDataImport = 0;
+	hr = profilerInfo3->GetModuleMetaData(moduleId, CorOpenFlags::ofRead, IID_IMetaDataImport, (LPUNKNOWN *)&metaDataImport);
+	if (FAILED(hr)) {
+		logger.error("Failed to retrieve meta data import for module with id %i. Aborting.", moduleId);
+		return;
+	}
+
+	// load class name
+
+	WCHAR wcharBuffer[MAX_BUFFERSIZE];
+	ULONG wcharBufferLength;
+	hr = metaDataImport->GetTypeDefProps(typeDefToken, wcharBuffer, MAX_BUFFERSIZE, &wcharBufferLength, 0, 0);
+	if (FAILED(hr)) {
+		logger.error("Failed to retrieve name of class with token %i. Aborting.", typeDefToken);
+		return;
+	}
+	classType->setFqn(std::wstring(wcharBuffer, wcharBufferLength));
+
+	// load parent class name (if available)
+
+	if (parentClassId != 0) {
+		hr = metaDataImport->GetTypeDefProps(parentTypeDefToken, wcharBuffer, MAX_BUFFERSIZE, &wcharBufferLength, 0, 0);
+		if (FAILED(hr)) {
+			logger.error("Failed to retrieve name of parent class with token %i. Aborting.", parentTypeDefToken);
+			return;
+		}
+		classType->addSuperClass(std::wstring(wcharBuffer, wcharBufferLength));
+	}
+
+	// load interfaces
+
+	HCORENUM* enumerator = 0;
+	mdInterfaceImpl interfaceImpls[MAX_BUFFERSIZE];
+	ULONG interfaceImplsLength;
+	HRESULT enumHr;
+	do {
+		enumHr = metaDataImport->EnumInterfaceImpls(enumerator, typeDefToken, interfaceImpls, MAX_BUFFERSIZE, &interfaceImplsLength);
+		
+		for (size_t i = 0; i < interfaceImplsLength; i++) {
+			mdToken interfaceToken;
+			hr = metaDataImport->GetInterfaceImplProps(interfaceImpls[i], 0, &interfaceToken);
+			if (FAILED(hr)) {
+				logger.error("Failed to retrieve interface token number %i. Aborting.", (i + 1));
+				return;
+			}
+			hr = metaDataImport->GetTypeDefProps(interfaceToken, wcharBuffer, MAX_BUFFERSIZE, &wcharBufferLength, 0, 0);
+			if (FAILED(hr)) {
+				logger.error("Failed to retrieve name of interface with token %i. Aborting.", interfaceToken);
+				return;
+			}
+			classType->addInterface(std::wstring(wcharBuffer, wcharBufferLength));
+		}
+	} while (enumHr == S_OK);
+
+	// load methods
+
+	enumerator = 0;
+	mdMethodDef methodDefs[MAX_BUFFERSIZE];
+	ULONG methodDefsLength;
+	do {
+		enumHr = metaDataImport->EnumMethods(enumerator, typeDefToken, methodDefs, MAX_BUFFERSIZE, &methodDefsLength);
+
+		for (size_t i = 0; i < methodDefsLength; i++) {
+			// TODO: GetMethodProps with methodDefs[i]
+			// TODO: Create MethodType and add it to classType
+		}
+	} while (enumHr == S_OK);
+
+	// Send it to the CMR and receive instrumentation definition
+
+	std::shared_ptr<InstrumentationDefinition> instrumentationDefinition = cmrConnection->analyze(platformID, classType);
+
+	// TODO: apply instrumentation definition
 }
 
 HRESULT Agent::DllDetachShutdown()
