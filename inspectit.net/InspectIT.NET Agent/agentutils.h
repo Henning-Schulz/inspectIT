@@ -2,15 +2,18 @@
 
 #include "basehdr.h"
 #include "MethodSensor.h"
+#include "ClassType.h"
+#include "MethodType.h"
 
 #include <vector>
 #include <memory>
-
-BOOL getSpecificsOfMethod(ICorProfilerInfo *profilerInfo, FunctionID functionID, LPWSTR wszClass, LPWSTR wszMethod, LPWSTR returnType,
-	JAVA_INT *javaModifiers, std::vector<LPWSTR> *parameterTypes);
 
 PCCOR_SIGNATURE parseMethodSignature(IMetaDataImport *metaDataImport, PCCOR_SIGNATURE signature, LPWSTR signatureText);
 
 JAVA_INT convertMethodModifiersToJava(DWORD netModifiers);
 
 void getMethodSensorClassName(std::shared_ptr<MethodSensor> sensor, LPWSTR className);
+
+HRESULT addMethodParams(std::shared_ptr<MethodType> method, IMetaDataImport* pIMetaDataImport, PCCOR_SIGNATURE sigBlob, ULONG sigBlobSize);
+
+std::shared_ptr<ClassType> createClassTypeFromId(ICorProfilerInfo3 *profilerInfo3, ClassID classId);

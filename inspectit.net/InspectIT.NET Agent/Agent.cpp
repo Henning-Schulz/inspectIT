@@ -30,28 +30,7 @@ Agent::Agent()
 
 Agent::~Agent()
 {
-	logger.debug("Deconstructor...");
-	logger.debug("Deconstructor finished.");
-}
-
-std::shared_ptr<std::unique_lock<std::mutex>> Agent::getFunctionMapperLock(ThreadID theThreadId)
-{
-	ThreadID threadId = 0;
-	if (theThreadId == 0) {
-		HRESULT hr = profilerInfo3->GetCurrentThreadID(&threadId);
-		if (FAILED(hr)) {
-			logger.error("Could not get thread id!");
-		}
-	}
-	else {
-		threadId = theThreadId;
-	}
-	logger.debug("Get FunctionMapper lock for thread %i.", threadId);
-
-	auto mut = functionMapperMutexMap[threadId];
-
-	std::shared_ptr<std::unique_lock<std::mutex>> lock = std::make_shared<std::unique_lock<std::mutex>>(*mut);
-	return lock;
+	logger.debug("Destructor.");
 }
 
 void Agent::addMethodHook(std::shared_ptr<MethodHook> hook, std::shared_ptr<HookStrategy> hookStrategy)
@@ -209,14 +188,55 @@ void __declspec(naked) TailcallNaked3(FunctionIDOrClientID functionIDOrClientID)
 	}
 }
 
+ClassID Agent::getClassIdForFunction(FunctionID functionId)
+{
+	ClassID classId;
+	HRESULT hr = profilerInfo3->GetFunctionInfo(functionId, &classId, 0, 0);
+
+	if (FAILED(hr)) {
+		return 0;
+	}
+	else {
+		return classId;
+	}
+}
+
+std::shared_ptr<InstrumentationDefinition> Agent::getInstrumentationDefinition(ClassID classId)
+{
+	auto it = instrumentationDefinitions.find(classId);
+
+	if (it == instrumentationDefinitions.end()) {
+		return std::shared_ptr<InstrumentationDefinition>();
+	}
+	else {
+		return it->second;
+	}
+}
+
 UINT_PTR  FunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
 {
-	auto functionMapperLock = globalAgentInstance->getFunctionMapperLock();
+	ClassID classId = globalAgentInstance->getClassIdForFunction(functionID);
 
-	if (globalAgentInstance->getNumberOfMethodHooks() == 0) {
-		*pbHookFunction = 0;
+	if (classId == 0) {
+		printf("ERROR FunctionMapper - Error while retrieving the ClassID of function %i!\n");
 		return functionID;
 	}
+
+	std::shared_ptr<InstrumentationDefinition> instrumentationDefinition = globalAgentInstance->getInstrumentationDefinition(classId);
+
+	if (!instrumentationDefinition) {
+		printf("ERROR FunctionMapper - There is no InstrumentationDefinition for function %i and class %i!\n", functionID, classId);
+		return functionID;
+	}
+
+	std::shared_ptr<MethodInstrumentationConfig> instrumentationConfig = instrumentationDefinition->getMethodInstrumentationConfigForFunctionId(functionID);
+
+	if (!instrumentationConfig) {
+		loggerFactory.staticLog(LEVEL_DEBUG, "FunctionMapper", "Not instrumenting method with FunctionID %i.", functionID);
+		return functionID;
+	}
+
+	// TODO: Create sensor / hook
 
 	WCHAR className[MAX_BUFFERSIZE];
 	WCHAR methodName[MAX_BUFFERSIZE];
@@ -283,8 +303,6 @@ UINT_PTR  FunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
 	// delete the elements on the heap
 	parameterTypes.clear();
 
-	functionMapperLock->unlock();
-
 	return methodId;
 }
 
@@ -295,12 +313,6 @@ UINT_PTR  FunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
 HRESULT Agent::ThreadCreated(ThreadID threadID)
 {
 	logger.debug("Thread %i created", threadID);
-
-	std::shared_ptr<std::mutex> mut = std::make_shared<std::mutex>();
-	{
-		std::unique_lock<std::mutex> uniqueLock(mFunctionMapperMutexMap);
-		functionMapperMutexMap.emplace(threadID, mut);
-	}
 
 	if (threadHookList.empty()) {
 		return S_OK;
@@ -325,11 +337,6 @@ HRESULT Agent::ThreadDestroyed(ThreadID threadID)
 		(*it)->threadDestroyed(threadID);
 	}
 
-	{
-		std::unique_lock<std::mutex> uniqueLock(mFunctionMapperMutexMap);
-		functionMapperMutexMap.erase(threadID);
-	}
-
 	return S_OK;
 }
 
@@ -351,173 +358,21 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 		return E_FAIL;
 	}
 
-	// TODO...
-	platformID = cmrConnection->registerPlatform(getAllDefinedIPs(), L".NET agent", L"0.1");
-
-	std::shared_ptr<StrategyConfig> bufferStrategyConfig = cmrConnection->getBufferStrategyConfig(platformID);
-	std::shared_ptr<BufferStrategy> bufferStrategy;
-
-	if (wcscmp(bufferStrategyConfig->getClassName(), SimpleBufferStrategyConfig::CLASS_NAME) == 0) {
-		logger.debug("Buffer strategy is %ls", bufferStrategyConfig->getClassName());
-		bufferStrategy = std::make_shared<SimpleBufferStrategy>();
-	}
-	else if (wcscmp(bufferStrategyConfig->getClassName(), SizeBufferStrategyConfig::CLASS_NAME) == 0) {
-		std::shared_ptr<SizeBufferStrategyConfig> config = std::static_pointer_cast<SizeBufferStrategyConfig>(bufferStrategyConfig);
-		logger.debug("Buffer strategy is %ls with size %ld", bufferStrategyConfig->getClassName(), config->getSize());
-		// TODO
-		logger.error("Not yet implemented! Shutting dowm.");
-		return E_FAIL;
-	}
-	else {
-		logger.error("Buffer strategy %ls is not supported. Shutting down...");
-		return E_FAIL;
-	}
-
-	std::shared_ptr<StrategyConfig> sendingStrategyConfig = cmrConnection->getSendingStrategyConfig(platformID);
-	
-	if (wcscmp(sendingStrategyConfig->getClassName(), ListSizeStrategyConfig::CLASS_NAME) == 0) {
-		std::shared_ptr<ListSizeStrategyConfig> config = std::static_pointer_cast<ListSizeStrategyConfig>(sendingStrategyConfig);
-		logger.debug("Sending strategy is %ls with listSize %ld", sendingStrategyConfig->getClassName(), config->getListSize());
-
-		std::shared_ptr<ListSizeStrategy> sendingStrategy = std::make_shared<ListSizeStrategy>(config->getListSize());
-		startDataSendingService(bufferStrategy, sendingStrategy);
-		sendingStrategy->setDataSendingService(dataSendingService);
-		dataSendingService->addListSizeListener(sendingStrategy);
-	}
-	else if (wcscmp(sendingStrategyConfig->getClassName(), TimeStrategyConfig::CLASS_NAME) == 0) {
-		std::shared_ptr<TimeStrategyConfig> config = std::static_pointer_cast<TimeStrategyConfig>(sendingStrategyConfig);
-		logger.debug("Sending strategy is %ls with time %lld", sendingStrategyConfig->getClassName(), config->getTime());
-		// TODO
-		logger.error("Not yet implemented! Shutting dowm.");
-		return E_FAIL;
-	} else {
-		logger.error("Sending strategy %ls is not supported. Shutting down...");
-		return E_FAIL;
-	}
-
-	std::vector<std::shared_ptr<MethodSensorConfig>> sensorConfigs = cmrConnection->getMethodSensorConfigs(platformID);
-	logger.debug("Sensor configs retrieved.");
-
-	for (auto it = sensorConfigs.begin(); it != sensorConfigs.end(); it++) {
-		logger.debug("Using sensor config %ls", (*it)->getClassName());
-	}
-
-	std::vector<std::shared_ptr<MethodSensorAssignment>> sensorAssignements = cmrConnection->getMethodSensorAssignments(platformID);
-	logger.debug("Sensor assignments retrieved.");
+	// TODO
 
 	HRESULT hr;
-	hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo3,
-		(void **)&profilerInfo3);
+	hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo3, (void **)&profilerInfo3);
 	if (FAILED(hr)) {
 		logger.error("Could not query interface ICorProfilerInfo3!");
 		return hr;
 	}
 	else {
-		logger.debug("profilerIfo set.");
+		logger.debug("profilerInfo set.");
 	}
 
 	DWORD eventMask = COR_PRF_MONITOR_ENTERLEAVE | COR_PRF_MONITOR_THREADS;
 
-	std::vector<std::wstring> excludedClasses = cmrConnection->getExcludedClasses(platformID);
-
-	logger.debug("Excluded classes are:");
-	for (auto it = excludedClasses.begin(); it != excludedClasses.end(); it++) {
-		printf("%ls, ", it->c_str());
-	}
-	printf("\n");
-
-	for (auto it = sensorConfigs.begin(); it != sensorConfigs.end(); it++) {
-		logger.debug("Creating sensor %ls...", (*it)->getClassName());
-
-		bool isStackTraceSensor = wcscmp((*it)->getClassName(), StackTraceSensorConfig::CLASS_NAME) == 0;
-		bool isTimerSensor = wcscmp((*it)->getClassName(), TimerSensorConfig::CLASS_NAME) == 0;
-
-		if (isStackTraceSensor || isTimerSensor) {
-			std::shared_ptr<StackTraceSensorConfig> config = std::static_pointer_cast<StackTraceSensorConfig>(*it);
-
-			std::shared_ptr<AssignmentHookStrategy> hookStrategy = std::make_shared<AssignmentHookStrategy>();
-			hookStrategy->setExcludedClasses(excludedClasses);
-
-			// StackTraceSamplingSensor
-			std::shared_ptr<AssignmentHookStrategy> baseMethodHookStrategy;
-			if (isStackTraceSensor) {
-				baseMethodHookStrategy = std::make_shared<AssignmentHookStrategy>();
-				baseMethodHookStrategy->setExcludedClasses(excludedClasses);
-			}
-
-			for (auto ait = sensorAssignements.begin(); ait != sensorAssignements.end(); ait++) {
-				if (wcscmp((*it)->getClassName(), (*ait)->getSensorClassName()) == 0) {
-					std::shared_ptr<MethodSensorAssignment> ass = *ait;
-					logger.debug("Using sensor assignment for sensor %ls with parameters:", ass->getSensorClassName());
-					logger.debug("\tclassName: %ls", ass->getClassName().c_str());
-					logger.debug("\tsuperclass: %s", (ass->isSuperclass() ? "true" : "false"));
-					logger.debug("\tinterface: %s", (ass->isInterface() ? "true" : "false"));
-					logger.debug("\tmethodName: %ls", ass->getMethodName().c_str());
-					logger.debug("\tparameters: %s", (ass->getParameters().empty() ? "*" : "..."));
-					logger.debug("\tconstructor: %s", (ass->isConstructor() ? "true" : "false"));
-					logger.debug("\tpublicModifier: %s", (ass->isPublicModifier() ? "true" : "false"));
-					logger.debug("\tprotectedModifier: %s", (ass->isProtectedModifier() ? "true" : "false"));
-					logger.debug("\tprivateModifier: %s", (ass->isPrivateModifier() ? "true" : "false"));
-					logger.debug("\tdefaultModifier: %s", (ass->isDefaultModifier() ? "true" : "false"));
-
-					hookStrategy->addAssignment(ass);
-
-					// StackTraceSamplingSensor
-					if (isStackTraceSensor) {
-						std::shared_ptr<StackTraceSensorAssignment> stsConfig = std::static_pointer_cast<StackTraceSensorAssignment>(ass);
-						baseMethodHookStrategy->addAssignment(stsConfig->getBaseMethodAssignment());
-					}
-				}
-			}
-
-			if (!hookStrategy->isEmpty()) {
-				// Only create sensor if there is an assigment
-				std::shared_ptr<MethodSensor> sensor;
-
-				if (isStackTraceSensor) {
-					sensor = std::make_shared<StackTraceSamplingSensor>();
-					logger.debug("Created StackTraceSamplingSensor.");
-				}
-				else {
-					sensor = std::make_shared<TimerSensor>();
-					logger.debug("Created TimerSensor.");
-				}
-
-				JAVA_LONG sensorTypeId = cmrConnection->registerMethodSensorType(platformID, config->getClassName());
-				logger.debug("Sensor %ls has id %lli", config->getClassName(), sensorTypeId);
-				sensor->init(config, sensorTypeId, platformID, profilerInfo3);
-				methodSensorList.push_back(sensor);
-
-				// StackTraceSamplingSensor
-				if (isStackTraceSensor) {
-					std::static_pointer_cast<StackTraceSamplingSensor>(sensor)->getProvider()->setHookStrategy(hookStrategy);
-				}
-
-				if (sensor->hasHook()) {
-					methodHookList.push_back(std::make_pair(sensor->getHook(), hookStrategy));
-					logger.debug("Added hook.");
-				}
-
-				// StackTraceSamplingSensor
-				if (isStackTraceSensor && std::static_pointer_cast<StackTraceSamplingSensor>(sensor)->hasBaseMethodHook()) {
-					methodHookList.push_back(std::make_pair(std::static_pointer_cast<StackTraceSamplingSensor>(sensor)->getBaseMethodHook(), baseMethodHookStrategy));
-					logger.debug("Added base method hook.");
-				}
-
-				if (sensor->hasThreadHook()) {
-					threadHookList.push_back(sensor->getThreadHook());
-					//eventMask |= COR_PRF_MONITOR_THREADS; is always activated
-					logger.debug("Adding thread hook");
-				}
-
-				eventMask |= sensor->getSpecialMonitorFlags();
-			}
-		}
-		else {
-			logger.warn("Sensor %ls is currently not supported!", (*it)->getClassName());
-			continue;
-		}
-	}
+	// TODO
 
 	hr = profilerInfo3->SetEventMask(eventMask);
 	if (FAILED(hr)) {
@@ -546,8 +401,6 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 		(*it)->notifyStartup();
 	}
 
-	initializationFinished = true;
-
 	logger.info("Initialized successfully");
 
 	return S_OK;
@@ -574,102 +427,42 @@ HRESULT Agent::Shutdown()
 HRESULT Agent::ClassLoadFinished(ClassID classId, HRESULT hrStatus)
 {
 	if (FAILED(hrStatus)) {
-		logger.warn("Class with id %i was not properly loaded!", classId);
+		logger.warn("Class with id %i was not properly loaded! Aborting.", classId);
 		return S_OK;
 	}
 
-	std::shared_ptr<ClassType> classType = std::make_shared<ClassType>();
+	std::shared_ptr<ClassType> classType = createClassTypeFromId(profilerInfo3, classId);
 
-	ModuleID moduleId;
-	mdTypeDef typeDefToken;
-	ClassID parentClassId;
-	mdTypeDef parentTypeDefToken;
-
-	HRESULT hr = profilerInfo3->GetClassIDInfo2(classId, &moduleId, &typeDefToken, &parentClassId, 0, 0, 0);
-	if (FAILED(hr)) {
-		logger.error("Failed to retrieve information for class with id %i. Aborting.", classId);
-		return;
+	if (!classType) {
+		logger.error("Error during creation of ClassType for ClassID %i. Aborting.", classId);
+		return E_FAIL;
 	}
-
-	hr = profilerInfo3->GetClassIDInfo(parentClassId, 0, &parentTypeDefToken);
-	if (FAILED(hr)) {
-		logger.error("Failed to retrieve information for parent class with id %i. Aborting.", parentClassId);
-		return;
-	}
-
-	IMetaDataImport* metaDataImport = 0;
-	hr = profilerInfo3->GetModuleMetaData(moduleId, CorOpenFlags::ofRead, IID_IMetaDataImport, (LPUNKNOWN *)&metaDataImport);
-	if (FAILED(hr)) {
-		logger.error("Failed to retrieve meta data import for module with id %i. Aborting.", moduleId);
-		return;
-	}
-
-	// load class name
-
-	WCHAR wcharBuffer[MAX_BUFFERSIZE];
-	ULONG wcharBufferLength;
-	hr = metaDataImport->GetTypeDefProps(typeDefToken, wcharBuffer, MAX_BUFFERSIZE, &wcharBufferLength, 0, 0);
-	if (FAILED(hr)) {
-		logger.error("Failed to retrieve name of class with token %i. Aborting.", typeDefToken);
-		return;
-	}
-	classType->setFqn(std::wstring(wcharBuffer, wcharBufferLength));
-
-	// load parent class name (if available)
-
-	if (parentClassId != 0) {
-		hr = metaDataImport->GetTypeDefProps(parentTypeDefToken, wcharBuffer, MAX_BUFFERSIZE, &wcharBufferLength, 0, 0);
-		if (FAILED(hr)) {
-			logger.error("Failed to retrieve name of parent class with token %i. Aborting.", parentTypeDefToken);
-			return;
-		}
-		classType->addSuperClass(std::wstring(wcharBuffer, wcharBufferLength));
-	}
-
-	// load interfaces
-
-	HCORENUM* enumerator = 0;
-	mdInterfaceImpl interfaceImpls[MAX_BUFFERSIZE];
-	ULONG interfaceImplsLength;
-	HRESULT enumHr;
-	do {
-		enumHr = metaDataImport->EnumInterfaceImpls(enumerator, typeDefToken, interfaceImpls, MAX_BUFFERSIZE, &interfaceImplsLength);
-		
-		for (size_t i = 0; i < interfaceImplsLength; i++) {
-			mdToken interfaceToken;
-			hr = metaDataImport->GetInterfaceImplProps(interfaceImpls[i], 0, &interfaceToken);
-			if (FAILED(hr)) {
-				logger.error("Failed to retrieve interface token number %i. Aborting.", (i + 1));
-				return;
-			}
-			hr = metaDataImport->GetTypeDefProps(interfaceToken, wcharBuffer, MAX_BUFFERSIZE, &wcharBufferLength, 0, 0);
-			if (FAILED(hr)) {
-				logger.error("Failed to retrieve name of interface with token %i. Aborting.", interfaceToken);
-				return;
-			}
-			classType->addInterface(std::wstring(wcharBuffer, wcharBufferLength));
-		}
-	} while (enumHr == S_OK);
-
-	// load methods
-
-	enumerator = 0;
-	mdMethodDef methodDefs[MAX_BUFFERSIZE];
-	ULONG methodDefsLength;
-	do {
-		enumHr = metaDataImport->EnumMethods(enumerator, typeDefToken, methodDefs, MAX_BUFFERSIZE, &methodDefsLength);
-
-		for (size_t i = 0; i < methodDefsLength; i++) {
-			// TODO: GetMethodProps with methodDefs[i]
-			// TODO: Create MethodType and add it to classType
-		}
-	} while (enumHr == S_OK);
 
 	// Send it to the CMR and receive instrumentation definition
 
 	std::shared_ptr<InstrumentationDefinition> instrumentationDefinition = cmrConnection->analyze(platformID, classType);
 
-	// TODO: apply instrumentation definition
+	// store instrumentation definition for later use
+
+	instrumentationDefinitions.emplace(classId, instrumentationDefinition);
+
+	// TODO: correlate FunctionsIDs of classType->methodTypes with instrDef->MethodInstrumentationConfigs
+
+	auto methodInstrConfigs = instrumentationDefinition->getMethodInstrumentationConfigs();
+	auto methodTypes = classType->getMethods();
+
+	for (auto it = methodInstrConfigs.begin(); it != methodInstrConfigs.end(); it++) {
+		for (auto typesIt = methodTypes.begin(); typesIt != methodTypes.end(); typesIt++) {
+			// TODO: compare method signatures --> change true
+			if (true) {
+				// instrumentationDefinitions.addFunctionIdMapping((*it), (*typesIt)->getFunctionId());
+				// remove method type (only from copy)
+				break;
+			}
+		}
+	}
+
+	return S_OK;
 }
 
 HRESULT Agent::DllDetachShutdown()
@@ -777,9 +570,4 @@ HRESULT Agent::CreateObject(REFIID riid, void **ppInterface)
 
 	return hr;
 
-}
-
-BOOL Agent::getMethodSpecifics(FunctionID functionID, LPWSTR wszClass, LPWSTR wszMethod, LPWSTR returnType,
-	JAVA_INT *javaModifiers, std::vector<LPWSTR> *parameterTypes) {
-	return getSpecificsOfMethod(profilerInfo3, functionID, wszClass, wszMethod, returnType, javaModifiers, parameterTypes);
 }

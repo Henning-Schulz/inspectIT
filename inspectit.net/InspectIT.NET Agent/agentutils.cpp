@@ -7,72 +7,132 @@
 #include <sstream>
 
 
-BOOL getSpecificsOfMethod(ICorProfilerInfo *profilerInfo, FunctionID functionID, LPWSTR wszClass, LPWSTR wszMethod, LPWSTR returnType,
-	JAVA_INT *javaModifiers, std::vector<LPWSTR> *parameterTypes) {
+std::shared_ptr<ClassType> createClassTypeFromId(ICorProfilerInfo3 *profilerInfo3, ClassID classId)
+{
+	std::shared_ptr<ClassType> classType = std::make_shared<ClassType>();
 
-	BOOL succ = 0;
+	ModuleID moduleId;
+	mdTypeDef typeDefToken;
+	ClassID parentClassId;
+	mdTypeDef parentTypeDefToken;
+	ClassID typeArgs[MAX_BUFFERSIZE];
+	ULONG typeArgsLength;
 
-	IMetaDataImport* pIMetaDataImport = 0;
-	HRESULT hr = S_OK;
-	mdToken funcToken = 0;
-	WCHAR szFunction[MAX_BUFFERSIZE];
-	char str[MAX_BUFFERSIZE];
-
-	WCHAR szClass[MAX_BUFFERSIZE];
-
-	// get the token for the function which we will use to get its name
-	hr = profilerInfo->GetTokenAndMetaDataFromFunction(functionID, IID_IMetaDataImport, (LPUNKNOWN *)&pIMetaDataImport, &funcToken);
-
-	if (SUCCEEDED(hr))
-	{
-		mdTypeDef classTypeDef;
-		ULONG cchFunction;
-		ULONG cchClass;
-		DWORD methodModifiers = 0;
-		PCCOR_SIGNATURE sigBlob = NULL;
-		ULONG sigBlobSize;
-
-		// retrieve the function properties based on the token
-		hr = pIMetaDataImport->GetMethodProps(funcToken, &classTypeDef, szFunction, MAX_BUFFERSIZE, &cchFunction, &methodModifiers, &sigBlob, &sigBlobSize, 0, 0);
-		if (SUCCEEDED(hr))
-		{
-			// get the function name
-			hr = pIMetaDataImport->GetTypeDefProps(classTypeDef, szClass, MAX_BUFFERSIZE, &cchClass, 0, 0);
-
-			if (SUCCEEDED(hr))
-			{
-				wcscpy_s(wszMethod, MAX_BUFFERSIZE, szFunction);
-				wcscpy_s(wszClass, MAX_BUFFERSIZE, szClass);
-
-				*javaModifiers = convertMethodModifiersToJava(methodModifiers);
-
-				// Structure of sigBlob:
-				// first and second byte: ???
-				// following bytes: return type (one or several bytes; depending on type)
-				// after return type: parameter types
-
-				PCCOR_SIGNATURE sigBlobEnd = sigBlob + sigBlobSize;
-				sigBlob += 2;
-
-				memset(returnType, 0, MAX_BUFFERSIZE);
-				sigBlob = parseMethodSignature(pIMetaDataImport, sigBlob, returnType);
-
-				while (sigBlob < sigBlobEnd) {
-					LPWSTR param = new WCHAR[MAX_BUFFERSIZE];
-					memset(param, 0, MAX_BUFFERSIZE);
-					sigBlob = parseMethodSignature(pIMetaDataImport, sigBlob, param);
-					parameterTypes->push_back(param);
-				}
-
-				succ = 1;
-			}
-		}
-
-		// release our reference to the metadata
-		pIMetaDataImport->Release();
+	HRESULT hr = profilerInfo3->GetClassIDInfo2(classId, &moduleId, &typeDefToken, &parentClassId, MAX_BUFFERSIZE, &typeArgsLength, typeArgs);
+	if (FAILED(hr)) {
+		return std::shared_ptr<ClassType>();
 	}
 
-	return succ;
+	hr = profilerInfo3->GetClassIDInfo(parentClassId, 0, &parentTypeDefToken);
+	if (FAILED(hr)) {
+		return std::shared_ptr<ClassType>();
+	}
+
+	IMetaDataImport* metaDataImport = 0;
+	hr = profilerInfo3->GetModuleMetaData(moduleId, CorOpenFlags::ofRead, IID_IMetaDataImport, (LPUNKNOWN *)&metaDataImport);
+	if (FAILED(hr)) {
+		return std::shared_ptr<ClassType>();
+	}
+
+	// load class name
+
+	WCHAR wcharBuffer[MAX_BUFFERSIZE];
+	ULONG wcharBufferLength;
+	hr = metaDataImport->GetTypeDefProps(typeDefToken, wcharBuffer, MAX_BUFFERSIZE, &wcharBufferLength, 0, 0);
+	if (FAILED(hr)) {
+		return std::shared_ptr<ClassType>();
+	}
+	classType->setFqn(std::wstring(wcharBuffer, wcharBufferLength));
+
+	// load parent class name (if available)
+
+	if (parentClassId != 0) {
+		hr = metaDataImport->GetTypeDefProps(parentTypeDefToken, wcharBuffer, MAX_BUFFERSIZE, &wcharBufferLength, 0, 0);
+		if (FAILED(hr)) {
+			return std::shared_ptr<ClassType>();
+		}
+		classType->addSuperClass(std::wstring(wcharBuffer, wcharBufferLength));
+	}
+
+	// load interfaces
+
+	HCORENUM* enumerator = 0;
+	mdInterfaceImpl interfaceImpls[MAX_BUFFERSIZE];
+	ULONG interfaceImplsLength;
+	HRESULT enumHr;
+	do {
+		enumHr = metaDataImport->EnumInterfaceImpls(enumerator, typeDefToken, interfaceImpls, MAX_BUFFERSIZE, &interfaceImplsLength);
+
+		for (size_t i = 0; i < interfaceImplsLength; i++) {
+			mdToken interfaceToken;
+			hr = metaDataImport->GetInterfaceImplProps(interfaceImpls[i], 0, &interfaceToken);
+			if (FAILED(hr)) {
+				return std::shared_ptr<ClassType>();
+			}
+			hr = metaDataImport->GetTypeDefProps(interfaceToken, wcharBuffer, MAX_BUFFERSIZE, &wcharBufferLength, 0, 0);
+			if (FAILED(hr)) {
+				return std::shared_ptr<ClassType>();
+			}
+			classType->addInterface(std::wstring(wcharBuffer, wcharBufferLength));
+		}
+	} while (enumHr == S_OK);
+
+	// load methods
+
+	enumerator = 0;
+	mdMethodDef methodDefs[MAX_BUFFERSIZE];
+	ULONG methodDefsLength;
+	do {
+		enumHr = metaDataImport->EnumMethods(enumerator, typeDefToken, methodDefs, MAX_BUFFERSIZE, &methodDefsLength);
+
+		for (size_t i = 0; i < methodDefsLength; i++) {
+			// GetMethodProps with methodDefs[i]
+			DWORD methodModifiers = 0;
+			PCCOR_SIGNATURE sigBlob = NULL;
+			ULONG sigBlobSize;
+			hr = metaDataImport->GetMethodProps(methodDefs[i], 0, wcharBuffer, MAX_BUFFERSIZE, &wcharBufferLength, &methodModifiers, &sigBlob, &sigBlobSize, 0, 0);
+			if (FAILED(hr)) {
+				return std::shared_ptr<ClassType>();
+			}
+
+			// Get FunctionID
+			FunctionID functionId;
+			hr = profilerInfo3->GetFunctionFromTokenAndTypeArgs(moduleId, methodDefs[i], classId, typeArgsLength, typeArgs, &functionId);
+			if (FAILED(hr)) {
+				return std::shared_ptr<ClassType>();
+			}
+
+			// Create MethodType and add it to classType
+			std::shared_ptr<MethodType> method = std::make_shared<MethodType>();
+			method->setName(std::wstring(wcharBuffer, wcharBufferLength));
+			method->setModifiers(convertMethodModifiersToJava(methodModifiers));
+			addMethodParams(method, metaDataImport, sigBlob, sigBlobSize);
+			method->setFunctionId(functionId);
+
+			classType->addMethod(method);
+		}
+	} while (enumHr == S_OK);
+}
+
+HRESULT addMethodParams(std::shared_ptr<MethodType> method, IMetaDataImport* pIMetaDataImport, PCCOR_SIGNATURE sigBlob, ULONG sigBlobSize)
+{
+	WCHAR buffer[MAX_BUFFERSIZE];
+
+	PCCOR_SIGNATURE sigBlobEnd = sigBlob + sigBlobSize;
+	sigBlob += 2;
+
+	memset(buffer, 0, MAX_BUFFERSIZE);
+	sigBlob = parseMethodSignature(pIMetaDataImport, sigBlob, buffer);
+
+	method->setReturnType(std::wstring(buffer));
+
+	while (sigBlob < sigBlobEnd) {
+		memset(buffer, 0, MAX_BUFFERSIZE);
+		sigBlob = parseMethodSignature(pIMetaDataImport, sigBlob, buffer);
+		method->addParameter(std::wstring(buffer));
+	}
+
+	return S_OK;
 }
 
 PCCOR_SIGNATURE parseMethodSignature(IMetaDataImport *metaDataImport, PCCOR_SIGNATURE signature, LPWSTR signatureText)

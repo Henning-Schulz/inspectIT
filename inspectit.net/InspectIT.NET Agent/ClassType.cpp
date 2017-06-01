@@ -31,12 +31,12 @@ void ClassType::addInterface(std::wstring interfaceName)
 	realizedInterfaces.push_back(interfaceName);
 }
 
-std::vector<MethodType> ClassType::getMethods()
+std::vector<std::shared_ptr<MethodType>> ClassType::getMethods()
 {
 	return methods;
 }
 
-void ClassType::addMethod(MethodType method)
+void ClassType::addMethod(std::shared_ptr<MethodType> method)
 {
 	methods.push_back(method);
 }
@@ -69,7 +69,7 @@ json::value ClassType::toJson()
 	json::value methodsArray;
 	i = 0;
 	for (auto it = methods.begin(); it != methods.end(); it++) {
-		methodsArray[i] = it->toJson();
+		methodsArray[i] = (*it)->toJson();
 		i++;
 	}
 	json[L"methods"] = methodsArray;

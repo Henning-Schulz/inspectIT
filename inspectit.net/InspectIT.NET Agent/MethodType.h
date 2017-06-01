@@ -14,6 +14,8 @@ private:
 	std::vector<std::wstring> exceptions;
 	std::vector<std::wstring> annotations;
 
+	FunctionID functionId = 0;
+
 public:
 	MethodType();
 	~MethodType();
@@ -30,6 +32,9 @@ public:
 	void addException(std::wstring exception);
 	std::vector<std::wstring> getAnnotations();
 	void addAnnotation(std::wstring annotation);
+
+	FunctionID getFunctionId();
+	void setFunctionId(FunctionID functionId);
 
 	json::value toJson();
 };

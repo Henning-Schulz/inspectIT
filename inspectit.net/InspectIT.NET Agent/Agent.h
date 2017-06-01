@@ -38,6 +38,8 @@ private:
 	DWORD shutdownCounter;
 	ICorProfilerInfo3 *profilerInfo3;
 
+	std::map<ClassID, std::shared_ptr<InstrumentationDefinition>> instrumentationDefinitions;
+
 	std::list<std::shared_ptr<MethodSensor>> methodSensorList;
 	std::list<std::pair<std::shared_ptr<MethodHook>, std::shared_ptr<HookStrategy>>> methodHookList;
 	std::list<std::shared_ptr<ThreadHook>> threadHookList;
@@ -45,13 +47,8 @@ private:
 	std::map<METHOD_ID, std::vector<std::shared_ptr<MethodHook>>> hookAssignment;
 	std::shared_mutex mHookAssignment;
 
-	bool initializationFinished = false;
-
 	std::thread keepAliveThread;
 	boolean alive = false;
-
-	std::map<ThreadID, std::shared_ptr<std::mutex>> functionMapperMutexMap;
-	std::mutex mFunctionMapperMutexMap;
 
 	Logger logger = loggerFactory.createLogger("Agent");
 
@@ -63,8 +60,6 @@ public:
 
 	JAVA_LONG platformID;
 
-	std::shared_ptr<std::unique_lock<std::mutex>> getFunctionMapperLock(ThreadID threadId = 0);
-
 	void addMethodHook(std::shared_ptr<MethodHook> hook, std::shared_ptr<HookStrategy> hookStrategy);
 	void removeMethodHook(std::shared_ptr<MethodHook> hook);
 	void removeAllMethodHooks();
@@ -73,7 +68,8 @@ public:
 
 	void assignHookToMethod(METHOD_ID methodId, std::shared_ptr<MethodHook> hook);
 
-	BOOL getMethodSpecifics(FunctionID functionID, LPWSTR wszClass, LPWSTR wszMethod, LPWSTR returnType, JAVA_INT *javaModifiers, std::vector<LPWSTR> *parameterTypes);
+	ClassID getClassIdForFunction(FunctionID functionId);
+	std::shared_ptr<InstrumentationDefinition> getInstrumentationDefinition(ClassID classId);
 
 	//
 	// IUnknown 

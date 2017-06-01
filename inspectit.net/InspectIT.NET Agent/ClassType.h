@@ -14,7 +14,7 @@ private:
 	std::vector<std::wstring> superClasses;
 	std::vector<std::wstring> realizedInterfaces;
 
-	std::vector<MethodType> methods;
+	std::vector<std::shared_ptr<MethodType>> methods;
 
 public:
 	ClassType();
@@ -25,8 +25,8 @@ public:
 	std::vector<std::wstring> getRealizedInterfaces();
 	void addInterface(std::wstring interfaceName);
 
-	std::vector<MethodType> getMethods();
-	void addMethod(MethodType method);
+	std::vector<std::shared_ptr<MethodType>> getMethods();
+	void addMethod(std::shared_ptr<MethodType> method);
 
 	std::wstring typeName();
 

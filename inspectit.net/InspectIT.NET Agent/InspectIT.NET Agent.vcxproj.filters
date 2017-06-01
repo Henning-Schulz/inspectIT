@@ -40,18 +40,6 @@
     <Filter Include="Source Files\logging">
       <UniqueIdentifier>{fd83f324-6fef-4e2d-bf5f-f84a6c70ad2f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\config.strategy">
-      <UniqueIdentifier>{d0a42feb-ee34-45fd-b7bb-5b435b48f7cd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\config.strategy">
-      <UniqueIdentifier>{1eb1e7e0-5fb7-4816-9781-870a92691ccb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\config.sensor">
-      <UniqueIdentifier>{fa34d856-a1c4-44d7-b354-c89c97188cf8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\config.sensor">
-      <UniqueIdentifier>{4d228176-09aa-4aff-9778-7333f6d3118b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\utils">
       <UniqueIdentifier>{8e37ad29-29f1-4a03-8e3c-35cf892b8ba8}</UniqueIdentifier>
     </Filter>
@@ -63,6 +51,12 @@
     </Filter>
     <Filter Include="Source Files\timer">
       <UniqueIdentifier>{c6e50440-75e2-497e-836d-cf7831c499e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\config">
+      <UniqueIdentifier>{d0a42feb-ee34-45fd-b7bb-5b435b48f7cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\config">
+      <UniqueIdentifier>{1eb1e7e0-5fb7-4816-9781-870a92691ccb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -145,40 +139,13 @@
       <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="StrategyConfig.h">
-      <Filter>Header Files\config.strategy</Filter>
-    </ClInclude>
-    <ClInclude Include="ListSizeStrategyConfig.h">
-      <Filter>Header Files\config.strategy</Filter>
-    </ClInclude>
-    <ClInclude Include="SimpleBufferStrategyConfig.h">
-      <Filter>Header Files\config.strategy</Filter>
-    </ClInclude>
-    <ClInclude Include="SizeBufferStrategyConfig.h">
-      <Filter>Header Files\config.strategy</Filter>
-    </ClInclude>
-    <ClInclude Include="StrategyConfigJsonFactory.h">
-      <Filter>Header Files\config.strategy</Filter>
-    </ClInclude>
-    <ClInclude Include="TimeStrategyConfig.h">
-      <Filter>Header Files\config.strategy</Filter>
-    </ClInclude>
-    <ClInclude Include="MethodSensorConfig.h">
-      <Filter>Header Files\config.sensor</Filter>
-    </ClInclude>
-    <ClInclude Include="MethodSensorAssignment.h">
-      <Filter>Header Files\config.sensor</Filter>
-    </ClInclude>
-    <ClInclude Include="MethodSensorConfigJsonFactory.h">
-      <Filter>Header Files\config.sensor</Filter>
+      <Filter>Header Files\config</Filter>
     </ClInclude>
     <ClInclude Include="stringutils.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
     <ClInclude Include="cmp_wstr.h">
       <Filter>Header Files\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="MethodSensorAssignmentJsonFactory.h">
-      <Filter>Header Files\config.sensor</Filter>
     </ClInclude>
     <ClInclude Include="AssignmentHookStrategy.h">
       <Filter>Header Files\core</Filter>
@@ -209,6 +176,60 @@
     </ClInclude>
     <ClInclude Include="agentutils.h">
       <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="ip_calculation.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="AbstractSensorTypeConfig.h">
+      <Filter>Header Files\config</Filter>
+    </ClInclude>
+    <ClInclude Include="AgentConfig.h">
+      <Filter>Header Files\config</Filter>
+    </ClInclude>
+    <ClInclude Include="ExceptionSensorTypeConfig.h">
+      <Filter>Header Files\config</Filter>
+    </ClInclude>
+    <ClInclude Include="InstrumentationDefinition.h">
+      <Filter>Header Files\config</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonReceivable.h">
+      <Filter>Header Files\config</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodInstrumentationConfig.h">
+      <Filter>Header Files\config</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodSensorTypeConfig.h">
+      <Filter>Header Files\config</Filter>
+    </ClInclude>
+    <ClInclude Include="PlatformSensorTypeConfig.h">
+      <Filter>Header Files\config</Filter>
+    </ClInclude>
+    <ClInclude Include="SensorInstrumentationPoint.h">
+      <Filter>Header Files\config</Filter>
+    </ClInclude>
+    <ClInclude Include="Type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonSendable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ClassType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InterfaceType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AnnotationType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodSensorMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SensorData.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -248,35 +269,11 @@
     <ClCompile Include="Logger.cpp">
       <Filter>Source Files\logging</Filter>
     </ClCompile>
-    <ClCompile Include="ListSizeStrategyConfig.cpp">
-      <Filter>Source Files\config.strategy</Filter>
-    </ClCompile>
-    <ClCompile Include="SimpleBufferStrategyConfig.cpp">
-      <Filter>Source Files\config.strategy</Filter>
-    </ClCompile>
-    <ClCompile Include="SizeBufferStrategyConfig.cpp">
-      <Filter>Source Files\config.strategy</Filter>
-    </ClCompile>
-    <ClCompile Include="StrategyConfigJsonFactory.cpp">
-      <Filter>Source Files\config.strategy</Filter>
-    </ClCompile>
-    <ClCompile Include="TimeStrategyConfig.cpp">
-      <Filter>Source Files\config.strategy</Filter>
-    </ClCompile>
     <ClCompile Include="stringutils.cpp">
       <Filter>Source Files\utils</Filter>
     </ClCompile>
     <ClCompile Include="AssignmentHookStrategy.cpp">
       <Filter>Source Files\core</Filter>
-    </ClCompile>
-    <ClCompile Include="MethodSensorAssignment.cpp">
-      <Filter>Source Files\config.sensor</Filter>
-    </ClCompile>
-    <ClCompile Include="MethodSensorAssignmentJsonFactory.cpp">
-      <Filter>Source Files\config.sensor</Filter>
-    </ClCompile>
-    <ClCompile Include="MethodSensorConfigJsonFactory.cpp">
-      <Filter>Source Files\config.sensor</Filter>
     </ClCompile>
     <ClCompile Include="json_string_prep.cpp">
       <Filter>Source Files\utils</Filter>
@@ -301,6 +298,54 @@
     </ClCompile>
     <ClCompile Include="agentutils.cpp">
       <Filter>Source Files\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="ip_calculation.cpp">
+      <Filter>Source Files\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="AbstractSensorTypeConfig.cpp">
+      <Filter>Source Files\config</Filter>
+    </ClCompile>
+    <ClCompile Include="AgentConfig.cpp">
+      <Filter>Source Files\config</Filter>
+    </ClCompile>
+    <ClCompile Include="ExceptionSensorTypeConfig.cpp">
+      <Filter>Source Files\config</Filter>
+    </ClCompile>
+    <ClCompile Include="InstrumentationDefinition.cpp">
+      <Filter>Source Files\config</Filter>
+    </ClCompile>
+    <ClCompile Include="MethodInstrumentationConfig.cpp">
+      <Filter>Source Files\config</Filter>
+    </ClCompile>
+    <ClCompile Include="MethodSensorTypeConfig.cpp">
+      <Filter>Source Files\config</Filter>
+    </ClCompile>
+    <ClCompile Include="PlatformSensorTypeConfig.cpp">
+      <Filter>Source Files\config</Filter>
+    </ClCompile>
+    <ClCompile Include="SensorInstrumentationPoint.cpp">
+      <Filter>Source Files\config</Filter>
+    </ClCompile>
+    <ClCompile Include="StrategyConfig.cpp">
+      <Filter>Source Files\config</Filter>
+    </ClCompile>
+    <ClCompile Include="ClassType.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MethodType.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InterfaceType.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AnnotationType.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MethodSensorMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SensorData.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

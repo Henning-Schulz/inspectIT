@@ -21,6 +21,18 @@ std::vector<std::shared_ptr<MethodInstrumentationConfig>> InstrumentationDefinit
 	return methodInstrumentationConfigs;
 }
 
+std::shared_ptr<MethodInstrumentationConfig> InstrumentationDefinition::getMethodInstrumentationConfigForFunctionId(FunctionID functionId)
+{
+	auto it = functionIdToConfigMapping.find(functionId);
+
+	if (it == functionIdToConfigMapping.end()) {
+		return std::shared_ptr<MethodInstrumentationConfig>();
+	}
+	else {
+		return it->second;
+	}
+}
+
 void InstrumentationDefinition::fromJson(json::object json)
 {
 	className = json.at(L"className").as_string();
