@@ -112,4 +112,6 @@ json::value MethodType::toJson()
 		i++;
 	}
 	json[L"annotations"] = annotationsArray;
+
+	return json;
 }

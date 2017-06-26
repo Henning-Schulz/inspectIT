@@ -19,8 +19,8 @@ DataSendingService::DataSendingService(std::shared_ptr<BufferStrategy> bufferStr
 	this->sendingStrategy = sendingStrategy;
 	sendingStrategy->start();
 
-	measurements = std::make_unique<std::map<std::string, std::shared_ptr<MethodSensorData>>>();
-	measurementsPrepCopy = std::make_unique<std::map<std::string, std::shared_ptr<MethodSensorData>>>();
+	measurements = std::make_unique<std::map<std::string, std::shared_ptr<SensorData>>>();
+	measurementsPrepCopy = std::make_unique<std::map<std::string, std::shared_ptr<SensorData>>>();
 
 	storages = std::make_unique<std::map<std::string, std::shared_ptr<MeasurementStorage>>>();
 
@@ -49,7 +49,7 @@ DataSendingService::~DataSendingService()
 	logger.info("All measurement data sent.");
 }
 
-std::shared_ptr<MethodSensorData> DataSendingService::getMethodSensorData(JAVA_LONG sensorTypeId, JAVA_LONG methodId, std::string prefix)
+std::shared_ptr<SensorData> DataSendingService::getMethodSensorData(JAVA_LONG sensorTypeId, JAVA_LONG methodId, std::string prefix)
 {
 	std::shared_lock<std::shared_mutex> lock(mMeasurements);
 	auto it = measurements->find(createKey(sensorTypeId, methodId, prefix));
@@ -61,10 +61,10 @@ std::shared_ptr<MethodSensorData> DataSendingService::getMethodSensorData(JAVA_L
 	}
 }
 
-void DataSendingService::addMethodSensorData(std::shared_ptr<MethodSensorData> data, std::string prefix)
+void DataSendingService::addMethodSensorData(std::shared_ptr<SensorData> data, std::string prefix)
 {
 	std::unique_lock<std::shared_mutex> lock(mMeasurements);
-	measurements->insert({ createKey(data->getMethodSensorId(), data->getMethodId(), prefix), data });
+	measurements->insert({ createKey(data->getSensorTypeId(), data->getMethodId(), prefix), data });
 	notifiyListSizeListeners();
 }
 
@@ -252,7 +252,7 @@ void DataSendingService::sendData()
 		logger.debug("Sending data...");
 
 		while (bufferStrategy->hasNext()) {
-			std::vector<std::shared_ptr<MethodSensorData>> dataToSend = bufferStrategy->next();
+			std::vector<std::shared_ptr<SensorData>> dataToSend = bufferStrategy->next();
 			cmrConnection->sendDataObjects(dataToSend, stop); // wait for request only during shutdown
 		}
 	}

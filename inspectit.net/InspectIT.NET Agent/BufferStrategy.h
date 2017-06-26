@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MethodSensorData.h"
+#include "SensorData.h"
 
 #include <memory>
 
@@ -10,7 +10,7 @@ public:
 	BufferStrategy() {}
 	virtual ~BufferStrategy() {}
 
-	virtual void addMeasurements(std::vector<std::shared_ptr<MethodSensorData>> data) = 0;
+	virtual void addMeasurements(std::vector<std::shared_ptr<SensorData>> data) = 0;
 	virtual bool hasNext() = 0;
-	virtual std::vector<std::shared_ptr<MethodSensorData>> next() = 0;
+	virtual std::vector<std::shared_ptr<SensorData>> next() = 0;
 };

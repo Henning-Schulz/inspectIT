@@ -1,8 +1,8 @@
 #pragma once
 
 #include "MethodHook.h"
-#include "MethodSensorConfig.h"
 #include "ThreadHook.h"
+#include "MethodSensorTypeConfig.h"
 
 #include <memory>
 
@@ -12,16 +12,16 @@ class MethodSensor
 private:
 	JAVA_LONG sensorTypeId;
 	JAVA_LONG platformId;
+	std::wstring name;
 
 protected:
-	void setSensorTypeId(JAVA_LONG sensorTypeId) { this->sensorTypeId = sensorTypeId; }
-	void setPlatformId(JAVA_LONG platformId) { this->platformId = platformId; }
+	virtual void init(ICorProfilerInfo *profilerInfo) = 0;
 
 public:
 	MethodSensor() {}
 	virtual ~MethodSensor() {}
 
-	virtual void init(std::shared_ptr<MethodSensorConfig> config, JAVA_LONG sensorTypeId, JAVA_LONG platformId, ICorProfilerInfo *profilerInfo) = 0;
+	void initialize(std::shared_ptr<MethodSensorTypeConfig> config, JAVA_LONG platformId, ICorProfilerInfo *profilerInfo);
 	virtual void notifyStartup() = 0;
 	virtual void notifyShutdown() = 0;
 
@@ -33,7 +33,7 @@ public:
 
 	virtual DWORD getSpecialMonitorFlags() = 0;
 
-	JAVA_LONG getSensorTypeId() { return sensorTypeId; }
-
-	JAVA_LONG getPlatformId() { return platformId; }
+	JAVA_LONG getSensorTypeId();
+	JAVA_LONG getPlatformId();
+	std::wstring getName();
 };

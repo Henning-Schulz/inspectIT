@@ -7,9 +7,9 @@
 #include "Logger.h"
 #include "mscoree.h"
 #include "agentutils.h"
-#include "HookStrategy.h"
 #include "CMRConnection.h"
 #include "DataSendingService.h"
+#include "InstrumentationManager.h"
 
 #include <list>
 #include <memory>
@@ -38,10 +38,8 @@ private:
 	DWORD shutdownCounter;
 	ICorProfilerInfo3 *profilerInfo3;
 
-	std::map<ClassID, std::shared_ptr<InstrumentationDefinition>> instrumentationDefinitions;
+	std::shared_ptr<InstrumentationManager> instrumentationManager;
 
-	std::list<std::shared_ptr<MethodSensor>> methodSensorList;
-	std::list<std::pair<std::shared_ptr<MethodHook>, std::shared_ptr<HookStrategy>>> methodHookList;
 	std::list<std::shared_ptr<ThreadHook>> threadHookList;
 
 	std::map<METHOD_ID, std::vector<std::shared_ptr<MethodHook>>> hookAssignment;
@@ -60,16 +58,10 @@ public:
 
 	JAVA_LONG platformID;
 
-	void addMethodHook(std::shared_ptr<MethodHook> hook, std::shared_ptr<HookStrategy> hookStrategy);
-	void removeMethodHook(std::shared_ptr<MethodHook> hook);
-	void removeAllMethodHooks();
-	size_t getNumberOfMethodHooks();
-	std::list<std::pair<std::shared_ptr<MethodHook>, std::shared_ptr<HookStrategy>>> getMethodHooksWithStrategies();
-
 	void assignHookToMethod(METHOD_ID methodId, std::shared_ptr<MethodHook> hook);
+	void addThreadHook(std::shared_ptr<ThreadHook> hook);
 
-	ClassID getClassIdForFunction(FunctionID functionId);
-	std::shared_ptr<InstrumentationDefinition> getInstrumentationDefinition(ClassID classId);
+	std::shared_ptr<InstrumentationManager> getInstrumentationManager();
 
 	//
 	// IUnknown 

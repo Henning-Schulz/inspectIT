@@ -8,7 +8,7 @@
 class SimpleBufferStrategy : public BufferStrategy
 {
 private:
-	std::vector<std::shared_ptr<MethodSensorData>> measurements;
+	std::vector<std::shared_ptr<SensorData>> measurements;
 	bool newMeasurements = false;
 	std::mutex measurementsMutex;
 
@@ -18,8 +18,8 @@ public:
 	SimpleBufferStrategy();
 	~SimpleBufferStrategy();
 
-	void addMeasurements(std::vector<std::shared_ptr<MethodSensorData>> data);
+	void addMeasurements(std::vector<std::shared_ptr<SensorData>> data);
 	bool hasNext();
-	std::vector<std::shared_ptr<MethodSensorData>> next();
+	std::vector<std::shared_ptr<SensorData>> next();
 };
 

@@ -13,7 +13,7 @@ public:
 	TimerSensor();
 	~TimerSensor();
 
-	void init(std::shared_ptr<MethodSensorConfig> config, JAVA_LONG sensorTypeId, JAVA_LONG platformId, ICorProfilerInfo *profilerInfo);
+	void init(ICorProfilerInfo *profilerInfo);
 	void notifyStartup();
 	void notifyShutdown();
 

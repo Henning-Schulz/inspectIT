@@ -1,6 +1,5 @@
 #include "Agent.h"
 #include "dllmain.hpp"
-#include "HelloSensor.h"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -10,13 +9,9 @@
 #include <limits.h>
 #include <inttypes.h>
 
-#include "SingleClassHookStrategy.h"
 #include "SimpleBufferStrategy.h"
 #include "ListSizeStrategy.h"
-#include "ShadowStackHook.h"
 #include "StrategyConfig.h"
-#include "AssignmentHookStrategy.h"
-#include "TimerSensorConfig.h"
 #include "TimerSensor.h"
 #include "ClassType.h"
 #include "AgentConfig.h"
@@ -33,38 +28,6 @@ Agent::~Agent()
 	logger.debug("Destructor.");
 }
 
-void Agent::addMethodHook(std::shared_ptr<MethodHook> hook, std::shared_ptr<HookStrategy> hookStrategy)
-{
-	methodHookList.push_back(std::make_pair(hook, hookStrategy));
-}
-
-void Agent::removeMethodHook(std::shared_ptr<MethodHook> hook)
-{
-	for (auto it = methodHookList.begin(); it != methodHookList.end(); ) {
-		if (it->first == hook) {
-			it = methodHookList.erase(it);
-			break;
-		}
-		else {
-			it++;
-		}
-	}
-}
-
-void Agent::removeAllMethodHooks()
-{
-	methodHookList.clear();
-}
-
-size_t Agent::getNumberOfMethodHooks()
-{
-	return methodHookList.size();
-}
-
-std::list<std::pair<std::shared_ptr<MethodHook>, std::shared_ptr<HookStrategy>>> Agent::getMethodHooksWithStrategies()
-{
-	return methodHookList;
-}
 
 void Agent::assignHookToMethod(METHOD_ID methodId, std::shared_ptr<MethodHook> hook)
 {
@@ -83,7 +46,12 @@ void Agent::assignHookToMethod(METHOD_ID methodId, std::shared_ptr<MethodHook> h
 	}
 
 	it->second.insert(hit, hook);
-	logger.debug("There are now %i hooks assigned to this method.", hookAssignment.find(methodId)->second.size());
+	logger.debug("There are now %i hooks assigned to method %lli.", hookAssignment.find(methodId)->second.size(), methodId);
+}
+
+void Agent::addThreadHook(std::shared_ptr<ThreadHook> hook)
+{
+	threadHookList.push_back(hook);
 }
 
 
@@ -188,120 +156,36 @@ void __declspec(naked) TailcallNaked3(FunctionIDOrClientID functionIDOrClientID)
 	}
 }
 
-ClassID Agent::getClassIdForFunction(FunctionID functionId)
+std::shared_ptr<InstrumentationManager> Agent::getInstrumentationManager()
 {
-	ClassID classId;
-	HRESULT hr = profilerInfo3->GetFunctionInfo(functionId, &classId, 0, 0);
-
-	if (FAILED(hr)) {
-		return 0;
-	}
-	else {
-		return classId;
-	}
+	return instrumentationManager;
 }
 
-std::shared_ptr<InstrumentationDefinition> Agent::getInstrumentationDefinition(ClassID classId)
+UINT_PTR FunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
 {
-	auto it = instrumentationDefinitions.find(classId);
+	auto instrumentationManager = globalAgentInstance->getInstrumentationManager();
+	auto sensorInstrumentationPoint = instrumentationManager->getSensorInstrumentationPoint(functionID);
 
-	if (it == instrumentationDefinitions.end()) {
-		return std::shared_ptr<InstrumentationDefinition>();
-	}
-	else {
-		return it->second;
-	}
-}
-
-UINT_PTR  FunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
-{
-	ClassID classId = globalAgentInstance->getClassIdForFunction(functionID);
-
-	if (classId == 0) {
-		printf("ERROR FunctionMapper - Error while retrieving the ClassID of function %i!\n");
+	if (!sensorInstrumentationPoint) {
+		// Nothing to instrument
+		*pbHookFunction = 0;
 		return functionID;
 	}
 
-	std::shared_ptr<InstrumentationDefinition> instrumentationDefinition = globalAgentInstance->getInstrumentationDefinition(classId);
+	JAVA_LONG methodId = sensorInstrumentationPoint->getId();
 
-	if (!instrumentationDefinition) {
-		printf("ERROR FunctionMapper - There is no InstrumentationDefinition for function %i and class %i!\n", functionID, classId);
-		return functionID;
-	}
+	auto sensorIds = sensorInstrumentationPoint->getSensorIds();
+	for (auto it = sensorIds.begin(); it != sensorIds.end(); it++) {
+		auto sensor = instrumentationManager->getMethodSensorForId(*it);
 
-	std::shared_ptr<MethodInstrumentationConfig> instrumentationConfig = instrumentationDefinition->getMethodInstrumentationConfigForFunctionId(functionID);
+		if (sensor->hasHook()) {
+			globalAgentInstance->assignHookToMethod(methodId, sensor->getHook());
+		}
 
-	if (!instrumentationConfig) {
-		loggerFactory.staticLog(LEVEL_DEBUG, "FunctionMapper", "Not instrumenting method with FunctionID %i.", functionID);
-		return functionID;
-	}
-
-	// TODO: Create sensor / hook
-
-	WCHAR className[MAX_BUFFERSIZE];
-	WCHAR methodName[MAX_BUFFERSIZE];
-	WCHAR returnType[MAX_BUFFERSIZE];
-	JAVA_INT javaModifiers;
-	std::vector<LPWSTR> parameterTypes; // elements will be created on the heap --> need to delete them afterwards
-	globalAgentInstance->getMethodSpecifics(functionID, className, methodName, returnType, &javaModifiers, &parameterTypes);
-
-	auto methodHooksAndStrategies = globalAgentInstance->getMethodHooksWithStrategies();
-
-	boolean hookRegistered = false;
-	METHOD_ID methodId = functionID;
-
-	for (auto it = methodHooksAndStrategies.begin(); it != methodHooksAndStrategies.end(); it++) {
-		if (it->second->hook(className, methodName, parameterTypes, javaModifiers)) {
-			if (!hookRegistered) {
-				LogLevel level = loggerFactory.getLogLevel();
-
-				if (level >= LEVEL_DEBUG) {
-					loggerFactory.staticLogWithoutNewLine(LEVEL_DEBUG, "FunctionMapper", "Hook 0x%03x %ls %ls.%ls(", javaModifiers, returnType, className, methodName);
-					bool first = true;
-					for (std::vector<LPWSTR>::iterator it = parameterTypes.begin(); it != parameterTypes.end(); it++) {
-						if (first) {
-							first = false;
-						}
-						else {
-							loggerFactory.printf(", ");
-						}
-						loggerFactory.printf("%ls", *it);
-					}
-					loggerFactory.printf(")\n");
-				}
-
-				methodId = cmrConnection->registerMethod(globalAgentInstance->platformID, className, methodName, returnType, parameterTypes, javaModifiers);
-
-				if (methodId > UINT_MAX) {
-					loggerFactory.staticLog(LEVEL_ERROR, "FunctionMapper", "methodId %lld is greater than maximum value of unsigned int (%u)! Disabling hook.\n", methodId, UINT_MAX);
-					*pbHookFunction = 0;
-					break;
-				}
-				else if (methodId < 0) {
-					loggerFactory.staticLog(LEVEL_ERROR, "FunctionMapper", "methodId %lld is less than zero! Disabling hook.\n", methodId);
-					*pbHookFunction = 0;
-					break;
-				}
-				else {
-					*pbHookFunction = 1;
-				}
-
-				hookRegistered = true;
-			}
-
-			// Function hook is activated and method is registered
-			
-			loggerFactory.staticLog(LEVEL_DEBUG, "FunctionMapper", "Assigning method %i to hook of sensor %lli", methodId, it->first->getSensorTypeId());
-			globalAgentInstance->assignHookToMethod(methodId, it->first);
+		if (sensor->hasThreadHook()) {
+			globalAgentInstance->addThreadHook(sensor->getThreadHook());
 		}
 	}
-
-	if (!hookRegistered) {
-		*pbHookFunction = 0;
-	}
-
-	// delete the elements on the heap
-	parameterTypes.clear();
 
 	return methodId;
 }
@@ -358,7 +242,10 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 		return E_FAIL;
 	}
 
-	// TODO
+	// Register agent
+
+	auto agentConfig = cmrConnection->registerPlatform(L".NET agent", L"0.1"); // TODO: Retrieve the name dynamically
+	platformID = agentConfig->getPlatformId();
 
 	HRESULT hr;
 	hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo3, (void **)&profilerInfo3);
@@ -370,9 +257,11 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 		logger.debug("profilerInfo set.");
 	}
 
+	instrumentationManager = std::make_shared<InstrumentationManager>(platformID, profilerInfo3);
+
 	DWORD eventMask = COR_PRF_MONITOR_ENTERLEAVE | COR_PRF_MONITOR_THREADS;
 
-	// TODO
+	// TODO: Add flags to event mask if necessary
 
 	hr = profilerInfo3->SetEventMask(eventMask);
 	if (FAILED(hr)) {
@@ -396,11 +285,6 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 	alive = true;
 	keepAliveThread = std::thread([this]() { keepAlive(); });
 
-	for (auto it = methodSensorList.begin(); it != methodSensorList.end(); it++) {
-		logger.debug("Call notifyStartup() on sensor %lli", (*it)->getSensorTypeId());
-		(*it)->notifyStartup();
-	}
-
 	logger.info("Initialized successfully");
 
 	return S_OK;
@@ -410,10 +294,6 @@ HRESULT Agent::Shutdown()
 {
 	logger.debug("Shutdown...");
 	shutdownCounter++;
-
-	for (auto it = methodSensorList.begin(); it != methodSensorList.end(); it++) {
-		(*it)->notifyShutdown();
-	}
 
 	shutdownDataSendingService();
 	cmrConnection->unregisterPlatform(platformID);
@@ -442,25 +322,9 @@ HRESULT Agent::ClassLoadFinished(ClassID classId, HRESULT hrStatus)
 
 	std::shared_ptr<InstrumentationDefinition> instrumentationDefinition = cmrConnection->analyze(platformID, classType);
 
-	// store instrumentation definition for later use
+	// Register instrumentation definition at the InstrumentationManager
 
-	instrumentationDefinitions.emplace(classId, instrumentationDefinition);
-
-	// TODO: correlate FunctionsIDs of classType->methodTypes with instrDef->MethodInstrumentationConfigs
-
-	auto methodInstrConfigs = instrumentationDefinition->getMethodInstrumentationConfigs();
-	auto methodTypes = classType->getMethods();
-
-	for (auto it = methodInstrConfigs.begin(); it != methodInstrConfigs.end(); it++) {
-		for (auto typesIt = methodTypes.begin(); typesIt != methodTypes.end(); typesIt++) {
-			// TODO: compare method signatures --> change true
-			if (true) {
-				// instrumentationDefinitions.addFunctionIdMapping((*it), (*typesIt)->getFunctionId());
-				// remove method type (only from copy)
-				break;
-			}
-		}
-	}
+	instrumentationManager->registerInstrumentationDefinition(classType, instrumentationDefinition);
 
 	return S_OK;
 }

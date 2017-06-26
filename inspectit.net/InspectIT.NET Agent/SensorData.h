@@ -13,6 +13,10 @@ private:
 	JAVA_LONG sensorTypeId;
 	JAVA_LONG timestampMs;
 
+protected:
+	virtual std::wstring typeName() = 0;
+
+
 public:
 	SensorData() {}
 	virtual ~SensorData() {}
@@ -20,8 +24,6 @@ public:
 	JAVA_LONG getPlatformId();
 	JAVA_LONG getSensorTypeId();
 	JAVA_LONG getTimestampMs();
-
-	virtual std::wstring typeName() = 0;
 
 	json::value toJson();
 };

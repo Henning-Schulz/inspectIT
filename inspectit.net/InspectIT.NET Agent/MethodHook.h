@@ -1,8 +1,7 @@
 #pragma once
 
 #include "basehdr.h"
-
-#include "MethodSensorConfig.h"
+#include "MethodSensorTypeConfig.h"
 
 /*
  * Interface for method sensors.

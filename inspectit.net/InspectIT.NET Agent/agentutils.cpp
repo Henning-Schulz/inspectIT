@@ -16,7 +16,7 @@ std::shared_ptr<ClassType> createClassTypeFromId(ICorProfilerInfo3 *profilerInfo
 	ClassID parentClassId;
 	mdTypeDef parentTypeDefToken;
 	ClassID typeArgs[MAX_BUFFERSIZE];
-	ULONG typeArgsLength;
+	ULONG32 typeArgsLength;
 
 	HRESULT hr = profilerInfo3->GetClassIDInfo2(classId, &moduleId, &typeDefToken, &parentClassId, MAX_BUFFERSIZE, &typeArgsLength, typeArgs);
 	if (FAILED(hr)) {

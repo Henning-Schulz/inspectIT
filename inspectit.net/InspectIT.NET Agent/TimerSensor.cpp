@@ -12,12 +12,10 @@ TimerSensor::~TimerSensor()
 {
 }
 
-void TimerSensor::init(std::shared_ptr<MethodSensorConfig> config, JAVA_LONG sensorTypeId, JAVA_LONG platformId, ICorProfilerInfo *profilerInfo)
+void TimerSensor::init(ICorProfilerInfo *profilerInfo)
 {
-	setSensorTypeId(sensorTypeId);
-	setPlatformId(platformId);
-	hook->setPlatformId(platformId);
-	hook->setSensorTypeId(sensorTypeId);
+	hook->setPlatformId(getPlatformId());
+	hook->setSensorTypeId(getSensorTypeId());
 	hook->init(profilerInfo);
 }
 

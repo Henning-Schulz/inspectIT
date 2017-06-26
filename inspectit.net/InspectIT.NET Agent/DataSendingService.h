@@ -24,8 +24,8 @@ class DataSendingService : public ListSizeListenable
 private:
 	std::shared_ptr<BufferStrategy> bufferStrategy;
 	std::shared_ptr<SendingStrategy> sendingStrategy;
-	std::unique_ptr<std::map<std::string, std::shared_ptr<MethodSensorData>>> measurements;
-	std::unique_ptr<std::map<std::string, std::shared_ptr<MethodSensorData>>> measurementsPrepCopy;
+	std::unique_ptr<std::map<std::string, std::shared_ptr<SensorData>>> measurements;
+	std::unique_ptr<std::map<std::string, std::shared_ptr<SensorData>>> measurementsPrepCopy;
 	std::shared_mutex mMeasurements;
 
 	std::unique_ptr<std::map<std::string, std::shared_ptr<MeasurementStorage>>> storages;
@@ -59,8 +59,8 @@ public:
 	DataSendingService(std::shared_ptr<BufferStrategy> bufferStrategy, std::shared_ptr<SendingStrategy> sendingStrategy);
 	~DataSendingService();
 
-	std::shared_ptr<MethodSensorData> getMethodSensorData(JAVA_LONG sensorTypeId, JAVA_LONG methodId, std::string prefix = "");
-	void addMethodSensorData(std::shared_ptr<MethodSensorData> data, std::string prefix = "");
+	std::shared_ptr<SensorData> getMethodSensorData(JAVA_LONG sensorTypeId, JAVA_LONG methodId, std::string prefix = "");
+	void addMethodSensorData(std::shared_ptr<SensorData> data, std::string prefix = "");
 
 	std::shared_ptr<MeasurementStorage> getMeasurementStorage(JAVA_LONG sensorTypeId, JAVA_LONG methodId, std::string prefix = "");
 	void addMeasurementStorage(std::shared_ptr<MeasurementStorage> storage, std::string prefix = "");

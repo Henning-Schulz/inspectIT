@@ -11,7 +11,7 @@ SimpleBufferStrategy::~SimpleBufferStrategy()
 {
 }
 
-void SimpleBufferStrategy::addMeasurements(std::vector<std::shared_ptr<MethodSensorData>> data)
+void SimpleBufferStrategy::addMeasurements(std::vector<std::shared_ptr<SensorData>> data)
 {
 	// Creates a unique lock on the mutex
 	std::unique_lock<std::mutex> lock(measurementsMutex);
@@ -27,7 +27,7 @@ bool SimpleBufferStrategy::hasNext()
 	return newMeasurements;
 }
 
-std::vector<std::shared_ptr<MethodSensorData>> SimpleBufferStrategy::next()
+std::vector<std::shared_ptr<SensorData>> SimpleBufferStrategy::next()
 {
 	std::unique_lock<std::mutex> lock(measurementsMutex);
 
@@ -37,6 +37,6 @@ std::vector<std::shared_ptr<MethodSensorData>> SimpleBufferStrategy::next()
 	}
 	else {
 		logger.error("No new measurements available!");
-		return std::vector<std::shared_ptr<MethodSensorData>>();
+		return std::vector<std::shared_ptr<SensorData>>();
 	}
 }

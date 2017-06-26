@@ -76,14 +76,14 @@ void AgentConfig::fromJson(json::object json)
 	json::array configArray = json.at(L"platformSensorTypeConfigs").as_array();
 	for (auto it = configArray.begin(); it != configArray.end(); it++) {
 		auto platformSensorConfig = std::make_shared<PlatformSensorTypeConfig>();
-		platformSensorConfig->fromJson(it->as_object);
+		platformSensorConfig->fromJson(it->as_object());
 		platformSensorTypeConfigs.push_back(platformSensorConfig);
 	}
 
 	configArray = json.at(L"methodSensorTypeConfigs").as_array();
 	for (auto it = configArray.begin(); it != configArray.end(); it++) {
 		auto methodSensorConfig = std::make_shared<MethodSensorTypeConfig>();
-		methodSensorConfig->fromJson(it->as_object);
+		methodSensorConfig->fromJson(it->as_object());
 		methodSensorTypeConfigs.push_back(methodSensorConfig);
 	}
 
@@ -93,7 +93,7 @@ void AgentConfig::fromJson(json::object json)
 	configArray = json.at(L"methodSensorTypeConfigs").as_array();
 	for (auto it = configArray.begin(); it != configArray.end(); it++) {
 		auto methodSensorConfig = std::make_shared<MethodSensorTypeConfig>();
-		methodSensorConfig->fromJson(it->as_object);
+		methodSensorConfig->fromJson(it->as_object());
 		specialMethodSensorTypeConfigs.push_back(methodSensorConfig);
 	}
 
