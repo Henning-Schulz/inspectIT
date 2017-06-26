@@ -25,17 +25,11 @@
     <Filter Include="Header Files\logging">
       <UniqueIdentifier>{a6f35c7f-ffa5-4069-ad70-a4519fe5939f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\test">
-      <UniqueIdentifier>{a3b6eab5-3f4f-483b-9957-863a584c0ccd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\core">
       <UniqueIdentifier>{d59941fe-ef43-460f-b876-abb878f79585}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\sending">
       <UniqueIdentifier>{ddbe1c3b-ac38-4b5c-b9e1-d603d3eedb59}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\test">
-      <UniqueIdentifier>{1ef6dbf9-ce0b-45d8-ad44-76ae65c147d7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\logging">
       <UniqueIdentifier>{fd83f324-6fef-4e2d-bf5f-f84a6c70ad2f}</UniqueIdentifier>
@@ -102,29 +96,14 @@
     <ClInclude Include="ListSizeStrategy.h">
       <Filter>Header Files\sending</Filter>
     </ClInclude>
-    <ClInclude Include="HookStrategy.h">
-      <Filter>Header Files\core</Filter>
-    </ClInclude>
     <ClInclude Include="SendingStrategy.h">
       <Filter>Header Files\sending</Filter>
     </ClInclude>
     <ClInclude Include="SimpleBufferStrategy.h">
       <Filter>Header Files\sending</Filter>
     </ClInclude>
-    <ClInclude Include="HelloSensor.h">
-      <Filter>Header Files\test</Filter>
-    </ClInclude>
-    <ClInclude Include="HelloSensorData.h">
-      <Filter>Header Files\test</Filter>
-    </ClInclude>
     <ClInclude Include="Logger.h">
       <Filter>Header Files\logging</Filter>
-    </ClInclude>
-    <ClInclude Include="NoHookStrategy.h">
-      <Filter>Header Files\test</Filter>
-    </ClInclude>
-    <ClInclude Include="SingleClassHookStrategy.h">
-      <Filter>Header Files\test</Filter>
     </ClInclude>
     <ClInclude Include="MethodSensorData.h">
       <Filter>Header Files\core</Filter>
@@ -146,9 +125,6 @@
     </ClInclude>
     <ClInclude Include="cmp_wstr.h">
       <Filter>Header Files\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="AssignmentHookStrategy.h">
-      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="ThreadHook.h">
       <Filter>Header Files\core</Filter>
@@ -248,20 +224,8 @@
     <ClCompile Include="CorProfilerCallbackDefaultImpl.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="HelloSensor.cpp">
-      <Filter>Source Files\test</Filter>
-    </ClCompile>
-    <ClCompile Include="HelloSensorData.cpp">
-      <Filter>Source Files\test</Filter>
-    </ClCompile>
     <ClCompile Include="ListSizeStrategy.cpp">
       <Filter>Source Files\sending</Filter>
-    </ClCompile>
-    <ClCompile Include="NoHookStrategy.cpp">
-      <Filter>Source Files\test</Filter>
-    </ClCompile>
-    <ClCompile Include="SingleClassHookStrategy.cpp">
-      <Filter>Source Files\test</Filter>
     </ClCompile>
     <ClCompile Include="SimpleBufferStrategy.cpp">
       <Filter>Source Files\sending</Filter>
@@ -271,9 +235,6 @@
     </ClCompile>
     <ClCompile Include="stringutils.cpp">
       <Filter>Source Files\utils</Filter>
-    </ClCompile>
-    <ClCompile Include="AssignmentHookStrategy.cpp">
-      <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="json_string_prep.cpp">
       <Filter>Source Files\utils</Filter>

@@ -131,7 +131,6 @@
     <ClInclude Include="AgentConfiguration.h" />
     <ClInclude Include="agentutils.h" />
     <ClInclude Include="AnnotationType.h" />
-    <ClInclude Include="AssignmentHookStrategy.h" />
     <ClInclude Include="basehdr.h" />
     <ClInclude Include="BufferStrategy.h" />
     <ClInclude Include="classfactory.hpp" />
@@ -142,9 +141,6 @@
     <ClInclude Include="DataSendingService.h" />
     <ClInclude Include="dllmain.hpp" />
     <ClInclude Include="ExceptionSensorTypeConfig.h" />
-    <ClInclude Include="HelloSensor.h" />
-    <ClInclude Include="HelloSensorData.h" />
-    <ClInclude Include="HookStrategy.h" />
     <ClInclude Include="InstrumentationDefinition.h" />
     <ClInclude Include="InterfaceType.h" />
     <ClInclude Include="ip_calculation.h" />
@@ -163,7 +159,6 @@
     <ClInclude Include="MethodSensorMap.h" />
     <ClInclude Include="MethodSensorTypeConfig.h" />
     <ClInclude Include="MethodType.h" />
-    <ClInclude Include="NoHookStrategy.h" />
     <ClInclude Include="PlatformSensorTypeConfig.h" />
     <ClInclude Include="regutil.h" />
     <ClInclude Include="regutil.hpp" />
@@ -171,7 +166,6 @@
     <ClInclude Include="SensorData.h" />
     <ClInclude Include="SensorInstrumentationPoint.h" />
     <ClInclude Include="SimpleBufferStrategy.h" />
-    <ClInclude Include="SingleClassHookStrategy.h" />
     <ClInclude Include="StrategyConfig.h" />
     <ClInclude Include="stringutils.h" />
     <ClInclude Include="ThreadHook.h" />
@@ -190,13 +184,10 @@
     <ClCompile Include="AgentConfiguration.cpp" />
     <ClCompile Include="agentutils.cpp" />
     <ClCompile Include="AnnotationType.cpp" />
-    <ClCompile Include="AssignmentHookStrategy.cpp" />
     <ClCompile Include="ClassType.cpp" />
     <ClCompile Include="CorProfilerCallbackDefaultImpl.cpp" />
     <ClCompile Include="DataSendingService.cpp" />
     <ClCompile Include="ExceptionSensorTypeConfig.cpp" />
-    <ClCompile Include="HelloSensor.cpp" />
-    <ClCompile Include="HelloSensorData.cpp" />
     <ClCompile Include="InstrumentationDefinition.cpp" />
     <ClCompile Include="InterfaceType.cpp" />
     <ClCompile Include="ip_calculation.cpp" />
@@ -208,12 +199,10 @@
     <ClCompile Include="MethodSensorMap.cpp" />
     <ClCompile Include="MethodSensorTypeConfig.cpp" />
     <ClCompile Include="MethodType.cpp" />
-    <ClCompile Include="NoHookStrategy.cpp" />
     <ClCompile Include="PlatformSensorTypeConfig.cpp" />
     <ClCompile Include="SensorData.cpp" />
     <ClCompile Include="SensorInstrumentationPoint.cpp" />
     <ClCompile Include="SimpleBufferStrategy.cpp" />
-    <ClCompile Include="SingleClassHookStrategy.cpp" />
     <ClCompile Include="StrategyConfig.cpp" />
     <ClCompile Include="stringutils.cpp" />
     <ClCompile Include="TimerData.cpp" />
