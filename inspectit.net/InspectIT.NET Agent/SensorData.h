@@ -25,6 +25,8 @@ public:
 	JAVA_LONG getSensorTypeId();
 	JAVA_LONG getTimestampMs();
 
-	json::value toJson();
+	virtual JAVA_LONG getIdentifyingId() = 0;
+
+	virtual json::value toJson();
 };
 

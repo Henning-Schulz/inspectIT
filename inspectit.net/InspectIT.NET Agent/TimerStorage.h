@@ -23,6 +23,6 @@ public:
 	void finishCurrentEntry(std::chrono::duration<long long, std::nano> endNanos);
 
 	bool finished();
-	std::vector<std::shared_ptr<MethodSensorData>> finalizeData();
+	std::vector<std::shared_ptr<SensorData>> finalizeData();
 };
 

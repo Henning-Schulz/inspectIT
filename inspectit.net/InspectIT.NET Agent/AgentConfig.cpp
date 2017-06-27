@@ -117,7 +117,15 @@ void AgentConfig::fromJson(json::object json)
 		auto instrumentationDef = std::make_shared<InstrumentationDefinition>();
 		instrumentationDef->fromJson(it->second.as_object());
 
-		initialInstrumentationDefinitions.emplace(it->first, instrumentationDef);
+		json::value keyListJsonString(it->first);
+		json::array keyJsonList = keyListJsonString.as_array();
+		std::vector<std::wstring> keyList;
+
+		for (auto keyIt = keyJsonList.begin(); keyIt != keyJsonList.end(); keyIt++) {
+			keyList.push_back(keyIt->as_string());
+		}
+
+		initialInstrumentationDefinitions.emplace(keyList, instrumentationDef);
 	}
 
 	// configuration info

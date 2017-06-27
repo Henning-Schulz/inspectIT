@@ -22,20 +22,6 @@ MethodSensorFactory::~MethodSensorFactory()
 {
 }
 
-std::shared_ptr<MethodSensorFactory> MethodSensorFactory::getInstance()
-{
-	if (!instance) {
-		{
-			std::shared_lock<std::shared_mutex> lock(instanceMutex);
-			if (!instance) {
-				instance = std::make_shared<MethodSensorFactory>();
-			}
-		}
-	}
-
-	return instance;
-}
-
 std::shared_ptr<MethodSensor> MethodSensorFactory::createMethodSensor(std::shared_ptr<MethodSensorTypeConfig> sensorTypeConfig, JAVA_LONG platformId, ICorProfilerInfo3 * profilerInfo)
 {
 	auto it = knownSensors.find(sensorTypeConfig->getName());

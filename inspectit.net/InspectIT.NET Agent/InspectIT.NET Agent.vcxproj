@@ -128,7 +128,6 @@
     <ClInclude Include="AbstractSensorTypeConfig.h" />
     <ClInclude Include="Agent.h" />
     <ClInclude Include="AgentConfig.h" />
-    <ClInclude Include="AgentConfiguration.h" />
     <ClInclude Include="agentutils.h" />
     <ClInclude Include="AnnotationType.h" />
     <ClInclude Include="basehdr.h" />
@@ -142,6 +141,7 @@
     <ClInclude Include="dllmain.hpp" />
     <ClInclude Include="ExceptionSensorTypeConfig.h" />
     <ClInclude Include="InstrumentationDefinition.h" />
+    <ClInclude Include="InstrumentationManager.h" />
     <ClInclude Include="InterfaceType.h" />
     <ClInclude Include="ip_calculation.h" />
     <ClInclude Include="JsonReceivable.h" />
@@ -156,6 +156,7 @@
     <ClInclude Include="MethodInstrumentationConfig.h" />
     <ClInclude Include="MethodSensor.h" />
     <ClInclude Include="MethodSensorData.h" />
+    <ClInclude Include="MethodSensorFactory.h" />
     <ClInclude Include="MethodSensorMap.h" />
     <ClInclude Include="MethodSensorTypeConfig.h" />
     <ClInclude Include="MethodType.h" />
@@ -172,7 +173,6 @@
     <ClInclude Include="TimerData.h" />
     <ClInclude Include="TimerHook.h" />
     <ClInclude Include="TimerSensor.h" />
-    <ClInclude Include="TimerSensorConfig.h" />
     <ClInclude Include="TimerStorage.h" />
     <ClInclude Include="TimerStorageEntry.h" />
     <ClInclude Include="Type.h" />
@@ -181,7 +181,6 @@
     <ClCompile Include="AbstractSensorTypeConfig.cpp" />
     <ClCompile Include="Agent.cpp" />
     <ClCompile Include="AgentConfig.cpp" />
-    <ClCompile Include="AgentConfiguration.cpp" />
     <ClCompile Include="agentutils.cpp" />
     <ClCompile Include="AnnotationType.cpp" />
     <ClCompile Include="ClassType.cpp" />
@@ -189,6 +188,7 @@
     <ClCompile Include="DataSendingService.cpp" />
     <ClCompile Include="ExceptionSensorTypeConfig.cpp" />
     <ClCompile Include="InstrumentationDefinition.cpp" />
+    <ClCompile Include="InstrumentationManager.cpp" />
     <ClCompile Include="InterfaceType.cpp" />
     <ClCompile Include="ip_calculation.cpp" />
     <ClCompile Include="json_string_prep.cpp" />
@@ -196,6 +196,8 @@
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="CMRRestfulConnection.cpp" />
     <ClCompile Include="MethodInstrumentationConfig.cpp" />
+    <ClCompile Include="MethodSensor.cpp" />
+    <ClCompile Include="MethodSensorFactory.cpp" />
     <ClCompile Include="MethodSensorMap.cpp" />
     <ClCompile Include="MethodSensorTypeConfig.cpp" />
     <ClCompile Include="MethodType.cpp" />
@@ -208,7 +210,6 @@
     <ClCompile Include="TimerData.cpp" />
     <ClCompile Include="TimerHook.cpp" />
     <ClCompile Include="TimerSensor.cpp" />
-    <ClCompile Include="TimerSensorConfig.cpp" />
     <ClCompile Include="TimerStorage.cpp" />
     <ClCompile Include="TimerStorageEntry.cpp" />
   </ItemGroup>

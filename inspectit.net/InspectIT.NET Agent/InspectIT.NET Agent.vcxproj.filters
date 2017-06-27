@@ -72,9 +72,6 @@
     <ClInclude Include="regutil.hpp">
       <Filter>Header Files\dll</Filter>
     </ClInclude>
-    <ClInclude Include="AgentConfiguration.h">
-      <Filter>Header Files\core</Filter>
-    </ClInclude>
     <ClInclude Include="BufferStrategy.h">
       <Filter>Header Files\sending</Filter>
     </ClInclude>
@@ -144,9 +141,6 @@
     <ClInclude Include="TimerSensor.h">
       <Filter>Header Files\timer</Filter>
     </ClInclude>
-    <ClInclude Include="TimerSensorConfig.h">
-      <Filter>Header Files\timer</Filter>
-    </ClInclude>
     <ClInclude Include="TimerStorageEntry.h">
       <Filter>Header Files\timer</Filter>
     </ClInclude>
@@ -207,12 +201,15 @@
     <ClInclude Include="SensorData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="InstrumentationManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodSensorFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Agent.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
-    <ClCompile Include="AgentConfiguration.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="DataSendingService.cpp">
@@ -249,9 +246,6 @@
       <Filter>Source Files\timer</Filter>
     </ClCompile>
     <ClCompile Include="TimerSensor.cpp">
-      <Filter>Source Files\timer</Filter>
-    </ClCompile>
-    <ClCompile Include="TimerSensorConfig.cpp">
       <Filter>Source Files\timer</Filter>
     </ClCompile>
     <ClCompile Include="TimerStorageEntry.cpp">
@@ -306,6 +300,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SensorData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InstrumentationManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MethodSensor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MethodSensorFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

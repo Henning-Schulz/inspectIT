@@ -2,7 +2,7 @@
 
 
 
-LPWSTR TimerData::getJavaTypeName()
+std::wstring TimerData::typeName()
 {
 	return L"TimerData";
 }

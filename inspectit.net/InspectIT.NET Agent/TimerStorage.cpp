@@ -35,9 +35,9 @@ bool TimerStorage::finished()
 	return started && entries.size() == 0;
 }
 
-std::vector<std::shared_ptr<MethodSensorData>> TimerStorage::finalizeData()
+std::vector<std::shared_ptr<SensorData>> TimerStorage::finalizeData()
 {
-	std::vector<std::shared_ptr<MethodSensorData>> result;
+	std::vector<std::shared_ptr<SensorData>> result;
 
 	for (auto it = finishedEntries.begin(); it != finishedEntries.end(); it++) {
 		std::shared_ptr<TimerData> timerData = std::make_shared<TimerData>(getPlatformId(), getMethodSensorId(), it->getMethodId(), threadId, getTimestamp(), it->getStartNanos(), it->getEndNanos());

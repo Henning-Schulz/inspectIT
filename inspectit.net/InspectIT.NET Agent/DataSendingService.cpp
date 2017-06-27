@@ -64,7 +64,7 @@ std::shared_ptr<SensorData> DataSendingService::getMethodSensorData(JAVA_LONG se
 void DataSendingService::addMethodSensorData(std::shared_ptr<SensorData> data, std::string prefix)
 {
 	std::unique_lock<std::shared_mutex> lock(mMeasurements);
-	measurements->insert({ createKey(data->getSensorTypeId(), data->getMethodId(), prefix), data });
+	measurements->insert({ createKey(data->getSensorTypeId(), data->getIdentifyingId(), prefix), data });
 	notifiyListSizeListeners();
 }
 
@@ -197,7 +197,7 @@ void DataSendingService::prepareData()
 			logger.debug("Maps swapped");
 			logger.debug("finishedStoragesPrepCopy has size %i", finishedStoragesPrepCopy->size());
 
-			std::vector<std::shared_ptr<MethodSensorData>> dataObjects;
+			std::vector<std::shared_ptr<SensorData>> dataObjects;
 			for (auto it = measurementsPrepCopy->begin(); it != measurementsPrepCopy->end(); it++) {
 				dataObjects.push_back(it->second);
 			}

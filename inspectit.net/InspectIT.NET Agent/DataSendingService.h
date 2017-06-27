@@ -4,7 +4,6 @@
 #include "SendingStrategy.h"
 #include "ListSizeListener.h"
 #include "MeasurementStorage.h"
-#include "MeasurementStorage.h"
 #include "CMRConnection.h"
 #include "Logger.h"
 

@@ -5,6 +5,7 @@
 #include "ClassType.h"
 #include "InstrumentationDefinition.h"
 #include "MethodSensor.h"
+#include "MethodSensorFactory.h"
 
 #include <map>
 #include <vector>
@@ -21,6 +22,8 @@ private:
 
 	std::map<JAVA_LONG, std::shared_ptr<MethodSensorTypeConfig>> sensorTypeConfigs;
 	std::map<JAVA_LONG, std::shared_ptr<MethodSensor>> methodSensors;
+
+	MethodSensorFactory methodSensorFactory;
 
 public:
 	InstrumentationManager(JAVA_LONG platformId, ICorProfilerInfo3 *profilerInfo);

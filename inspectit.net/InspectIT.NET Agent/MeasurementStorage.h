@@ -1,7 +1,7 @@
 #pragma once
 
 #include "basehdr.h"
-#include "MethodSensorData.h"
+#include "SensorData.h"
 
 #include <memory>
 
@@ -36,5 +36,5 @@ public:
 	JAVA_LONG getMethodId() { return methodId; }
 
 	virtual bool finished() = 0;
-	virtual std::vector<std::shared_ptr<MethodSensorData>> finalizeData() = 0;
+	virtual std::vector<std::shared_ptr<SensorData>> finalizeData() = 0;
 };

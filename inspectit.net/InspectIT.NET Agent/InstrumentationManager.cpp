@@ -99,7 +99,7 @@ std::shared_ptr<MethodSensor> InstrumentationManager::getMethodSensorForId(JAVA_
 			return std::shared_ptr<MethodSensor>();
 		}
 
-		return MethodSensorFactory::getInstance()->createMethodSensor(configIt->second, platformId, profilerInfo);
+		return methodSensorFactory.createMethodSensor(configIt->second, platformId, profilerInfo);
 	}
 	else {
 		return it->second;

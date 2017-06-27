@@ -8,7 +8,7 @@
 
 #define TYPE_KEY L"objectType"
 
-class MethodSensorData : SensorData
+class MethodSensorData : public SensorData
 {
 private:
 	typedef SensorData super;
@@ -39,6 +39,7 @@ public:
 	JAVA_LONG getPlatformId() { return platformId; }
 	JAVA_LONG getMethodSensorId() { return methodSensorId; }
 	JAVA_LONG getMethodId() { return methodId; }
+	JAVA_LONG getIdentifyingId() { return getMethodId(); }
 
 	virtual web::json::value toJson()
 	{
