@@ -1,5 +1,6 @@
 #pragma once
 #include "AbstractSensorTypeConfig.h"
+#include "Logger.h"
 
 enum MethodSensorPriority { INVOC = 1, MIN, LOW, NORMAL, HIGH, MAX };
 
@@ -13,6 +14,8 @@ private:
 	MethodSensorPriority priority = NORMAL;
 
 	MethodSensorPriority prioFromString(std::wstring sPrio);
+
+	Logger logger = loggerFactory.createLogger("MethodSensorTypeConfig");
 
 public:
 	MethodSensorTypeConfig();

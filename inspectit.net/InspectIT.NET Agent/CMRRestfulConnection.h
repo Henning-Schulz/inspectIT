@@ -20,8 +20,6 @@ private:
 
 	Logger logger = loggerFactory.createLogger("CMRRestfulConnection");
 
-	std::shared_ptr<StrategyConfig> getStrategyConfig(JAVA_LONG platformId, const wchar_t* path);
-
 public:
 	CMRRestfulConnection();
 	~CMRRestfulConnection();

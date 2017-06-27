@@ -7,6 +7,7 @@
 #include "ExceptionSensorTypeConfig.h"
 #include "StrategyConfig.h"
 #include "InstrumentationDefinition.h"
+#include "Logger.h"
 
 #include <map>
 
@@ -29,6 +30,8 @@ private:
 	std::map<std::vector<std::wstring>, std::shared_ptr<InstrumentationDefinition>> initialInstrumentationDefinitions;
 
 	std::wstring configurationInfo;
+
+	Logger logger = loggerFactory.createLogger("AgentConfig");
 
 public:
 	AgentConfig();

@@ -68,9 +68,13 @@ std::wstring AgentConfig::getConfigurationInfo()
 
 void AgentConfig::fromJson(json::object json)
 {
+	logger.debug("Creating from JSON...");
+
 	// general settings
 	platformId = json.at(L"platformId").as_number().to_int64();
 	classCacheExistsOnCmr = json.at(L"classCacheExistsOnCmr").as_bool();
+
+	logger.debug("1");
 
 	// sensor type configs
 	json::array configArray = json.at(L"platformSensorTypeConfigs").as_array();
@@ -80,12 +84,22 @@ void AgentConfig::fromJson(json::object json)
 		platformSensorTypeConfigs.push_back(platformSensorConfig);
 	}
 
+	logger.debug("2");
+
 	configArray = json.at(L"methodSensorTypeConfigs").as_array();
+	logger.debug("configArray: %ls", json.at(L"methodSensorTypeConfigs").serialize().c_str());
+	logger.debug("2.1");
 	for (auto it = configArray.begin(); it != configArray.end(); it++) {
+		logger.debug("2.2");
 		auto methodSensorConfig = std::make_shared<MethodSensorTypeConfig>();
+		logger.debug("2.3");
 		methodSensorConfig->fromJson(it->as_object());
+		logger.debug("2.4");
 		methodSensorTypeConfigs.push_back(methodSensorConfig);
+		logger.debug("2.5");
 	}
+
+	logger.debug("3");
 
 	exceptionSensorTypeConfig = std::make_shared<ExceptionSensorTypeConfig>();
 	exceptionSensorTypeConfig->fromJson(json.at(L"exceptionSensorTypeConfig").as_object());
@@ -97,6 +111,8 @@ void AgentConfig::fromJson(json::object json)
 		specialMethodSensorTypeConfigs.push_back(methodSensorConfig);
 	}
 
+	logger.debug("4");
+
 	// strategy configs
 	bufferStrategyConfig = std::make_shared<StrategyConfig>();
 	bufferStrategyConfig->fromJson(json.at(L"bufferStrategyConfig").as_object());
@@ -104,12 +120,16 @@ void AgentConfig::fromJson(json::object json)
 	sendingStrategyConfig = std::make_shared<StrategyConfig>();
 	sendingStrategyConfig->fromJson(json.at(L"sendingStrategyConfig").as_object());
 
+	logger.debug("5");
+
 	// exclusions
 	json::array excludesArray = json.at(L"excludeClassesPatterns").as_array();
 	for (auto it = excludesArray.begin(); it != excludesArray.end(); it++) {
 		std::wstring pattern = it->as_object().at(L"pattern").as_string();
 		excludeClassesPatterns.push_back(pattern);
 	}
+
+	logger.debug("6");
 
 	// initial instr results
 	json::object instrResultsMap = json.at(L"initialInstrumentationResults").as_object();
@@ -128,6 +148,10 @@ void AgentConfig::fromJson(json::object json)
 		initialInstrumentationDefinitions.emplace(keyList, instrumentationDef);
 	}
 
+	logger.debug("7");
+
 	// configuration info
 	configurationInfo = json.at(L"configurationInfo").as_string();
+
+	logger.debug("8");
 }

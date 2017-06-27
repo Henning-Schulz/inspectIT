@@ -1,6 +1,7 @@
 #pragma once
 #include "basehdr.h"
 #include "JsonReceivable.h"
+#include "Logger.h"
 
 #include <map>
 
@@ -11,7 +12,9 @@ private:
 	JAVA_LONG id;
 	std::wstring className;
 
-	std::map<std::wstring, json::object> parameters;
+	std::map<std::wstring, std::wstring> parameters;
+
+	Logger logger = loggerFactory.createLogger("AbstractSensorTypeConfig");
 
 public:
 	AbstractSensorTypeConfig();
@@ -20,7 +23,7 @@ public:
 	JAVA_LONG getId();
 	std::wstring getClassName();
 
-	std::map<std::wstring, json::object> getParameters();
+	std::map<std::wstring, std::wstring> getParameters();
 
 	void fromJson(json::object json);
 };

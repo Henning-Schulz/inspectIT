@@ -3,6 +3,8 @@
 #include "ip_calculation.h"
 
 #include <exception>
+#include <locale>
+#include <codecvt>
 
 using namespace web::http;
 using namespace web::http::client;
@@ -46,7 +48,7 @@ CMRRestfulConnection::CMRRestfulConnection()
 	}
 
 	connectionTestPath = L"/cmrManagement/testConnection";
-	keepAlivePath = L"keep-alive";
+	keepAlivePath = L"/keep-alive";
 	agentPath = L"/agent";
 	storagePath = L"/agent-storage";
 	logger.debug("Using CMR URL %ls", baseUrl);
@@ -89,6 +91,8 @@ void CMRRestfulConnection::sendKeepAlive(JAVA_LONG platformId, bool waitForRespo
 	std::wstringstream urlStream;
 	urlStream << baseUrl << keepAlivePath << L"/" << platformId;
 
+	logger.debug("Calling URL %ls", urlStream.str().c_str());
+
 	Logger *nestedLogger = &logger;
 
 	http_client client(urlStream.str().c_str());
@@ -125,23 +129,32 @@ std::shared_ptr<AgentConfig> CMRRestfulConnection::registerPlatform(LPWSTR agent
 
 	std::vector<std::string> definedIps = getAllDefinedIPs();
 
+	logger.debug("%i IPs retrieved. First is %s. Last is %s", definedIps.size(), definedIps.front().c_str(), definedIps.back().c_str());
+
 	std::wstringstream urlStream;
 	urlStream << baseUrl << agentPath << "/register/" << agentName << "/" << version;
 
 	json::value ipArray;
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+
+	json::value val;
 
 	int i = 0;
 	for (std::vector<std::string>::iterator it = definedIps.begin(); it != definedIps.end(); it++) {
-		std::wstringstream wss;
-		wss << it->c_str();
-		ipArray[i] = json::value(wss.str());
+		ipArray[i] = json::value::string(converter.from_bytes(*it));
+		logger.debug("IP %i: %ls", i, ipArray[i].as_string().c_str());
 		i++;
 	}
+
+	logger.debug("url is: %ls", urlStream.str().c_str());
+	logger.debug("ipArray is: %ls", ipArray.serialize().c_str());
 
 	http_client client(urlStream.str().c_str());
 	http_response response;
 	try {
-		response = client.request(methods::POST, L"", ipArray.serialize(), MIME_JSON).get();
+		logger.debug("Sending request...");
+		response = client.request(methods::POST, L"", ipArray.serialize().c_str(), MIME_JSON).get();
+		logger.debug("Request sent.");
 	}
 	catch (web::http::http_exception) {
 		logger.error("Could not connect to %ls", urlStream.str().c_str());
@@ -151,6 +164,7 @@ std::shared_ptr<AgentConfig> CMRRestfulConnection::registerPlatform(LPWSTR agent
 	status_code c = response.status_code();
 	if (c == status_codes::OK) {
 		json::object obj = response.extract_json().get().as_object();
+		logger.debug("Converting JSON to AgentConfig...");
 		std::shared_ptr<AgentConfig> agentConfig = std::make_shared<AgentConfig>();
 		agentConfig->fromJson(obj);
 		logger.debug("Platform registered. ID is %lld", agentConfig->getPlatformId());
@@ -166,7 +180,9 @@ void CMRRestfulConnection::unregisterPlatform(JAVA_LONG platformId)
 	logger.debug("Unregistering platform...");
 
 	std::wstringstream urlStream;
-	urlStream << baseUrl << agentPath << std::to_wstring(platformId) << "/unregister";
+	urlStream << baseUrl << agentPath << L"/" << std::to_wstring(platformId) << L"/unregister";
+
+	logger.debug("Calling URL %ls", urlStream.str().c_str());
 
 	http_client client(urlStream.str().c_str());
 	http_response response;

@@ -244,8 +244,11 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 
 	// Register agent
 
-	auto agentConfig = cmrConnection->registerPlatform(L".NET agent", L"0.1"); // TODO: Retrieve the name dynamically
+	auto agentConfig = cmrConnection->registerPlatform(L".NET%20agent", L"1"); // TODO: Retrieve the name dynamically
+	logger.debug("Got AgentConfig.");
 	platformID = agentConfig->getPlatformId();
+
+	logger.debug("Platform ID is %lli.", platformID);
 
 	HRESULT hr;
 	hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo3, (void **)&profilerInfo3);
