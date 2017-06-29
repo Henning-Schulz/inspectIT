@@ -206,10 +206,10 @@ void CMRRestfulConnection::unregisterPlatform(JAVA_LONG platformId)
 
 std::shared_ptr<InstrumentationDefinition> CMRRestfulConnection::analyze(JAVA_LONG platformIdent, std::shared_ptr<Type> type)
 {
-	logger.debug("Analyzing class for instrumentation...");
+	logger.debug("Analyzing class %ls for instrumentation...", type->getFqn().c_str());
 
 	std::wstringstream urlStream;
-	urlStream << baseUrl << agentPath << platformIdent << "/analyze";
+	urlStream << baseUrl << agentPath << "/" << platformIdent << "/analyze";
 
 	http_client client(urlStream.str().c_str());
 	http_response response;
@@ -223,11 +223,18 @@ std::shared_ptr<InstrumentationDefinition> CMRRestfulConnection::analyze(JAVA_LO
 
 	status_code c = response.status_code();
 	if (c == status_codes::OK) {
-		json::object obj = response.extract_json().get().as_object();
-		std::shared_ptr<InstrumentationDefinition> instrumentationDefinition = std::make_shared<InstrumentationDefinition>();
-		instrumentationDefinition->fromJson(obj);
-		logger.debug("Analyzation finished. Received %i method instrumentations.", instrumentationDefinition->getMethodInstrumentationConfigs().size());
-		return instrumentationDefinition;
+		auto json = response.extract_json().get();
+		if (json.is_null()) {
+			// If there is nothing to instrument, the CMR will return null
+			return std::shared_ptr<InstrumentationDefinition>();
+		}
+		else {
+			json::object obj = json.as_object();
+			std::shared_ptr<InstrumentationDefinition> instrumentationDefinition = std::make_shared<InstrumentationDefinition>();
+			instrumentationDefinition->fromJson(obj);
+			logger.debug("Analysis finished. Received %i method instrumentations.", instrumentationDefinition->getMethodInstrumentationConfigs().size());
+			return instrumentationDefinition;
+		}
 	}
 	else {
 		logger.error("Could not analyze class %ls. Response was %u!", type->getFqn(), c);

@@ -33,6 +33,8 @@ public:
 
 	virtual DWORD getSpecialMonitorFlags() = 0;
 
+	virtual std::wstring getClassName() = 0;
+
 	JAVA_LONG getSensorTypeId();
 	JAVA_LONG getPlatformId();
 	std::wstring getName();

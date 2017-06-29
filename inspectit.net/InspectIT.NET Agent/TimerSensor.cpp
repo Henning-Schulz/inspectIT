@@ -51,3 +51,8 @@ DWORD TimerSensor::getSpecialMonitorFlags()
 {
 	return 0;
 }
+
+std::wstring TimerSensor::getClassName()
+{
+	return L"rocks.inspectit.agent.java.sensor.method.timer.TimerSensor";
+}

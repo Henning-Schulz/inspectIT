@@ -10,11 +10,12 @@ void MethodSensorFactory::setupKnownSensors()
 
 void MethodSensorFactory::addKnownSensor(std::shared_ptr<MethodSensor> sensor)
 {
-	knownSensors.emplace(sensor->getName(), sensor);
+	knownSensors.emplace(sensor->getClassName(), sensor);
 }
 
 MethodSensorFactory::MethodSensorFactory()
 {
+	setupKnownSensors();
 }
 
 
@@ -24,9 +25,16 @@ MethodSensorFactory::~MethodSensorFactory()
 
 std::shared_ptr<MethodSensor> MethodSensorFactory::createMethodSensor(std::shared_ptr<MethodSensorTypeConfig> sensorTypeConfig, JAVA_LONG platformId, ICorProfilerInfo3 * profilerInfo)
 {
-	auto it = knownSensors.find(sensorTypeConfig->getName());
+	auto it = knownSensors.find(sensorTypeConfig->getClassName());
 	if (it == knownSensors.end()) {
-		// TODO: Error!
+		logger.warn("Do not know a sensor %ls with class name %lli and id %lli!", sensorTypeConfig->getName().c_str(), sensorTypeConfig->getClassName().c_str(), sensorTypeConfig->getId());
+		if (loggerFactory.getLogLevel() >= LEVEL_INFO) {
+			logger.info("Known sensors are:");
+			for (auto sit = knownSensors.begin(); sit != knownSensors.end(); sit++) {
+				logger.info("%ls - %ls", sit->first.c_str(), sit->second->getName().c_str());
+			}
+		}
+
 		return std::shared_ptr<MethodSensor>();
 	}
 	else {

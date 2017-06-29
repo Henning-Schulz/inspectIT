@@ -44,16 +44,11 @@ MethodSensorPriority MethodSensorTypeConfig::getPriority()
 
 void MethodSensorTypeConfig::fromJson(json::object json)
 {
-	logger.debug("1");
 	super::fromJson(json);
 	
-	logger.debug("2");
 	name = json.at(L"name").as_string();
-	logger.debug("3");
 	std::wstring priorityName = json.at(L"priority").as_string();
-	logger.debug("4");
 	priority = prioFromString(priorityName);
-	logger.debug("5");
 }
 
 MethodSensorPriority prioFromString(std::wstring sPrio)

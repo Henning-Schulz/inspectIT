@@ -1,15 +1,23 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include "agentutils.h"
+#include "java_modifiers.h"
 
 #include <typeinfo>
 #include <iostream>
 #include <sstream>
+#include <locale>
+#include <codecvt>
+#include <string>
+
+#include <cryptopp\sha.h>
+#include <cryptopp\hex.h>
 
 
 std::shared_ptr<ClassType> createClassTypeFromId(ICorProfilerInfo3 *profilerInfo3, ClassID classId)
 {
 	std::shared_ptr<ClassType> classType = std::make_shared<ClassType>();
+	std::wstringstream hashInputStream;
 
 	ModuleID moduleId;
 	mdTypeDef typeDefToken;
@@ -23,9 +31,11 @@ std::shared_ptr<ClassType> createClassTypeFromId(ICorProfilerInfo3 *profilerInfo
 		return std::shared_ptr<ClassType>();
 	}
 
-	hr = profilerInfo3->GetClassIDInfo(parentClassId, 0, &parentTypeDefToken);
-	if (FAILED(hr)) {
-		return std::shared_ptr<ClassType>();
+	if (parentClassId != 0) {
+		hr = profilerInfo3->GetClassIDInfo(parentClassId, 0, &parentTypeDefToken);
+		if (FAILED(hr)) {
+			return std::shared_ptr<ClassType>();
+		}
 	}
 
 	IMetaDataImport* metaDataImport = 0;
@@ -38,52 +48,68 @@ std::shared_ptr<ClassType> createClassTypeFromId(ICorProfilerInfo3 *profilerInfo
 
 	WCHAR wcharBuffer[MAX_BUFFERSIZE];
 	ULONG wcharBufferLength;
-	hr = metaDataImport->GetTypeDefProps(typeDefToken, wcharBuffer, MAX_BUFFERSIZE, &wcharBufferLength, 0, 0);
+	DWORD classModifiers = 0;
+	hr = metaDataImport->GetTypeDefProps(typeDefToken, wcharBuffer, MAX_BUFFERSIZE, &wcharBufferLength, &classModifiers, 0);
 	if (FAILED(hr)) {
+		metaDataImport->Release();
 		return std::shared_ptr<ClassType>();
 	}
-	classType->setFqn(std::wstring(wcharBuffer, wcharBufferLength));
+	classType->setFqn(std::wstring(wcharBuffer, wcharBufferLength - 1)); // Omit terminating \0
+	classType->setModifiers(convertClassModifiersToJava(classModifiers));
+	hashInputStream << classType->getFqn() << L"{";
 
 	// load parent class name (if available)
 
 	if (parentClassId != 0) {
 		hr = metaDataImport->GetTypeDefProps(parentTypeDefToken, wcharBuffer, MAX_BUFFERSIZE, &wcharBufferLength, 0, 0);
 		if (FAILED(hr)) {
-			return std::shared_ptr<ClassType>();
+			loggerFactory.staticLog(LEVEL_WARN, "agentutils", "Could not get props of superclass %i of class %ls! Ignoring the superclass.", parentClassId, wcharBuffer);
 		}
-		classType->addSuperClass(std::wstring(wcharBuffer, wcharBufferLength));
+		else {
+			classType->addSuperClass(std::wstring(wcharBuffer, wcharBufferLength - 1)); // Omit terminating \0
+		}
 	}
 
-	// load interfaces
+	// TODO: load interfaces
 
+	/*
 	HCORENUM* enumerator = 0;
 	mdInterfaceImpl interfaceImpls[MAX_BUFFERSIZE];
 	ULONG interfaceImplsLength;
 	HRESULT enumHr;
 	do {
+
 		enumHr = metaDataImport->EnumInterfaceImpls(enumerator, typeDefToken, interfaceImpls, MAX_BUFFERSIZE, &interfaceImplsLength);
 
 		for (size_t i = 0; i < interfaceImplsLength; i++) {
+
 			mdToken interfaceToken;
 			hr = metaDataImport->GetInterfaceImplProps(interfaceImpls[i], 0, &interfaceToken);
+
 			if (FAILED(hr)) {
+				metaDataImport->Release();
 				return std::shared_ptr<ClassType>();
 			}
+
 			hr = metaDataImport->GetTypeDefProps(interfaceToken, wcharBuffer, MAX_BUFFERSIZE, &wcharBufferLength, 0, 0);
 			if (FAILED(hr)) {
+				metaDataImport->Release();
 				return std::shared_ptr<ClassType>();
 			}
+
 			classType->addInterface(std::wstring(wcharBuffer, wcharBufferLength));
 		}
 	} while (enumHr == S_OK);
+	*/
 
 	// load methods
 
-	enumerator = 0;
+	HCORENUM enumerator = 0;
 	mdMethodDef methodDefs[MAX_BUFFERSIZE];
 	ULONG methodDefsLength;
+	HRESULT enumHr;
 	do {
-		enumHr = metaDataImport->EnumMethods(enumerator, typeDefToken, methodDefs, MAX_BUFFERSIZE, &methodDefsLength);
+		enumHr = metaDataImport->EnumMethods(&enumerator, typeDefToken, methodDefs, MAX_BUFFERSIZE, &methodDefsLength);
 
 		for (size_t i = 0; i < methodDefsLength; i++) {
 			// GetMethodProps with methodDefs[i]
@@ -92,26 +118,41 @@ std::shared_ptr<ClassType> createClassTypeFromId(ICorProfilerInfo3 *profilerInfo
 			ULONG sigBlobSize;
 			hr = metaDataImport->GetMethodProps(methodDefs[i], 0, wcharBuffer, MAX_BUFFERSIZE, &wcharBufferLength, &methodModifiers, &sigBlob, &sigBlobSize, 0, 0);
 			if (FAILED(hr)) {
-				return std::shared_ptr<ClassType>();
-			}
-
-			// Get FunctionID
-			FunctionID functionId;
-			hr = profilerInfo3->GetFunctionFromTokenAndTypeArgs(moduleId, methodDefs[i], classId, typeArgsLength, typeArgs, &functionId);
-			if (FAILED(hr)) {
+				metaDataImport->Release();
 				return std::shared_ptr<ClassType>();
 			}
 
 			// Create MethodType and add it to classType
 			std::shared_ptr<MethodType> method = std::make_shared<MethodType>();
-			method->setName(std::wstring(wcharBuffer, wcharBufferLength));
+			method->setName(std::wstring(wcharBuffer, wcharBufferLength - 1)); // Omit terminating \0
 			method->setModifiers(convertMethodModifiersToJava(methodModifiers));
 			addMethodParams(method, metaDataImport, sigBlob, sigBlobSize);
-			method->setFunctionId(functionId);
+			method->setMethodDef(methodDefs[i]);
 
 			classType->addMethod(method);
+			hashInputStream << method->getName() << L"(";
+			auto params = method->getParameters();
+			bool first = true;
+			for (auto it = params.begin(); it != params.end(); it++) {
+				if (first) {
+					first = false;
+				}
+				else {
+					hashInputStream << ",";
+				}
+
+				hashInputStream << *it;
+			}
+			hashInputStream << ")";
 		}
 	} while (enumHr == S_OK);
+
+	hashInputStream << "}";
+
+	metaDataImport->Release();
+
+	classType->setHash(generateHash(hashInputStream.str()));
+	return classType;
 }
 
 HRESULT addMethodParams(std::shared_ptr<MethodType> method, IMetaDataImport* pIMetaDataImport, PCCOR_SIGNATURE sigBlob, ULONG sigBlobSize)
@@ -133,6 +174,34 @@ HRESULT addMethodParams(std::shared_ptr<MethodType> method, IMetaDataImport* pIM
 	}
 
 	return S_OK;
+}
+
+mdMethodDef getMethodDefForFunctionID(ICorProfilerInfo3 *profilerInfo3, FunctionID functionId)
+{
+	mdMethodDef methodDef;
+	HRESULT hr = profilerInfo3->GetFunctionInfo2(functionId, 0, 0, 0, &methodDef, 0, 0, 0);
+	if (FAILED(hr)) {
+		return 0;
+	}
+
+	return methodDef;
+}
+
+std::wstring generateHash(std::wstring input)
+{
+	CryptoPP::SHA256 hash;
+	byte digest[CryptoPP::SHA256::DIGESTSIZE];
+
+	hash.CalculateDigest(digest, (byte*)input.c_str(), input.length());
+
+	CryptoPP::HexEncoder encoder;
+	std::string output;
+	encoder.Attach(new CryptoPP::StringSink(output));
+	encoder.Put(digest, sizeof(digest));
+	encoder.MessageEnd();
+
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	return converter.from_bytes(output);
 }
 
 PCCOR_SIGNATURE parseMethodSignature(IMetaDataImport *metaDataImport, PCCOR_SIGNATURE signature, LPWSTR signatureText)
@@ -341,37 +410,72 @@ JAVA_INT convertMethodModifiersToJava(DWORD netModifiers) {
 	switch (netModifiers & mdMemberAccessMask) {
 	case mdPublic:
 		// public
-		javaModifiers |= 0x1;
+		javaModifiers |= JAVA_PUBLIC;
 		break;
 	case mdPrivate:
 	case mdPrivateScope:
 		// private
-		javaModifiers |= 0x2;
+		javaModifiers |= JAVA_PRIVATE;
 		break;
 	default:
 		// protected
-		javaModifiers |= 0x4;
+		javaModifiers |= JAVA_PROTECTED;
 		break;
 	}
 
 	if ((netModifiers & mdStatic) == mdStatic) {
 		// static
-		javaModifiers |= 0x8;
+		javaModifiers |= JAVA_STATIC;
 	}
 
 	if ((netModifiers & mdFinal) == mdFinal) {
 		// final
-		javaModifiers |= 0x10;
+		javaModifiers |= JAVA_FINAL;
 	}
 
 	if ((netModifiers & mdAbstract) == mdAbstract) {
 		// abstract
-		javaModifiers |= 0x400;
+		javaModifiers |= JAVA_ABSTRACT;
 	}
 
 	if((netModifiers & mdPinvokeImpl) == mdPinvokeImpl) {
 		// native
-		javaModifiers |= 0x100;
+		javaModifiers |= JAVA_NATIVE;
+	}
+
+	return javaModifiers;
+}
+
+JAVA_INT convertClassModifiersToJava(DWORD netModifiers)
+{
+	JAVA_INT javaModifiers = 0;
+
+	switch (netModifiers & tdVisibilityMask) {
+	case tdPublic:
+	case tdNestedPublic:
+		javaModifiers |= JAVA_PUBLIC;
+		break;
+	case tdNestedPrivate:
+		javaModifiers |= JAVA_PRIVATE;
+		break;
+	case tdNotPublic:
+		// Leave as default
+		break;
+	default:
+		javaModifiers |= JAVA_PROTECTED;
+		break;
+	}
+
+	if ((netModifiers & tdClassSemanticsMask) == tdInterface) {
+		javaModifiers |= JAVA_INTERFACE;
+	}
+
+	if ((netModifiers & tdAbstract) == tdAbstract) {
+		javaModifiers |= JAVA_ABSTRACT;
+	}
+
+	if ((netModifiers & tdSealed) == tdSealed) {
+		javaModifiers |= JAVA_FINAL;
 	}
 
 	return javaModifiers;

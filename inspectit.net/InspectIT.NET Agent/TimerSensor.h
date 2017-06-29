@@ -24,5 +24,7 @@ public:
 	std::shared_ptr<ThreadHook> getThreadHook();
 
 	DWORD getSpecialMonitorFlags();
+
+	std::wstring getClassName();
 };
 

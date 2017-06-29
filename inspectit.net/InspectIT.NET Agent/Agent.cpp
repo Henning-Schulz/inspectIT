@@ -161,22 +161,45 @@ std::shared_ptr<InstrumentationManager> Agent::getInstrumentationManager()
 	return instrumentationManager;
 }
 
+ICorProfilerInfo3* Agent::getProfilerInfo()
+{
+	return profilerInfo3;
+}
+
 UINT_PTR FunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
 {
+	// Get SensorInstrumentationPoint
+
+	loggerFactory.staticLog(LEVEL_DEBUG, "FunctionMapper", "FunctionID %i.", functionID);
+	// Have to work with mdMethodDef, since the FunctionID is now available for the first time
+	mdMethodDef methodDef = getMethodDefForFunctionID(globalAgentInstance->getProfilerInfo(), functionID);
+	loggerFactory.staticLog(LEVEL_DEBUG, "FunctionMapper", "Got mdMethodDef %li for FunctionID %i.", methodDef, functionID);
+
 	auto instrumentationManager = globalAgentInstance->getInstrumentationManager();
-	auto sensorInstrumentationPoint = instrumentationManager->getSensorInstrumentationPoint(functionID);
+	auto sensorInstrumentationPoint = instrumentationManager->getSensorInstrumentationPoint(methodDef);
 
 	if (!sensorInstrumentationPoint) {
+		loggerFactory.staticLog(LEVEL_INFO, "FunctionMapper", "Not instrumenting method with mdMethodDef %li.", methodDef);
 		// Nothing to instrument
 		*pbHookFunction = 0;
 		return functionID;
 	}
 
+	// Instantiate sensor
+
 	JAVA_LONG methodId = sensorInstrumentationPoint->getId();
+
+	loggerFactory.staticLog(LEVEL_INFO, "FunctionMapper", "Instrumenting method %lli.", methodId);
 
 	auto sensorIds = sensorInstrumentationPoint->getSensorIds();
 	for (auto it = sensorIds.begin(); it != sensorIds.end(); it++) {
 		auto sensor = instrumentationManager->getMethodSensorForId(*it);
+
+		if (!sensor) {
+			loggerFactory.staticLog(LEVEL_ERROR, "FunctionMapper", "There is no sensor with id %lli. Not instrumenting method %lli!", *it, methodId);
+			*pbHookFunction = 0;
+			return methodId;
+		}
 
 		if (sensor->hasHook()) {
 			globalAgentInstance->assignHookToMethod(methodId, sensor->getHook());
@@ -186,6 +209,14 @@ UINT_PTR FunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
 			globalAgentInstance->addThreadHook(sensor->getThreadHook());
 		}
 	}
+
+	// Tell the CMR that the instrumentation was applied
+
+	MethodSensorMap methodSensorMap;
+	methodSensorMap.addAllSensors(methodId, sensorIds);
+	cmrConnection->instrumentationApplied(globalAgentInstance->platformID, methodSensorMap, false);
+
+	*pbHookFunction = 1;
 
 	return methodId;
 }
@@ -244,7 +275,7 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 
 	// Register agent
 
-	auto agentConfig = cmrConnection->registerPlatform(L".NET%20agent", L"1"); // TODO: Retrieve the name dynamically
+	auto agentConfig = cmrConnection->registerPlatform(L"dotNET-agent", L"1"); // TODO: Retrieve the name dynamically
 	logger.debug("Got AgentConfig.");
 	platformID = agentConfig->getPlatformId();
 
@@ -261,8 +292,9 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 	}
 
 	instrumentationManager = std::make_shared<InstrumentationManager>(platformID, profilerInfo3);
+	instrumentationManager->addSensorTypeConfigs(agentConfig->getMethodSensorTypeConfigs());
 
-	DWORD eventMask = COR_PRF_MONITOR_ENTERLEAVE | COR_PRF_MONITOR_THREADS;
+	DWORD eventMask = COR_PRF_MONITOR_ENTERLEAVE | COR_PRF_MONITOR_THREADS | COR_PRF_MONITOR_CLASS_LOADS;
 
 	// TODO: Add flags to event mask if necessary
 
@@ -314,20 +346,51 @@ HRESULT Agent::ClassLoadFinished(ClassID classId, HRESULT hrStatus)
 		return S_OK;
 	}
 
+	logger.debug("Class %i loaded.", classId);
+
 	std::shared_ptr<ClassType> classType = createClassTypeFromId(profilerInfo3, classId);
 
 	if (!classType) {
-		logger.error("Error during creation of ClassType for ClassID %i. Aborting.", classId);
-		return E_FAIL;
+		logger.warn("Could not create ClassType for ClassID %i! Aborting.", classId);
+		return S_OK;
 	}
+
+	logger.debug("Class %ls loaded. Modifiers are 0x%lx.", classType->getFqn().c_str(), classType->getModifiers());
+
+	// TODO: Check if excluded --> do not ask CMR in this case
 
 	// Send it to the CMR and receive instrumentation definition
 
 	std::shared_ptr<InstrumentationDefinition> instrumentationDefinition = cmrConnection->analyze(platformID, classType);
+	
+	// Register instrumentation definition at the InstrumentationManager if not null
 
-	// Register instrumentation definition at the InstrumentationManager
+	if (instrumentationDefinition) {
+		instrumentationManager->registerInstrumentationDefinition(classType, instrumentationDefinition);
+	}
+	else {
+		logger.debug("Received no instrumentation definition for class %ls.", classType->getFqn().c_str());
+	}
 
-	instrumentationManager->registerInstrumentationDefinition(classType, instrumentationDefinition);
+
+	// TODO: remove:
+	if (instrumentationDefinition) {
+		if (classType->getFqn().compare(L"TestSystem.Program") == 0) {
+			auto methods = classType->getMethods();
+			mdMethodDef methodDef = 0;
+			for (auto mit = methods.begin(); mit != methods.end(); mit++) {
+				if ((*mit)->getName().compare(L"say") == 0) {
+					methodDef = (*mit)->getMethodDef();
+				}
+			}
+			logger.info("Stored instrumentation definition for TestSystem.Program. mdMethodDef of say is %li.", methodDef);
+
+			auto instrs = instrumentationDefinition->getMethodInstrumentationConfigs();
+			for (auto it2 = instrs.begin(); it2 != instrs.end(); it2++) {
+				logger.debug("Instrumenting %ls with %i sensors, first is %lli.", (*it2)->getTargetMethodName().c_str(), (*it2)->getSensorInstrumentationPoint()->getSensorIds().size(), (*it2)->getSensorInstrumentationPoint()->getSensorIds().front());
+			}
+		}
+	}
 
 	return S_OK;
 }

@@ -12,7 +12,7 @@ import rocks.inspectit.shared.all.communication.DefaultData;
  *
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "dataType")
-@JsonSubTypes({ @JsonSubTypes.Type(name = "TODO", value = TransferMethodSensorData.class) })
+@JsonSubTypes({ @JsonSubTypes.Type(name = "TimerData", value = TransferTimerSensorData.class) })
 public abstract class TransferData {
 
 	private long timestampMs;

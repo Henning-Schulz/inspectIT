@@ -58,6 +58,8 @@ public:
 
 	JAVA_LONG platformID;
 
+	ICorProfilerInfo3* getProfilerInfo();
+
 	void assignHookToMethod(METHOD_ID methodId, std::shared_ptr<MethodHook> hook);
 	void addThreadHook(std::shared_ptr<ThreadHook> hook);
 

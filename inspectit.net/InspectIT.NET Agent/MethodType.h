@@ -14,7 +14,8 @@ private:
 	std::vector<std::wstring> exceptions;
 	std::vector<std::wstring> annotations;
 
-	FunctionID functionId = 0;
+	/* Cannot use FunctionID, since we need this before the function was loaded */
+	mdMethodDef methodDef = 0;
 
 public:
 	MethodType();
@@ -33,8 +34,8 @@ public:
 	std::vector<std::wstring> getAnnotations();
 	void addAnnotation(std::wstring annotation);
 
-	FunctionID getFunctionId();
-	void setFunctionId(FunctionID functionId);
+	mdMethodDef getMethodDef();
+	void setMethodDef(mdMethodDef methodDef);
 
 	json::value toJson();
 };

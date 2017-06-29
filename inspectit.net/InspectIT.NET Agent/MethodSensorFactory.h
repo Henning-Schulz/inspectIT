@@ -2,6 +2,8 @@
 
 #include "MethodSensor.h"
 #include "MethodSensorTypeConfig.h"
+#include "Logger.h"
+
 #include <shared_mutex>
 
 class MethodSensorFactory
@@ -11,6 +13,8 @@ private:
 
 	void setupKnownSensors();
 	void addKnownSensor(std::shared_ptr<MethodSensor> sensor);
+
+	Logger logger = loggerFactory.createLogger("MethodSensorFactory");
 
 public:
 	MethodSensorFactory();

@@ -71,14 +71,14 @@ void MethodType::addAnnotation(std::wstring annotation)
 	annotations.push_back(annotation);
 }
 
-FunctionID MethodType::getFunctionId()
+mdMethodDef MethodType::getMethodDef()
 {
-	return functionId;
+	return methodDef;
 }
 
-void MethodType::setFunctionId(FunctionID functionId)
+void MethodType::setMethodDef(mdMethodDef methodDef)
 {
-	this->functionId = functionId;
+	this->methodDef = methodDef;
 }
 
 json::value MethodType::toJson()

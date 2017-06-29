@@ -15,6 +15,14 @@ InstrumentationManager::~InstrumentationManager()
 {
 }
 
+void InstrumentationManager::addSensorTypeConfigs(std::vector<std::shared_ptr<MethodSensorTypeConfig>> configs)
+{
+	for (auto it = configs.begin(); it != configs.end(); it++) {
+		auto conf = *it;
+		sensorTypeConfigs.emplace(conf->getId(), conf);
+	}
+}
+
 void InstrumentationManager::setExcludeClassesPatterns(std::vector<std::wstring> excludeClassesPatterns)
 {
 	this->excludeClassesPatterns = excludeClassesPatterns;
@@ -24,7 +32,7 @@ bool InstrumentationManager::instrumentationDefinitionMatches(std::shared_ptr<Me
 {
 	// Compare method name
 
-	if (instrConfig->getTargetClassFqn().compare(methodType->getName()) != 0) {
+	if (instrConfig->getTargetMethodName().compare(methodType->getName()) != 0) {
 		return false;
 	}
 
@@ -64,7 +72,9 @@ void InstrumentationManager::registerInstrumentationDefinition(std::shared_ptr<C
 	for (auto methodIt = methodTypes.begin(); methodIt != methodTypes.end(); methodIt++) {
 		for (auto configIt = instrConfigs.begin(); configIt != instrConfigs.end(); ) {
 			if (instrumentationDefinitionMatches(*methodIt, *configIt)) {
-				sensorInstrumentationPoints.emplace((*methodIt)->getFunctionId(), (*configIt)->getSensorInstrumentationPoint());
+				sensorInstrumentationPoints.emplace((*methodIt)->getMethodDef(), (*configIt)->getSensorInstrumentationPoint());
+
+				logger.debug("Added %i sensor points for method %ls.%ls", (*configIt)->getSensorInstrumentationPoint()->getSensorIds().size(), classType->getFqn().c_str(), (*methodIt)->getName());
 
 				configIt = instrConfigs.erase(configIt);
 			}
@@ -75,9 +85,9 @@ void InstrumentationManager::registerInstrumentationDefinition(std::shared_ptr<C
 	}
 }
 
-std::shared_ptr<SensorInstrumentationPoint> InstrumentationManager::getSensorInstrumentationPoint(FunctionID functionId)
+std::shared_ptr<SensorInstrumentationPoint> InstrumentationManager::getSensorInstrumentationPoint(mdMethodDef methodDef)
 {
-	auto it = sensorInstrumentationPoints.find(functionId);
+	auto it = sensorInstrumentationPoints.find(methodDef);
 
 	if (it == sensorInstrumentationPoints.end()) {
 		// Return empty pointer
@@ -95,7 +105,15 @@ std::shared_ptr<MethodSensor> InstrumentationManager::getMethodSensorForId(JAVA_
 	if (it == methodSensors.end()) {
 		auto configIt = sensorTypeConfigs.find(sensorId);
 		if (configIt == sensorTypeConfigs.end()) {
-			// TODO: Error!
+			logger.error("The passed sensor id %lli is not registered!", sensorId);
+
+			if (loggerFactory.getLogLevel() >= LEVEL_INFO) {
+				logger.info("Registered sensors are:");
+				for (auto cit = sensorTypeConfigs.begin(); cit != sensorTypeConfigs.end(); cit++) {
+					logger.info("%lli: %ls", cit->first, cit->second->getName().c_str());
+				}
+			}
+
 			return std::shared_ptr<MethodSensor>();
 		}
 

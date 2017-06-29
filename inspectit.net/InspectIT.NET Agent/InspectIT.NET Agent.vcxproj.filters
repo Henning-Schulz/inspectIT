@@ -207,6 +207,9 @@
     <ClInclude Include="MethodSensorFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="java_modifiers.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Agent.cpp">
@@ -317,8 +320,5 @@
     <None Include="agent.def">
       <Filter>Source Files\core</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Natvis Include="enable_vector.natvis" />
   </ItemGroup>
 </Project>

@@ -130,6 +130,18 @@ public class Test {
 		return map;
 	}
 
+	@RequestMapping(method = RequestMethod.GET, value = "collection-map")
+	@ResponseBody
+	public Map<Collection<String>, ClassA> getCollectionKeyMap() {
+		Map<Collection<String>, ClassA> map = new HashMap<>();
+		ClassA a = new ClassA();
+		a.setId(123);
+		a.setName("Name");
+		map.put(Arrays.asList("foo", "bar"), a);
+		map.put(Arrays.asList("xyz"), new ClassB());
+		return map;
+	}
+
 	@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "objectType")
 	@JsonSubTypes({ @JsonSubTypes.Type(name = "ClassB", value = ClassB.class), @JsonSubTypes.Type(name = "ClassA", value = ClassA.class) })
 	public static class ClassA {
