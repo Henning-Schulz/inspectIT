@@ -20,5 +20,5 @@ public:
 	MethodSensorFactory();
 	~MethodSensorFactory();
 
-	std::shared_ptr<MethodSensor> createMethodSensor(std::shared_ptr<MethodSensorTypeConfig> sensorTypeConfig, JAVA_LONG platformId, ICorProfilerInfo3 *profilerInfo);
+	std::shared_ptr<MethodSensor> createMethodSensor(std::shared_ptr<MethodSensorTypeConfig> sensorTypeConfig, JAVA_LONG platformId, ICorProfilerInfo3 *profilerInfo, std::shared_ptr<DataSendingService> dataSendingService);
 };

@@ -19,4 +19,3 @@ public:
 
 	void fromJson(json::object json);
 };
-

@@ -16,7 +16,7 @@ void TimerSensor::init(ICorProfilerInfo *profilerInfo)
 {
 	hook->setPlatformId(getPlatformId());
 	hook->setSensorTypeId(getSensorTypeId());
-	hook->init(profilerInfo);
+	hook->initialize(profilerInfo, getDataSendingService());
 }
 
 void TimerSensor::notifyStartup()

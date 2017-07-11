@@ -10,11 +10,12 @@ private:
 
 	ICorProfilerInfo *profilerInfo;
 
+protected:
+	void init(ICorProfilerInfo *profilerInfo);
+
 public:
 	TimerHook();
 	~TimerHook();
-
-	void init(ICorProfilerInfo *profilerInfo);
 	void notifyShutdown();
 
 	void beforeBody(METHOD_ID methodID);

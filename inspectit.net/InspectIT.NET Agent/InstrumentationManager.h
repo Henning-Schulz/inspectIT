@@ -6,6 +6,7 @@
 #include "InstrumentationDefinition.h"
 #include "MethodSensor.h"
 #include "MethodSensorFactory.h"
+#include "DataSendingService.h"
 #include "Logger.h"
 
 #include <map>
@@ -26,10 +27,12 @@ private:
 
 	MethodSensorFactory methodSensorFactory;
 
+	std::shared_ptr<DataSendingService> dataSendingService;
+
 	Logger logger = loggerFactory.createLogger("InstrumentationManager");
 
 public:
-	InstrumentationManager(JAVA_LONG platformId, ICorProfilerInfo3 *profilerInfo);
+	InstrumentationManager(JAVA_LONG platformId, ICorProfilerInfo3 *profilerInfo, std::shared_ptr<DataSendingService> dataSendingService);
 	~InstrumentationManager();
 
 	void addSensorTypeConfigs(std::vector<std::shared_ptr<MethodSensorTypeConfig>> configs);

@@ -1,22 +1,13 @@
 #include "DataSendingService.h"
+#include "SimpleBufferStrategy.h"
+#include "DroppingBufferStrategy.h"
+#include "ListSizeStrategy.h"
 
 
-DataSendingService *dataSendingService;
-
-void startDataSendingService(std::shared_ptr<BufferStrategy> bufferStrategy, std::shared_ptr<SendingStrategy> sendingStrategy)
+DataSendingService::DataSendingService(std::shared_ptr<StrategyConfig> bufferStrategyConfig, std::shared_ptr<StrategyConfig> sendingStrategyConfig)
 {
-	dataSendingService = new DataSendingService(bufferStrategy, sendingStrategy);
-}
-
-void shutdownDataSendingService()
-{
-	delete dataSendingService;
-}
-
-DataSendingService::DataSendingService(std::shared_ptr<BufferStrategy> bufferStrategy, std::shared_ptr<SendingStrategy> sendingStrategy)
-{
-	this->bufferStrategy = bufferStrategy;
-	this->sendingStrategy = sendingStrategy;
+	this->bufferStrategy = createBufferStrategy(bufferStrategyConfig);
+	this->sendingStrategy = createSendingStrategy(sendingStrategyConfig);
 	sendingStrategy->start();
 
 	measurements = std::make_unique<std::map<std::string, std::shared_ptr<SensorData>>>();
@@ -47,6 +38,28 @@ DataSendingService::~DataSendingService()
 	sendingThread.join();
 
 	logger.info("All measurement data sent.");
+}
+
+std::shared_ptr<BufferStrategy> DataSendingService::createBufferStrategy(std::shared_ptr<StrategyConfig> config)
+{
+	if (config->getClassName().compare(L"rocks.inspectit.agent.java.buffer.impl.SimpleBufferStrategy") == 0) {
+		return std::make_shared<SimpleBufferStrategy>();
+	}
+	else {
+		logger.error("Buffer strategy %ls is not supported! Data will be dropped.", config->getClassName().c_str());
+		return std::make_shared<DroppingBufferStrategy>();
+	}
+}
+
+std::shared_ptr<SendingStrategy> DataSendingService::createSendingStrategy(std::shared_ptr<StrategyConfig> config)
+{
+	if (config->getClassName().compare(L"rocks.inspectit.agent.java.sending.impl.ListSizeStrategy") == 0) {
+		size_t maxSize = _wtoi(config->getSettings().at(L"size").c_str());
+		return std::make_shared<ListSizeStrategy>(maxSize);
+	}
+	else {
+		logger.error("Sending strategy %ls is not supported! No data will be sent.", config->getClassName().c_str());
+	}
 }
 
 std::shared_ptr<SensorData> DataSendingService::getMethodSensorData(JAVA_LONG sensorTypeId, JAVA_LONG methodId, std::string prefix)

@@ -139,6 +139,7 @@
     <ClInclude Include="CorProfilerCallbackDefaultImpl.h" />
     <ClInclude Include="DataSendingService.h" />
     <ClInclude Include="dllmain.hpp" />
+    <ClInclude Include="DroppingBufferStrategy.h" />
     <ClInclude Include="ExceptionSensorTypeConfig.h" />
     <ClInclude Include="InstrumentationDefinition.h" />
     <ClInclude Include="InstrumentationManager.h" />
@@ -187,6 +188,7 @@
     <ClCompile Include="ClassType.cpp" />
     <ClCompile Include="CorProfilerCallbackDefaultImpl.cpp" />
     <ClCompile Include="DataSendingService.cpp" />
+    <ClCompile Include="DroppingBufferStrategy.cpp" />
     <ClCompile Include="ExceptionSensorTypeConfig.cpp" />
     <ClCompile Include="InstrumentationDefinition.cpp" />
     <ClCompile Include="InstrumentationManager.cpp" />
@@ -196,6 +198,7 @@
     <ClCompile Include="ListSizeStrategy.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="CMRRestfulConnection.cpp" />
+    <ClCompile Include="MethodHook.cpp" />
     <ClCompile Include="MethodInstrumentationConfig.cpp" />
     <ClCompile Include="MethodSensor.cpp" />
     <ClCompile Include="MethodSensorFactory.cpp" />

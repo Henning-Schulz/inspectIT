@@ -291,7 +291,9 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 		logger.debug("profilerInfo set.");
 	}
 
-	instrumentationManager = std::make_shared<InstrumentationManager>(platformID, profilerInfo3);
+	dataSendingService = std::make_shared<DataSendingService>(agentConfig->getBufferStrategyConfig(), agentConfig->getSendingStrategyConfig());
+
+	instrumentationManager = std::make_shared<InstrumentationManager>(platformID, profilerInfo3, dataSendingService);
 	instrumentationManager->addSensorTypeConfigs(agentConfig->getMethodSensorTypeConfigs());
 
 	DWORD eventMask = COR_PRF_MONITOR_ENTERLEAVE | COR_PRF_MONITOR_THREADS | COR_PRF_MONITOR_CLASS_LOADS;
@@ -330,7 +332,6 @@ HRESULT Agent::Shutdown()
 	logger.debug("Shutdown...");
 	shutdownCounter++;
 
-	shutdownDataSendingService();
 	cmrConnection->unregisterPlatform(platformID);
 	alive = false;
 	keepAliveThread.join();

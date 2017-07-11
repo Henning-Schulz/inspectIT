@@ -4,10 +4,12 @@
 #include "MethodSensorFactory.h"
 
 
-InstrumentationManager::InstrumentationManager(JAVA_LONG platformId, ICorProfilerInfo3 *profilerInfo)
+InstrumentationManager::InstrumentationManager(JAVA_LONG platformId, ICorProfilerInfo3 *profilerInfo, std::shared_ptr<DataSendingService> dataSendingService)
 {
 	this->platformId = platformId;
 	this->profilerInfo = profilerInfo;
+
+	this->dataSendingService = dataSendingService;
 }
 
 
@@ -117,7 +119,7 @@ std::shared_ptr<MethodSensor> InstrumentationManager::getMethodSensorForId(JAVA_
 			return std::shared_ptr<MethodSensor>();
 		}
 
-		return methodSensorFactory.createMethodSensor(configIt->second, platformId, profilerInfo);
+		return methodSensorFactory.createMethodSensor(configIt->second, platformId, profilerInfo, dataSendingService);
 	}
 	else {
 		return it->second;

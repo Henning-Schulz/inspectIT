@@ -26,12 +26,14 @@ thread_local std::vector<std::shared_ptr<TimerStorage>> storages;
 
 void TimerHook::beforeBody(METHOD_ID methodID)
 {
+	DebugBreak();
+
 	ThreadID threadId = 0;
 	profilerInfo->GetCurrentThreadID(&threadId);
 
 	auto startNanos = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch());
 
-	std::shared_ptr<MeasurementStorage> uncastedStorage = dataSendingService->getMeasurementStorage(getSensorTypeId(), threadId);
+	std::shared_ptr<MeasurementStorage> uncastedStorage = getDataSendingService()->getMeasurementStorage(getSensorTypeId(), threadId);
 	std::shared_ptr<TimerStorage> storage;
 
 	if (uncastedStorage == nullptr) {
@@ -44,7 +46,7 @@ void TimerHook::beforeBody(METHOD_ID methodID)
 	storage->newEntry(methodID, startNanos);
 
 	if (uncastedStorage == nullptr) {
-		dataSendingService->addMeasurementStorage(storage);
+		getDataSendingService()->addMeasurementStorage(storage);
 	}
 }
 
@@ -55,7 +57,7 @@ void TimerHook::afterBody(METHOD_ID methodID)
 	ThreadID threadId = 0;
 	profilerInfo->GetCurrentThreadID(&threadId);
 
-	std::shared_ptr<MeasurementStorage> uncastedStorage = dataSendingService->getMeasurementStorage(getSensorTypeId(), threadId);
+	std::shared_ptr<MeasurementStorage> uncastedStorage = getDataSendingService()->getMeasurementStorage(getSensorTypeId(), threadId);
 	std::shared_ptr<TimerStorage> storage;
 
 	if (uncastedStorage == nullptr) {
@@ -66,7 +68,7 @@ void TimerHook::afterBody(METHOD_ID methodID)
 		storage->finishCurrentEntry(endNanos);
 
 		if (storage->finished()) {
-			dataSendingService->notifyStorageFinished(storage);
+			getDataSendingService()->notifyStorageFinished(storage);
 		}
 	}
 }

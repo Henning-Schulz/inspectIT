@@ -10,6 +10,7 @@
 #include "CMRConnection.h"
 #include "DataSendingService.h"
 #include "InstrumentationManager.h"
+#include "DataSendingService.h"
 
 #include <list>
 #include <memory>
@@ -47,6 +48,8 @@ private:
 
 	std::thread keepAliveThread;
 	boolean alive = false;
+
+	std::shared_ptr<DataSendingService> dataSendingService;
 
 	Logger logger = loggerFactory.createLogger("Agent");
 

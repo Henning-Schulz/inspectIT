@@ -115,36 +115,25 @@ void AgentConfig::fromJson(json::object json)
 		excludeClassesPatterns.push_back(pattern);
 	}
 
-	logger.debug("START");
+	if (!json.at(L"initialInstrumentationResults").is_null()) {
+		// initial instr results
+		json::object instrResultsMap = json.at(L"initialInstrumentationResults").as_object();
+		for (auto it = instrResultsMap.begin(); it != instrResultsMap.end(); it++) {
+			auto instrumentationDef = std::make_shared<InstrumentationDefinition>();
+			instrumentationDef->fromJson(it->second.as_object());
 
-	logger.debug("%ls", json.at(L"initialInstrumentationResults").serialize().c_str());
+			std::vector<std::wstring> keyList;
+			std::wstring keyListStr = it->first.substr(1, it->first.size() - 2); // Params of substr are: begin index, number of chars (not end index)
+			std::wistringstream keyListStream(keyListStr);
+			std::wstring elem;
 
-	// TODO: Breaks sometimes after this point
+			while (std::getline(keyListStream, elem, L',')) {
+				keyList.push_back(elem);
+			}
 
-	// initial instr results
-	json::object instrResultsMap = json.at(L"initialInstrumentationResults").as_object();
-	logger.debug("1");
-	for (auto it = instrResultsMap.begin(); it != instrResultsMap.end(); it++) {
-		logger.debug("2");
-		auto instrumentationDef = std::make_shared<InstrumentationDefinition>();
-		instrumentationDef->fromJson(it->second.as_object());
-		logger.debug("3");
-		logger.debug("key: %ls", it->first.c_str());
-
-		std::vector<std::wstring> keyList;
-		std::wstring keyListStr = it->first.substr(1, it->first.size() - 2); // Params of substr are: begin index, number of chars (not end index)
-		std::wistringstream keyListStream(keyListStr);
-		std::wstring elem;
-
-		while (std::getline(keyListStream, elem, L',')) {
-			keyList.push_back(elem);
+			initialInstrumentationDefinitions.emplace(keyList, instrumentationDef);
 		}
-
-		initialInstrumentationDefinitions.emplace(keyList, instrumentationDef);
-		logger.debug("7");
 	}
-
-	logger.debug("END");
 
 	// configuration info
 	configurationInfo = json.at(L"configurationInfo").as_string();

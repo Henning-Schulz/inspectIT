@@ -52,10 +52,13 @@ private:
 
 	std::string createKey(JAVA_LONG sensorTypeId, JAVA_LONG methodId, std::string prefix);
 
+	std::shared_ptr<BufferStrategy> createBufferStrategy(std::shared_ptr<StrategyConfig> config);
+	std::shared_ptr<SendingStrategy> createSendingStrategy(std::shared_ptr<StrategyConfig> config);
+
 	void notifiyListSizeListeners();
 
 public:
-	DataSendingService(std::shared_ptr<BufferStrategy> bufferStrategy, std::shared_ptr<SendingStrategy> sendingStrategy);
+	DataSendingService(std::shared_ptr<StrategyConfig> bufferStrategyConfig, std::shared_ptr<StrategyConfig> sendingStrategyConfig);
 	~DataSendingService();
 
 	std::shared_ptr<SensorData> getMethodSensorData(JAVA_LONG sensorTypeId, JAVA_LONG methodId, std::string prefix = "");
@@ -69,8 +72,3 @@ public:
 
 	void addListSizeListener(std::shared_ptr<ListSizeListener> listener);
 };
-
-extern DataSendingService *dataSendingService;
-
-void startDataSendingService(std::shared_ptr<BufferStrategy> bufferStrategy, std::shared_ptr<SendingStrategy> sendingStrategy);
-void shutdownDataSendingService();

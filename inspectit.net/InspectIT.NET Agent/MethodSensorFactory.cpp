@@ -23,7 +23,7 @@ MethodSensorFactory::~MethodSensorFactory()
 {
 }
 
-std::shared_ptr<MethodSensor> MethodSensorFactory::createMethodSensor(std::shared_ptr<MethodSensorTypeConfig> sensorTypeConfig, JAVA_LONG platformId, ICorProfilerInfo3 * profilerInfo)
+std::shared_ptr<MethodSensor> MethodSensorFactory::createMethodSensor(std::shared_ptr<MethodSensorTypeConfig> sensorTypeConfig, JAVA_LONG platformId, ICorProfilerInfo3 * profilerInfo, std::shared_ptr<DataSendingService> dataSendingService)
 {
 	auto it = knownSensors.find(sensorTypeConfig->getClassName());
 	if (it == knownSensors.end()) {
@@ -39,7 +39,7 @@ std::shared_ptr<MethodSensor> MethodSensorFactory::createMethodSensor(std::share
 	}
 	else {
 		auto sensor = it->second;
-		sensor->initialize(sensorTypeConfig, platformId, profilerInfo);
+		sensor->initialize(sensorTypeConfig, platformId, profilerInfo, dataSendingService);
 		return sensor;
 	}
 }
