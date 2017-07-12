@@ -29,15 +29,7 @@ DataSendingService::DataSendingService(std::shared_ptr<StrategyConfig> bufferStr
 
 DataSendingService::~DataSendingService()
 {
-	stop = true;
-	sendingStrategy->stop();
-
-	cvPrepare.notify_all();
-	preparingThread.join();
-	cvSend.notify_all();
-	sendingThread.join();
-
-	logger.info("All measurement data sent.");
+	stopSending();
 }
 
 std::shared_ptr<BufferStrategy> DataSendingService::createBufferStrategy(std::shared_ptr<StrategyConfig> config)
@@ -285,4 +277,21 @@ void DataSendingService::notifiyListSizeListeners()
 void DataSendingService::addListSizeListener(std::shared_ptr<ListSizeListener> listener)
 {
 	listSizeListeners.push_back(listener);
+}
+
+void DataSendingService::stopSending()
+{
+	logger.debug("Stop sending...");
+	if (!stop) {
+		logger.debug("Really stop sending...");
+		stop = true;
+		sendingStrategy->stop();
+
+		cvPrepare.notify_all();
+		preparingThread.join();
+		cvSend.notify_all();
+		sendingThread.join();
+
+		logger.info("All measurement data sent.");
+	}
 }

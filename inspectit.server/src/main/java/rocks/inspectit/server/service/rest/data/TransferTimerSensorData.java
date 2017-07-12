@@ -81,7 +81,10 @@ public class TransferTimerSensorData extends TransferMethodSensorData {
 
 		TimerData data = new TimerData();
 		data.setDuration(duration);
+		data.calculateMin(duration);
+		data.calculateMax(duration);
 		data.setCount(1);
+		data.setCharting(false);
 		return data;
 	}
 

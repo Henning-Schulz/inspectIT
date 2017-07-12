@@ -79,8 +79,10 @@ public abstract class TransferMethodSensorData extends TransferData {
 	private Set<ParameterContentData> convertParameterContents() {
 		Set<ParameterContentData> contents = new HashSet<>();
 
-		for (Map.Entry<String, String> contentEntry : parameterContentData.entrySet()) {
-			contents.add(convertParamEntry(contentEntry));
+		if (parameterContentData != null) {
+			for (Map.Entry<String, String> contentEntry : parameterContentData.entrySet()) {
+				contents.add(convertParamEntry(contentEntry));
+			}
 		}
 
 		return contents;

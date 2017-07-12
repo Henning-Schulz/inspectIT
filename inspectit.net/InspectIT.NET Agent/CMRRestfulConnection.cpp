@@ -289,8 +289,13 @@ void CMRRestfulConnection::sendDataObjects(std::vector<std::shared_ptr<SensorDat
 	JAVA_LONG platformId = last->getPlatformId();
 	JAVA_LONG sensorTypeId = last->getSensorTypeId();
 
+	logger.debug("Platform ID is %lli.", platformId);
+	logger.debug("Sensor type ID is %lli.", sensorTypeId);
+
 	std::wstringstream urlStream;
-	urlStream << baseUrl << storagePath << L"/" << platformId << L"/" << sensorTypeId;
+	urlStream << baseUrl << storagePath << L"/" << std::to_wstring(platformId) << L"/" << std::to_wstring(sensorTypeId);
+
+	logger.debug("Calling url %ls", urlStream.str().c_str());
 
 	json::value objectsJson;
 	int i = 0;

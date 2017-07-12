@@ -18,7 +18,7 @@ protected:
 
 
 public:
-	SensorData() {}
+	SensorData(JAVA_LONG platformId, JAVA_LONG sensorTypeId, JAVA_LONG timestampMs = -1);
 	virtual ~SensorData() {}
 
 	JAVA_LONG getPlatformId();

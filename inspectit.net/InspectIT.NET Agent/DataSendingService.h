@@ -71,4 +71,6 @@ public:
 	void send();
 
 	void addListSizeListener(std::shared_ptr<ListSizeListener> listener);
+
+	void stopSending();
 };

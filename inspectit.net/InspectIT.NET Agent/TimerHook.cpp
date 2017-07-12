@@ -26,8 +26,6 @@ thread_local std::vector<std::shared_ptr<TimerStorage>> storages;
 
 void TimerHook::beforeBody(METHOD_ID methodID)
 {
-	DebugBreak();
-
 	ThreadID threadId = 0;
 	profilerInfo->GetCurrentThreadID(&threadId);
 

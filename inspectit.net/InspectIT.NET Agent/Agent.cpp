@@ -332,6 +332,8 @@ HRESULT Agent::Shutdown()
 	logger.debug("Shutdown...");
 	shutdownCounter++;
 
+	dataSendingService->stopSending();
+	logger.debug("Unregistering platform...");
 	cmrConnection->unregisterPlatform(platformID);
 	alive = false;
 	keepAliveThread.join();
