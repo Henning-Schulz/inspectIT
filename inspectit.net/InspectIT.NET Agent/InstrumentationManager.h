@@ -41,6 +41,7 @@ namespace inspectit {
 			void addSensorTypeConfigs(std::vector<std::shared_ptr<inspectit::config::MethodSensorTypeConfig>> configs);
 
 			void setExcludeClassesPatterns(std::vector<std::wstring> excludeClassesPatterns);
+			bool isExcluded(std::shared_ptr<inspectit::types::ClassType> classType);
 			bool instrumentationDefinitionMatches(std::shared_ptr<inspectit::types::MethodType> methodType, std::shared_ptr<inspectit::config::MethodInstrumentationConfig> instrConfig);
 
 			void registerInstrumentationDefinition(std::shared_ptr<inspectit::types::ClassType> classType, std::shared_ptr<inspectit::config::InstrumentationDefinition> instrDef);

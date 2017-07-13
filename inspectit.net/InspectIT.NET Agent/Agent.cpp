@@ -306,6 +306,7 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 
 	instrumentationManager = std::make_shared<InstrumentationManager>(platformID, profilerInfo3, dataSendingService);
 	instrumentationManager->addSensorTypeConfigs(agentConfig->getMethodSensorTypeConfigs());
+	instrumentationManager->setExcludeClassesPatterns(agentConfig->getExcludeClassesPatterns());
 
 	DWORD eventMask = COR_PRF_MONITOR_ENTERLEAVE | COR_PRF_MONITOR_THREADS | COR_PRF_MONITOR_CLASS_LOADS;
 
@@ -371,38 +372,15 @@ HRESULT Agent::ClassLoadFinished(ClassID classId, HRESULT hrStatus)
 
 	logger.debug("Class %ls loaded. Modifiers are 0x%lx.", classType->getFqn().c_str(), classType->getModifiers());
 
-	// TODO: Check if excluded --> do not ask CMR in this case
+	// Check if excluded --> do not ask CMR in this case
+	if (!instrumentationManager->isExcluded(classType)) {
+		std::shared_ptr<InstrumentationDefinition> instrumentationDefinition = cmrConnection->analyze(platformID, classType);
 
-	// Send it to the CMR and receive instrumentation definition
-
-	std::shared_ptr<InstrumentationDefinition> instrumentationDefinition = cmrConnection->analyze(platformID, classType);
-	
-	// Register instrumentation definition at the InstrumentationManager if not null
-
-	if (instrumentationDefinition) {
-		instrumentationManager->registerInstrumentationDefinition(classType, instrumentationDefinition);
-	}
-	else {
-		logger.debug("Received no instrumentation definition for class %ls.", classType->getFqn().c_str());
-	}
-
-
-	// TODO: remove:
-	if (instrumentationDefinition) {
-		if (classType->getFqn().compare(L"TestSystem.Program") == 0) {
-			auto methods = classType->getMethods();
-			mdMethodDef methodDef = 0;
-			for (auto mit = methods.begin(); mit != methods.end(); mit++) {
-				if ((*mit)->getName().compare(L"say") == 0) {
-					methodDef = (*mit)->getMethodDef();
-				}
-			}
-			logger.debug("Stored instrumentation definition for TestSystem.Program. mdMethodDef of say is %li.", methodDef);
-
-			auto instrs = instrumentationDefinition->getMethodInstrumentationConfigs();
-			for (auto it2 = instrs.begin(); it2 != instrs.end(); it2++) {
-				logger.debug("Instrumenting %ls with %i sensors, first is %lli.", (*it2)->getTargetMethodName().c_str(), (*it2)->getSensorInstrumentationPoint()->getSensorIds().size(), (*it2)->getSensorInstrumentationPoint()->getSensorIds().front());
-			}
+		if (instrumentationDefinition) {
+			instrumentationManager->registerInstrumentationDefinition(classType, instrumentationDefinition);
+		}
+		else {
+			logger.debug("Received no instrumentation definition for class %ls.", classType->getFqn().c_str());
 		}
 	}
 

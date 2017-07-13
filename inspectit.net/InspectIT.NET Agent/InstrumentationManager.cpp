@@ -37,6 +37,17 @@ void InstrumentationManager::setExcludeClassesPatterns(std::vector<std::wstring>
 	this->excludeClassesPatterns = excludeClassesPatterns;
 }
 
+bool InstrumentationManager::isExcluded(std::shared_ptr<ClassType> classType)
+{
+	for (auto it = excludeClassesPatterns.begin(); it != excludeClassesPatterns.end(); it++) {
+		if (patternMatches(*it, classType->getFqn())) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 bool InstrumentationManager::instrumentationDefinitionMatches(std::shared_ptr<MethodType> methodType, std::shared_ptr<MethodInstrumentationConfig> instrConfig)
 {
 	// Compare method name
@@ -68,11 +79,8 @@ bool InstrumentationManager::instrumentationDefinitionMatches(std::shared_ptr<Me
 
 void InstrumentationManager::registerInstrumentationDefinition(std::shared_ptr<ClassType> classType, std::shared_ptr<InstrumentationDefinition> instrDef)
 {
-	for (auto it = excludeClassesPatterns.begin(); it != excludeClassesPatterns.end(); it++) {
-		if (patternMatches(*it, classType->getFqn())) {
-			// Passed class is excluded
-			return;
-		}
+	if (isExcluded(classType)) {
+		return;
 	}
 
 	auto methodTypes = classType->getMethods();
