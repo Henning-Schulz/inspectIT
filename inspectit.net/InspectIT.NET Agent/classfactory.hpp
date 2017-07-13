@@ -28,7 +28,7 @@ const COCLASS_REGISTER g_CoClasses[] =
 {   
     &CLSID_PROFILER,
     PROFILER_GUID,          
-	Agent::CreateObject,
+	inspectit::Agent::CreateObject,
     NULL,               
     NULL,               
     NULL

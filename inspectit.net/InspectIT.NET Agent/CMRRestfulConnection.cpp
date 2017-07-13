@@ -10,16 +10,29 @@ using namespace web::http;
 using namespace web::http::client;
 using namespace web;
 
+using namespace inspectit::connection;
+using namespace inspectit::config;
+using namespace inspectit::data;
+using namespace inspectit::logger;
+using namespace inspectit::types;
+using namespace inspectit::utils;
+
 CMRConnection* cmrConnection;
 
-bool setupCMRConnection() {
-	cmrConnection = new CMRRestfulConnection();
+namespace inspectit {
+	namespace connection {
 
-	return ((CMRRestfulConnection*)cmrConnection)->testConnection();
-}
+		bool setupCMRConnection() {
+			cmrConnection = new CMRRestfulConnection();
 
-void shutdownCMRConnection() {
-	delete cmrConnection;
+			return ((CMRRestfulConnection*)cmrConnection)->testConnection();
+		}
+
+		void shutdownCMRConnection() {
+			delete cmrConnection;
+		}
+
+	}
 }
 
 CMRRestfulConnection::CMRRestfulConnection()
@@ -134,14 +147,14 @@ std::shared_ptr<AgentConfig> CMRRestfulConnection::registerPlatform(LPWSTR agent
 	std::wstringstream urlStream;
 	urlStream << baseUrl << agentPath << "/register/" << agentName << "/" << version;
 
-	json::value ipArray;
+	web::json::value ipArray;
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
-	json::value val;
+	web::json::value val;
 
 	int i = 0;
 	for (std::vector<std::string>::iterator it = definedIps.begin(); it != definedIps.end(); it++) {
-		ipArray[i] = json::value::string(converter.from_bytes(*it));
+		ipArray[i] = web::json::value::string(converter.from_bytes(*it));
 		logger.debug("IP %i: %ls", i, ipArray[i].as_string().c_str());
 		i++;
 	}
@@ -163,7 +176,7 @@ std::shared_ptr<AgentConfig> CMRRestfulConnection::registerPlatform(LPWSTR agent
 	
 	status_code c = response.status_code();
 	if (c == status_codes::OK) {
-		json::object obj = response.extract_json().get().as_object();
+		web::json::object obj = response.extract_json().get().as_object();
 		logger.debug("Converting JSON to AgentConfig...");
 		std::shared_ptr<AgentConfig> agentConfig = std::make_shared<AgentConfig>();
 		agentConfig->fromJson(obj);
@@ -229,7 +242,7 @@ std::shared_ptr<InstrumentationDefinition> CMRRestfulConnection::analyze(JAVA_LO
 			return std::shared_ptr<InstrumentationDefinition>();
 		}
 		else {
-			json::object obj = json.as_object();
+			web::json::object obj = json.as_object();
 			std::shared_ptr<InstrumentationDefinition> instrumentationDefinition = std::make_shared<InstrumentationDefinition>();
 			instrumentationDefinition->fromJson(obj);
 			logger.debug("Analysis finished. Received %i method instrumentations.", instrumentationDefinition->getMethodInstrumentationConfigs().size());
@@ -297,7 +310,7 @@ void CMRRestfulConnection::sendDataObjects(std::vector<std::shared_ptr<SensorDat
 
 	logger.debug("Calling url %ls", urlStream.str().c_str());
 
-	json::value objectsJson;
+	web::json::value objectsJson;
 	int i = 0;
 
 	for (auto it = dataObjects.begin(); it != dataObjects.end(); it++) {

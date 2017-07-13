@@ -1,6 +1,7 @@
 #include "TimerSensor.h"
 
-
+using namespace inspectit::sensor;
+using namespace inspectit::sensor::timer;
 
 TimerSensor::TimerSensor()
 {

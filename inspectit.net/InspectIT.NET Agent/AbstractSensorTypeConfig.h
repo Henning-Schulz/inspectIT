@@ -5,26 +5,31 @@
 
 #include <map>
 
-class AbstractSensorTypeConfig :
-	public JsonReceivable
-{
-private:
-	JAVA_LONG id;
-	std::wstring className;
+namespace inspectit {
+	namespace config {
 
-	std::map<std::wstring, std::wstring> parameters;
+		class AbstractSensorTypeConfig :
+			public inspectit::json::JsonReceivable
+		{
+		private:
+			JAVA_LONG id;
+			std::wstring className;
 
-	Logger logger = loggerFactory.createLogger("AbstractSensorTypeConfig");
+			std::map<std::wstring, std::wstring> parameters;
 
-public:
-	AbstractSensorTypeConfig();
-	~AbstractSensorTypeConfig();
+			inspectit::logger::Logger logger = loggerFactory.createLogger("AbstractSensorTypeConfig");
 
-	JAVA_LONG getId();
-	std::wstring getClassName();
+		public:
+			AbstractSensorTypeConfig();
+			~AbstractSensorTypeConfig();
 
-	std::map<std::wstring, std::wstring> getParameters();
+			JAVA_LONG getId();
+			std::wstring getClassName();
 
-	void fromJson(json::object json);
-};
+			std::map<std::wstring, std::wstring> getParameters();
 
+			void fromJson(web::json::object json);
+		};
+
+	}
+}

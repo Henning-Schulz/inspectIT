@@ -5,21 +5,28 @@
 
 #include <mutex>
 
-class SimpleBufferStrategy : public BufferStrategy
-{
-private:
-	std::vector<std::shared_ptr<SensorData>> measurements;
-	bool newMeasurements = false;
-	std::mutex measurementsMutex;
+namespace inspectit {
+	namespace sending {
+		namespace buffer {
 
-	Logger logger = loggerFactory.createLogger("SimpleBufferStrategy");
+			class SimpleBufferStrategy : public BufferStrategy
+			{
+			private:
+				std::vector<std::shared_ptr<inspectit::data::SensorData>> measurements;
+				bool newMeasurements = false;
+				std::mutex measurementsMutex;
 
-public:
-	SimpleBufferStrategy();
-	~SimpleBufferStrategy();
+				inspectit::logger::Logger logger = loggerFactory.createLogger("SimpleBufferStrategy");
 
-	void addMeasurements(std::vector<std::shared_ptr<SensorData>> data);
-	bool hasNext();
-	std::vector<std::shared_ptr<SensorData>> next();
-};
+			public:
+				SimpleBufferStrategy();
+				~SimpleBufferStrategy();
 
+				void addMeasurements(std::vector<std::shared_ptr<inspectit::data::SensorData>> data);
+				bool hasNext();
+				std::vector<std::shared_ptr<inspectit::data::SensorData>> next();
+			};
+
+		}
+	}
+}

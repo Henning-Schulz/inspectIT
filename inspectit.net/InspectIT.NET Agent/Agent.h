@@ -32,78 +32,82 @@ extern const GUID __declspec(selectany) CLSID_PROFILER =
 
 #define COM_METHOD( TYPE ) TYPE STDMETHODCALLTYPE
 
-class Agent : public CorProfilerCallbackDefaultImpl
+namespace inspectit
 {
-private:
-	long m_refCount;
-	DWORD shutdownCounter;
-	ICorProfilerInfo3 *profilerInfo3;
 
-	std::shared_ptr<InstrumentationManager> instrumentationManager;
+	class Agent : public CorProfilerCallbackDefaultImpl
+	{
+	private:
+		long m_refCount;
+		DWORD shutdownCounter;
+		ICorProfilerInfo3 *profilerInfo3;
 
-	std::list<std::shared_ptr<ThreadHook>> threadHookList;
+		std::shared_ptr<inspectit::instrumentation::InstrumentationManager> instrumentationManager;
 
-	std::map<METHOD_ID, std::vector<std::shared_ptr<MethodHook>>> hookAssignment;
-	std::shared_mutex mHookAssignment;
+		std::list<std::shared_ptr<inspectit::sensor::ThreadHook>> threadHookList;
 
-	std::thread keepAliveThread;
-	boolean alive = false;
+		std::map<METHOD_ID, std::vector<std::shared_ptr<inspectit::sensor::MethodHook>>> hookAssignment;
+		std::shared_mutex mHookAssignment;
 
-	std::shared_ptr<DataSendingService> dataSendingService;
+		std::thread keepAliveThread;
+		boolean alive = false;
 
-	Logger logger = loggerFactory.createLogger("Agent");
+		std::shared_ptr<inspectit::sending::DataSendingService> dataSendingService;
 
-	void keepAlive();
+		inspectit::logger::Logger logger = loggerFactory.createLogger("Agent");
 
-public:
-	Agent();
-	~Agent();
+		void keepAlive();
 
-	JAVA_LONG platformID;
+	public:
+		Agent();
+		~Agent();
 
-	ICorProfilerInfo3* getProfilerInfo();
+		JAVA_LONG platformID;
 
-	void assignHookToMethod(METHOD_ID methodId, std::shared_ptr<MethodHook> hook);
-	void addThreadHook(std::shared_ptr<ThreadHook> hook);
+		ICorProfilerInfo3* getProfilerInfo();
 
-	std::shared_ptr<InstrumentationManager> getInstrumentationManager();
+		void assignHookToMethod(METHOD_ID methodId, std::shared_ptr<inspectit::sensor::MethodHook> hook);
+		void addThreadHook(std::shared_ptr<inspectit::sensor::ThreadHook> hook);
 
-	//
-	// IUnknown 
-	//
-	COM_METHOD(ULONG) AddRef();
-	COM_METHOD(ULONG) Release();
-	COM_METHOD(HRESULT) QueryInterface(REFIID riid, void **ppInterface);
-	static COM_METHOD(HRESULT) CreateObject(REFIID riid, void **ppInterface);
+		std::shared_ptr<inspectit::instrumentation::InstrumentationManager> getInstrumentationManager();
 
-	//
-	// Startup/shutdown
-	//
-	virtual COM_METHOD(HRESULT) Initialize(IUnknown *pICorProfilerInfoUnk);
+		//
+		// IUnknown 
+		//
+		COM_METHOD(ULONG) AddRef();
+		COM_METHOD(ULONG) Release();
+		COM_METHOD(HRESULT) QueryInterface(REFIID riid, void **ppInterface);
+		static COM_METHOD(HRESULT) CreateObject(REFIID riid, void **ppInterface);
 
-	HRESULT DllDetachShutdown();
-	COM_METHOD(HRESULT) Shutdown();
+		//
+		// Startup/shutdown
+		//
+		virtual COM_METHOD(HRESULT) Initialize(IUnknown *pICorProfilerInfoUnk);
 
-	//
-	// Class events
-	//
-	COM_METHOD(HRESULT) ClassLoadFinished(ClassID classID,
-		HRESULT hrStatus);
+		HRESULT DllDetachShutdown();
+		COM_METHOD(HRESULT) Shutdown();
 
-	//
-	// Method callbacks
-	//
-	void Enter(METHOD_ID functionID);
-	void Leave(METHOD_ID functionID);
-	void Tailcall(METHOD_ID functionID);
+		//
+		// Class events
+		//
+		COM_METHOD(HRESULT) ClassLoadFinished(ClassID classID,
+			HRESULT hrStatus);
 
-	//
-	// Thread callbacks
-	//
-	COM_METHOD(HRESULT) ThreadCreated(ThreadID threadID);
-	COM_METHOD(HRESULT) ThreadDestroyed(ThreadID threadID);
+		//
+		// Method callbacks
+		//
+		void Enter(METHOD_ID functionID);
+		void Leave(METHOD_ID functionID);
+		void Tailcall(METHOD_ID functionID);
 
+		//
+		// Thread callbacks
+		//
+		COM_METHOD(HRESULT) ThreadCreated(ThreadID threadID);
+		COM_METHOD(HRESULT) ThreadDestroyed(ThreadID threadID);
+
+	};
 };
 
-extern Agent *globalAgentInstance;
+extern inspectit::Agent *globalAgentInstance;
 

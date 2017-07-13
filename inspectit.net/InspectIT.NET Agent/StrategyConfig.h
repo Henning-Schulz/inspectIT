@@ -3,19 +3,24 @@
 
 #include <map>
 
-class StrategyConfig :
-	public JsonReceivable
-{
-private:
-	std::wstring className;
-	std::map<std::wstring, std::wstring> settings;
+namespace inspectit {
+	namespace config {
 
-public:
-	StrategyConfig();
-	~StrategyConfig();
+		class StrategyConfig :
+			public inspectit::json::JsonReceivable
+		{
+		private:
+			std::wstring className;
+			std::map<std::wstring, std::wstring> settings;
 
-	std::wstring getClassName();
-	std::map<std::wstring, std::wstring> getSettings();
+		public:
+			StrategyConfig();
+			~StrategyConfig();
 
-	void fromJson(json::object json);
-};
+			std::wstring getClassName();
+			std::map<std::wstring, std::wstring> getSettings();
+
+			void fromJson(web::json::object json);
+		};
+	}
+}

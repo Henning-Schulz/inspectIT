@@ -3,7 +3,7 @@
 #include <sstream>
 #include <iostream>
 
-
+using namespace inspectit::config;
 
 AgentConfig::AgentConfig()
 {
@@ -69,14 +69,14 @@ std::wstring AgentConfig::getConfigurationInfo()
 	return configurationInfo;
 }
 
-void AgentConfig::fromJson(json::object json)
+void AgentConfig::fromJson(web::json::object json)
 {
 	// general settings
 	platformId = json.at(L"platformId").as_number().to_int64();
 	classCacheExistsOnCmr = json.at(L"classCacheExistsOnCmr").as_bool();
 
 	// sensor type configs
-	json::array configArray = json.at(L"platformSensorTypeConfigs").as_array();
+	web::json::array configArray = json.at(L"platformSensorTypeConfigs").as_array();
 	for (auto it = configArray.begin(); it != configArray.end(); it++) {
 		auto platformSensorConfig = std::make_shared<PlatformSensorTypeConfig>();
 		platformSensorConfig->fromJson(it->as_object());
@@ -109,7 +109,7 @@ void AgentConfig::fromJson(json::object json)
 	sendingStrategyConfig->fromJson(json.at(L"sendingStrategyConfig").as_object());
 
 	// exclusions
-	json::array excludesArray = json.at(L"excludeClassesPatterns").as_array();
+	web::json::array excludesArray = json.at(L"excludeClassesPatterns").as_array();
 	for (auto it = excludesArray.begin(); it != excludesArray.end(); it++) {
 		std::wstring pattern = it->as_object().at(L"pattern").as_string();
 		excludeClassesPatterns.push_back(pattern);
@@ -117,7 +117,7 @@ void AgentConfig::fromJson(json::object json)
 
 	if (!json.at(L"initialInstrumentationResults").is_null()) {
 		// initial instr results
-		json::object instrResultsMap = json.at(L"initialInstrumentationResults").as_object();
+		web::json::object instrResultsMap = json.at(L"initialInstrumentationResults").as_object();
 		for (auto it = instrResultsMap.begin(); it != instrResultsMap.end(); it++) {
 			auto instrumentationDef = std::make_shared<InstrumentationDefinition>();
 			instrumentationDef->fromJson(it->second.as_object());

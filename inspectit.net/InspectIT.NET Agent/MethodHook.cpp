@@ -1,5 +1,9 @@
 #include "MethodHook.h"
 
+using namespace inspectit::config;
+using namespace inspectit::sending;
+using namespace inspectit::sensor;
+
 std::shared_ptr<DataSendingService> MethodHook::getDataSendingService()
 {
 	return dataSendingService;

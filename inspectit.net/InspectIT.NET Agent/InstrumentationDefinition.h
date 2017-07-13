@@ -4,20 +4,25 @@
 
 #include <map>
 
-class InstrumentationDefinition :
-	public JsonReceivable
-{
-private:
-	std::wstring className;
-	std::vector<std::shared_ptr<MethodInstrumentationConfig>> methodInstrumentationConfigs;
+namespace inspectit {
+	namespace config {
 
-public:
-	InstrumentationDefinition();
-	~InstrumentationDefinition();
+		class InstrumentationDefinition :
+			public inspectit::json::JsonReceivable
+		{
+		private:
+			std::wstring className;
+			std::vector<std::shared_ptr<MethodInstrumentationConfig>> methodInstrumentationConfigs;
 
-	std::wstring getClassName();
-	std::vector<std::shared_ptr<MethodInstrumentationConfig>> getMethodInstrumentationConfigs();
+		public:
+			InstrumentationDefinition();
+			~InstrumentationDefinition();
 
-	void fromJson(json::object json);
-};
+			std::wstring getClassName();
+			std::vector<std::shared_ptr<MethodInstrumentationConfig>> getMethodInstrumentationConfigs();
 
+			void fromJson(web::json::object json);
+		};
+
+	}
+}

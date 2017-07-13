@@ -1,6 +1,6 @@
 #include "MethodSensorTypeConfig.h"
 
-
+using namespace inspectit::config;
 
 MethodSensorPriority MethodSensorTypeConfig::prioFromString(std::wstring sPrio)
 {
@@ -42,7 +42,7 @@ MethodSensorPriority MethodSensorTypeConfig::getPriority()
 	return priority;
 }
 
-void MethodSensorTypeConfig::fromJson(json::object json)
+void MethodSensorTypeConfig::fromJson(web::json::object json)
 {
 	super::fromJson(json);
 	

@@ -2,6 +2,12 @@
 
 #include "TimerSensor.h"
 
+using namespace inspectit::config;
+using namespace inspectit::instrumentation;
+using namespace inspectit::logger;
+using namespace inspectit::sending;
+using namespace inspectit::sensor;
+using namespace inspectit::sensor::timer;
 
 void MethodSensorFactory::setupKnownSensors()
 {

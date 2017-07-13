@@ -2,14 +2,18 @@
 
 #include <cpprest/json.h>
 
-using namespace web;
+namespace inspectit {
+	namespace json {
 
-class JsonReceivable {
+		class JsonReceivable {
 
-public:
-	JsonReceivable() {}
-	virtual ~JsonReceivable() {}
+		public:
+			JsonReceivable() {}
+			virtual ~JsonReceivable() {}
 
-	virtual void fromJson(json::object json) = 0;
+			virtual void fromJson(web::json::object json) = 0;
 
-};
+		};
+
+	}
+}

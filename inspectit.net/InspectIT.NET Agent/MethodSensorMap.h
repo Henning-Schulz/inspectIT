@@ -6,22 +6,25 @@
 #include <vector>
 #include <map>
 
-using namespace web;
+namespace inspectit {
+	namespace data {
 
-class MethodSensorMap : JsonSendable
-{
-private:
-	std::map<JAVA_LONG, std::vector<JAVA_LONG>> methodsToSensors;
+		class MethodSensorMap : public inspectit::json::JsonSendable
+		{
+		private:
+			std::map<JAVA_LONG, std::vector<JAVA_LONG>> methodsToSensors;
 
-public:
-	MethodSensorMap();
-	~MethodSensorMap();
+		public:
+			MethodSensorMap();
+			~MethodSensorMap();
 
-	void addSensor(JAVA_LONG methodId, JAVA_LONG sensorId);
-	void addAllSensors(JAVA_LONG methodId, std::vector<JAVA_LONG> sensorIds);
+			void addSensor(JAVA_LONG methodId, JAVA_LONG sensorId);
+			void addAllSensors(JAVA_LONG methodId, std::vector<JAVA_LONG> sensorIds);
 
-	std::vector<JAVA_LONG> getSensors(JAVA_LONG methodId);
+			std::vector<JAVA_LONG> getSensors(JAVA_LONG methodId);
 
-	json::value toJson();
-};
+			web::json::value toJson();
+		};
 
+	}
+}

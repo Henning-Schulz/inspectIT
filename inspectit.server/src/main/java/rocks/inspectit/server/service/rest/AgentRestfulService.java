@@ -72,6 +72,7 @@ public class AgentRestfulService {
 	@ResponseBody
 	public String instrumentationApplied(@PathVariable long platformIdent, @RequestBody Map<Long, long[]> methodToSensorMap) {
 		nextGenInstrumentationManager.instrumentationApplied(platformIdent, methodToSensorMap);
+		System.out.println("Instrumentation application stored: " + methodToSensorMap);
 		return "Instrumentation application stored.";
 	}
 

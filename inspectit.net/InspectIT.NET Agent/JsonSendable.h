@@ -2,11 +2,17 @@
 
 #include <cpprest/json.h>
 
-class JsonSendable
-{
-public:
-	JsonSendable() {}
-	virtual ~JsonSendable() {}
+namespace inspectit {
+	namespace json {
 
-	virtual web::json::value toJson() = 0;
-};
+		class JsonSendable
+		{
+		public:
+			JsonSendable() {}
+			virtual ~JsonSendable() {}
+
+			virtual web::json::value toJson() = 0;
+		};
+
+	}
+}

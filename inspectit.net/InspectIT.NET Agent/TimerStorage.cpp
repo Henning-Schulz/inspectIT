@@ -2,7 +2,8 @@
 
 #include "TimerData.h"
 
-
+using namespace inspectit::data;
+using namespace inspectit::sensor::timer;
 
 TimerStorage::TimerStorage(JAVA_LONG platformId, JAVA_LONG methodSensorId, ThreadID threadId, std::chrono::duration<long long, std::nano> timestamp)
 	: MeasurementStorage(platformId, methodSensorId, threadId, std::chrono::duration_cast<std::chrono::milliseconds>(timestamp).count())

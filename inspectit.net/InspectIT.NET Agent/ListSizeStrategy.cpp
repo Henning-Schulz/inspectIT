@@ -1,6 +1,7 @@
 #include "ListSizeStrategy.h"
 
-
+using namespace inspectit::sending;
+using namespace inspectit::sending::strategy;
 
 ListSizeStrategy::ListSizeStrategy(size_t maxSize)
 {

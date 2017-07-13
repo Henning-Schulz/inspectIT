@@ -2,29 +2,34 @@
 #include "JsonReceivable.h"
 #include "SensorInstrumentationPoint.h"
 
-class MethodInstrumentationConfig :
-	public JsonReceivable
-{
-private:
-	std::wstring targetClassFqn;
-	std::wstring targetMethodName;
-	std::wstring returnType;
-	std::vector<std::wstring> parameterTypes;
+namespace inspectit {
+	namespace config {
 
-	std::shared_ptr<SensorInstrumentationPoint> sensorInstrumentationPoint;
-	// TODO: sepcialInstrumentationPoint
+		class MethodInstrumentationConfig :
+			public inspectit::json::JsonReceivable
+		{
+		private:
+			std::wstring targetClassFqn;
+			std::wstring targetMethodName;
+			std::wstring returnType;
+			std::vector<std::wstring> parameterTypes;
 
-public:
-	MethodInstrumentationConfig();
-	~MethodInstrumentationConfig();
+			std::shared_ptr<SensorInstrumentationPoint> sensorInstrumentationPoint;
+			// TODO: sepcialInstrumentationPoint
 
-	std::wstring getTargetClassFqn();
-	std::wstring getTargetMethodName();
-	std::wstring getReturnType();
-	std::vector<std::wstring> getParameterTypes();
+		public:
+			MethodInstrumentationConfig();
+			~MethodInstrumentationConfig();
 
-	std::shared_ptr<SensorInstrumentationPoint> getSensorInstrumentationPoint();
+			std::wstring getTargetClassFqn();
+			std::wstring getTargetMethodName();
+			std::wstring getReturnType();
+			std::vector<std::wstring> getParameterTypes();
 
-	void fromJson(json::object json);
-};
+			std::shared_ptr<SensorInstrumentationPoint> getSensorInstrumentationPoint();
 
+			void fromJson(web::json::object json);
+		};
+
+	}
+}

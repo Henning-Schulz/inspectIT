@@ -1,6 +1,6 @@
 #include "InstrumentationDefinition.h"
 
-
+using namespace inspectit::config;
 
 InstrumentationDefinition::InstrumentationDefinition()
 {
@@ -21,11 +21,11 @@ std::vector<std::shared_ptr<MethodInstrumentationConfig>> InstrumentationDefinit
 	return methodInstrumentationConfigs;
 }
 
-void InstrumentationDefinition::fromJson(json::object json)
+void InstrumentationDefinition::fromJson(web::json::object json)
 {
 	className = json.at(L"className").as_string();
 
-	json::array instrConfigArray = json.at(L"methodInstrumentationConfigs").as_array();
+	web::json::array instrConfigArray = json.at(L"methodInstrumentationConfigs").as_array();
 	for (auto it = instrConfigArray.begin(); it != instrConfigArray.end(); it++) {
 		auto instrumentationConfig = std::make_shared<MethodInstrumentationConfig>();
 		instrumentationConfig->fromJson(it->as_object());

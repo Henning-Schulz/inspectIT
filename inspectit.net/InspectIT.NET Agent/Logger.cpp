@@ -5,6 +5,8 @@
 #include <windows.h>
 #include <iostream>
 
+using namespace inspectit::logger;
+
 LoggerFactory loggerFactory;
 
 Logger::Logger(char* name, LogLevel logLevel)

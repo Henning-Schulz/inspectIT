@@ -5,30 +5,35 @@
 
 #include <map>
 
-class SensorInstrumentationPoint :
-	public JsonReceivable
-{
-private:
-	JAVA_LONG id;
-	std::vector<JAVA_LONG> sensorIds;
-	std::vector<byte> sensorPriorities;
-	bool constructor;
-	bool startsInvocation;
-	std::map<std::wstring, json::object> settings;
+namespace inspectit {
+	namespace config {
 
-	// TODO: propertyAccessorList
+		class SensorInstrumentationPoint :
+			public inspectit::json::JsonReceivable
+		{
+		private:
+			JAVA_LONG id;
+			std::vector<JAVA_LONG> sensorIds;
+			std::vector<byte> sensorPriorities;
+			bool constructor;
+			bool startsInvocation;
+			std::map<std::wstring, web::json::object> settings;
 
-public:
-	SensorInstrumentationPoint();
-	~SensorInstrumentationPoint();
+			// TODO: propertyAccessorList
 
-	JAVA_LONG getId();
-	std::vector<JAVA_LONG> getSensorIds();
-	std::vector<byte> getSensorPriorities();
-	bool isConstructor();
-	bool doesStartInvocation();
-	std::map<std::wstring, json::object> getSettings();
+		public:
+			SensorInstrumentationPoint();
+			~SensorInstrumentationPoint();
 
-	void fromJson(json::object json);
-};
+			JAVA_LONG getId();
+			std::vector<JAVA_LONG> getSensorIds();
+			std::vector<byte> getSensorPriorities();
+			bool isConstructor();
+			bool doesStartInvocation();
+			std::map<std::wstring, web::json::object> getSettings();
 
+			void fromJson(web::json::object json);
+		};
+
+	}
+}

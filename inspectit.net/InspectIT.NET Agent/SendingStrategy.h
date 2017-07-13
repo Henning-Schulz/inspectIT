@@ -1,12 +1,20 @@
 #pragma once
 
-class SendingStrategy
-{
+namespace inspectit {
+	namespace sending {
+		namespace strategy {
 
-public:
-	SendingStrategy() {}
-	virtual ~SendingStrategy() {}
+			class SendingStrategy
+			{
 
-	virtual void start() = 0;
-	virtual void stop() = 0;
-};
+			public:
+				SendingStrategy() {}
+				virtual ~SendingStrategy() {}
+
+				virtual void start() = 0;
+				virtual void stop() = 0;
+			};
+
+		}
+	}
+}

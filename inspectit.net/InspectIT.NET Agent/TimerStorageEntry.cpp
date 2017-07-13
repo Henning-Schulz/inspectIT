@@ -1,6 +1,6 @@
 #include "TimerStorageEntry.h"
 
-
+using namespace inspectit::sensor::timer;
 
 TimerStorageEntry::TimerStorageEntry(METHOD_ID methodId, std::chrono::duration<long long, std::nano> startNanos)
 {

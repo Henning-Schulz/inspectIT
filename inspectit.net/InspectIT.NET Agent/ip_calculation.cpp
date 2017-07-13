@@ -16,113 +16,119 @@
 #define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
 #define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
 
-std::vector<std::string> __cdecl getAllDefinedIPs()
-{
-	/* Declare and initialize variables */
+namespace inspectit {
+	namespace utils {
 
-	DWORD dwSize = 0;
-	DWORD dwRetVal = 0;
+		std::vector<std::string> __cdecl getAllDefinedIPs()
+		{
+			/* Declare and initialize variables */
 
-	unsigned int i = 0;
+			DWORD dwSize = 0;
+			DWORD dwRetVal = 0;
 
-	// Set the flags to pass to GetAdaptersAddresses
-	ULONG flags = GAA_FLAG_INCLUDE_PREFIX;
+			unsigned int i = 0;
 
-	// default to unspecified address family (both)
-	ULONG family = AF_UNSPEC;
+			// Set the flags to pass to GetAdaptersAddresses
+			ULONG flags = GAA_FLAG_INCLUDE_PREFIX;
 
-	LPVOID lpMsgBuf = NULL;
+			// default to unspecified address family (both)
+			ULONG family = AF_UNSPEC;
 
-	PIP_ADAPTER_ADDRESSES pAddresses = NULL;
-	ULONG outBufLen = 0;
-	ULONG Iterations = 0;
+			LPVOID lpMsgBuf = NULL;
 
-	char buff[100];
-	DWORD bufflen = 100;
+			PIP_ADAPTER_ADDRESSES pAddresses = NULL;
+			ULONG outBufLen = 0;
+			ULONG Iterations = 0;
 
-	PIP_ADAPTER_ADDRESSES pCurrAddresses = NULL;
-	PIP_ADAPTER_UNICAST_ADDRESS pUnicast = NULL;
-	PIP_ADAPTER_ANYCAST_ADDRESS pAnycast = NULL;
-	PIP_ADAPTER_MULTICAST_ADDRESS pMulticast = NULL;
-	IP_ADAPTER_DNS_SERVER_ADDRESS *pDnServer = NULL;
-	IP_ADAPTER_PREFIX *pPrefix = NULL;
+			char buff[100];
+			DWORD bufflen = 100;
 
-	std::vector<std::string> ips;
+			PIP_ADAPTER_ADDRESSES pCurrAddresses = NULL;
+			PIP_ADAPTER_UNICAST_ADDRESS pUnicast = NULL;
+			PIP_ADAPTER_ANYCAST_ADDRESS pAnycast = NULL;
+			PIP_ADAPTER_MULTICAST_ADDRESS pMulticast = NULL;
+			IP_ADAPTER_DNS_SERVER_ADDRESS *pDnServer = NULL;
+			IP_ADAPTER_PREFIX *pPrefix = NULL;
 
-	// Allocate a 15 KB buffer to start with.
-	outBufLen = WORKING_BUFFER_SIZE;
+			std::vector<std::string> ips;
 
-	do {
+			// Allocate a 15 KB buffer to start with.
+			outBufLen = WORKING_BUFFER_SIZE;
 
-		pAddresses = (IP_ADAPTER_ADDRESSES *)MALLOC(outBufLen);
-		if (pAddresses == NULL) {
-			printf("Memory allocation failed for IP_ADAPTER_ADDRESSES struct\n");
-			exit(1);
-		}
+			do {
 
-		dwRetVal =
-			GetAdaptersAddresses(family, flags, NULL, pAddresses, &outBufLen);
+				pAddresses = (IP_ADAPTER_ADDRESSES *)MALLOC(outBufLen);
+				if (pAddresses == NULL) {
+					printf("Memory allocation failed for IP_ADAPTER_ADDRESSES struct\n");
+					exit(1);
+				}
 
-		if (dwRetVal == ERROR_BUFFER_OVERFLOW) {
-			FREE(pAddresses);
-			pAddresses = NULL;
-		}
-		else {
-			break;
-		}
+				dwRetVal =
+					GetAdaptersAddresses(family, flags, NULL, pAddresses, &outBufLen);
 
-		Iterations++;
+				if (dwRetVal == ERROR_BUFFER_OVERFLOW) {
+					FREE(pAddresses);
+					pAddresses = NULL;
+				}
+				else {
+					break;
+				}
 
-	} while ((dwRetVal == ERROR_BUFFER_OVERFLOW) && (Iterations < MAX_TRIES));
+				Iterations++;
 
-	if (dwRetVal == NO_ERROR) {
-		// If successful, output some information from the data we received
-		pCurrAddresses = pAddresses;
-		while (pCurrAddresses) {
+			} while ((dwRetVal == ERROR_BUFFER_OVERFLOW) && (Iterations < MAX_TRIES));
 
-			pUnicast = pCurrAddresses->FirstUnicastAddress;
-			if (pUnicast != NULL) {
-				for (i = 0; pUnicast != NULL; i++) {
-					SOCKET_ADDRESS address = pUnicast->Address;
-					if (address.lpSockaddr->sa_family == AF_INET) {
-						sockaddr_in *sa_in = (sockaddr_in *)pUnicast->Address.lpSockaddr;
-						PCSTR ip = inet_ntop(AF_INET, &(sa_in->sin_addr), buff, bufflen);
-						ips.push_back(std::string(ip));
+			if (dwRetVal == NO_ERROR) {
+				// If successful, output some information from the data we received
+				pCurrAddresses = pAddresses;
+				while (pCurrAddresses) {
+
+					pUnicast = pCurrAddresses->FirstUnicastAddress;
+					if (pUnicast != NULL) {
+						for (i = 0; pUnicast != NULL; i++) {
+							SOCKET_ADDRESS address = pUnicast->Address;
+							if (address.lpSockaddr->sa_family == AF_INET) {
+								sockaddr_in *sa_in = (sockaddr_in *)pUnicast->Address.lpSockaddr;
+								PCSTR ip = inet_ntop(AF_INET, &(sa_in->sin_addr), buff, bufflen);
+								ips.push_back(std::string(ip));
+							}
+							else if (address.lpSockaddr->sa_family == AF_INET6) {
+								sockaddr_in6 *sa_in6 = (sockaddr_in6 *)pUnicast->Address.lpSockaddr;
+								PCSTR ip = inet_ntop(AF_INET6, &(sa_in6->sin6_addr), buff, bufflen);
+								ips.push_back(std::string(ip));
+							}
+
+							pUnicast = pUnicast->Next;
+						}
 					}
-					else if (address.lpSockaddr->sa_family == AF_INET6) {
-						sockaddr_in6 *sa_in6 = (sockaddr_in6 *)pUnicast->Address.lpSockaddr;
-						PCSTR ip = inet_ntop(AF_INET6, &(sa_in6->sin6_addr), buff, bufflen);
-						ips.push_back(std::string(ip));
-					}
 
-					pUnicast = pUnicast->Next;
+					pCurrAddresses = pCurrAddresses->Next;
+				}
+			}
+			else {
+				printf("Call to GetAdaptersAddresses failed with error: %d\n", dwRetVal);
+				if (dwRetVal == ERROR_NO_DATA)
+					printf("\tNo addresses were found for the requested parameters\n");
+				else {
+					if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+						FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+						NULL, dwRetVal, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+						// Default language
+						(LPTSTR)& lpMsgBuf, 0, NULL)) {
+						printf("\tError: %s", lpMsgBuf);
+						LocalFree(lpMsgBuf);
+						if (pAddresses)
+							FREE(pAddresses);
+					}
 				}
 			}
 
-			pCurrAddresses = pCurrAddresses->Next;
-		}
-	}
-	else {
-		printf("Call to GetAdaptersAddresses failed with error: %d\n", dwRetVal);
-		if (dwRetVal == ERROR_NO_DATA)
-			printf("\tNo addresses were found for the requested parameters\n");
-		else {
-			if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-				FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-				NULL, dwRetVal, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				// Default language
-				(LPTSTR)& lpMsgBuf, 0, NULL)) {
-				printf("\tError: %s", lpMsgBuf);
-				LocalFree(lpMsgBuf);
-				if (pAddresses)
-					FREE(pAddresses);
+			if (pAddresses) {
+				FREE(pAddresses);
 			}
+
+			return ips;
 		}
-	}
 
-	if (pAddresses) {
-		FREE(pAddresses);
 	}
-
-	return ips;
 }

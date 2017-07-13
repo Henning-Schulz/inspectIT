@@ -13,36 +13,41 @@
 #include <vector>
 #include <string>
 
-class InstrumentationManager
-{
-private:
-	JAVA_LONG platformId;
-	ICorProfilerInfo3 *profilerInfo;
+namespace inspectit {
+	namespace instrumentation {
 
-	std::vector<std::wstring> excludeClassesPatterns;
-	std::map<mdMethodDef, std::shared_ptr<SensorInstrumentationPoint>> sensorInstrumentationPoints;
+		class InstrumentationManager
+		{
+		private:
+			JAVA_LONG platformId;
+			ICorProfilerInfo3 *profilerInfo;
 
-	std::map<JAVA_LONG, std::shared_ptr<MethodSensorTypeConfig>> sensorTypeConfigs;
-	std::map<JAVA_LONG, std::shared_ptr<MethodSensor>> methodSensors;
+			std::vector<std::wstring> excludeClassesPatterns;
+			std::map<mdMethodDef, std::shared_ptr<inspectit::config::SensorInstrumentationPoint>> sensorInstrumentationPoints;
 
-	MethodSensorFactory methodSensorFactory;
+			std::map<JAVA_LONG, std::shared_ptr<inspectit::config::MethodSensorTypeConfig>> sensorTypeConfigs;
+			std::map<JAVA_LONG, std::shared_ptr<inspectit::sensor::MethodSensor>> methodSensors;
 
-	std::shared_ptr<DataSendingService> dataSendingService;
+			MethodSensorFactory methodSensorFactory;
 
-	Logger logger = loggerFactory.createLogger("InstrumentationManager");
+			std::shared_ptr<inspectit::sending::DataSendingService> dataSendingService;
 
-public:
-	InstrumentationManager(JAVA_LONG platformId, ICorProfilerInfo3 *profilerInfo, std::shared_ptr<DataSendingService> dataSendingService);
-	~InstrumentationManager();
+			inspectit::logger::Logger logger = loggerFactory.createLogger("InstrumentationManager");
 
-	void addSensorTypeConfigs(std::vector<std::shared_ptr<MethodSensorTypeConfig>> configs);
+		public:
+			InstrumentationManager(JAVA_LONG platformId, ICorProfilerInfo3 *profilerInfo, std::shared_ptr<inspectit::sending::DataSendingService> dataSendingService);
+			~InstrumentationManager();
 
-	void setExcludeClassesPatterns(std::vector<std::wstring> excludeClassesPatterns);
-	bool instrumentationDefinitionMatches(std::shared_ptr<MethodType> methodType, std::shared_ptr<MethodInstrumentationConfig> instrConfig);
+			void addSensorTypeConfigs(std::vector<std::shared_ptr<inspectit::config::MethodSensorTypeConfig>> configs);
 
-	void registerInstrumentationDefinition(std::shared_ptr<ClassType> classType, std::shared_ptr<InstrumentationDefinition> instrDef);
-	std::shared_ptr<SensorInstrumentationPoint> getSensorInstrumentationPoint(mdMethodDef methodDef);
+			void setExcludeClassesPatterns(std::vector<std::wstring> excludeClassesPatterns);
+			bool instrumentationDefinitionMatches(std::shared_ptr<inspectit::types::MethodType> methodType, std::shared_ptr<inspectit::config::MethodInstrumentationConfig> instrConfig);
 
-	std::shared_ptr<MethodSensor> getMethodSensorForId(JAVA_LONG sensorId);
-};
+			void registerInstrumentationDefinition(std::shared_ptr<inspectit::types::ClassType> classType, std::shared_ptr<inspectit::config::InstrumentationDefinition> instrDef);
+			std::shared_ptr<inspectit::config::SensorInstrumentationPoint> getSensorInstrumentationPoint(mdMethodDef methodDef);
 
+			std::shared_ptr<inspectit::sensor::MethodSensor> getMethodSensorForId(JAVA_LONG sensorId);
+		};
+
+	}
+}

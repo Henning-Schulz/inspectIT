@@ -16,6 +16,17 @@
 #include "ClassType.h"
 #include "AgentConfig.h"
 
+using namespace inspectit;
+using namespace inspectit::connection;
+using namespace inspectit::config;
+using namespace inspectit::data;
+using namespace inspectit::instrumentation;
+using namespace inspectit::logger;
+using namespace inspectit::sending;
+using namespace inspectit::sensor;
+using namespace inspectit::types;
+using namespace inspectit::utils;
+
 Agent *globalAgentInstance;
 
 Agent::Agent()
@@ -179,7 +190,7 @@ UINT_PTR FunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
 	auto sensorInstrumentationPoint = instrumentationManager->getSensorInstrumentationPoint(methodDef);
 
 	if (!sensorInstrumentationPoint) {
-		loggerFactory.staticLog(LEVEL_INFO, "FunctionMapper", "Not instrumenting method with mdMethodDef %li.", methodDef);
+		loggerFactory.staticLog(LEVEL_DEBUG, "FunctionMapper", "Not instrumenting method with mdMethodDef %li.", methodDef);
 		// Nothing to instrument
 		*pbHookFunction = 0;
 		return functionID;
@@ -189,7 +200,7 @@ UINT_PTR FunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
 
 	JAVA_LONG methodId = sensorInstrumentationPoint->getId();
 
-	loggerFactory.staticLog(LEVEL_INFO, "FunctionMapper", "Instrumenting method %lli.", methodId);
+	loggerFactory.staticLog(LEVEL_DEBUG, "FunctionMapper", "Instrumenting method %lli.", methodId);
 
 	auto sensorIds = sensorInstrumentationPoint->getSensorIds();
 	for (auto it = sensorIds.begin(); it != sensorIds.end(); it++) {
@@ -386,7 +397,7 @@ HRESULT Agent::ClassLoadFinished(ClassID classId, HRESULT hrStatus)
 					methodDef = (*mit)->getMethodDef();
 				}
 			}
-			logger.info("Stored instrumentation definition for TestSystem.Program. mdMethodDef of say is %li.", methodDef);
+			logger.debug("Stored instrumentation definition for TestSystem.Program. mdMethodDef of say is %li.", methodDef);
 
 			auto instrs = instrumentationDefinition->getMethodInstrumentationConfigs();
 			for (auto it2 = instrs.begin(); it2 != instrs.end(); it2++) {

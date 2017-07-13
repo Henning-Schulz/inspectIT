@@ -4,25 +4,32 @@
 
 #include <chrono>
 
-class TimerStorage :
-	public MeasurementStorage
-{
-private:
-	ThreadID threadId;
+namespace inspectit {
+	namespace sensor {
+		namespace timer {
 
-	int32_t started = false;
+			class TimerStorage :
+				public inspectit::storage::MeasurementStorage
+			{
+			private:
+				ThreadID threadId;
 
-	std::vector<TimerStorageEntry> entries;
-	std::vector<TimerStorageEntry> finishedEntries;
+				int32_t started = false;
 
-public:
-	TimerStorage(JAVA_LONG platformId, JAVA_LONG methodSensorId, ThreadID threadId, std::chrono::duration<long long, std::nano> timestamp);
-	~TimerStorage();
+				std::vector<TimerStorageEntry> entries;
+				std::vector<TimerStorageEntry> finishedEntries;
 
-	void newEntry(JAVA_LONG methodId, std::chrono::duration<long long, std::nano> startNanos);
-	void finishCurrentEntry(std::chrono::duration<long long, std::nano> endNanos);
+			public:
+				TimerStorage(JAVA_LONG platformId, JAVA_LONG methodSensorId, ThreadID threadId, std::chrono::duration<long long, std::nano> timestamp);
+				~TimerStorage();
 
-	bool finished();
-	std::vector<std::shared_ptr<SensorData>> finalizeData();
-};
+				void newEntry(JAVA_LONG methodId, std::chrono::duration<long long, std::nano> startNanos);
+				void finishCurrentEntry(std::chrono::duration<long long, std::nano> endNanos);
 
+				bool finished();
+				std::vector<std::shared_ptr<inspectit::data::SensorData>> finalizeData();
+			};
+
+		}
+	}
+}

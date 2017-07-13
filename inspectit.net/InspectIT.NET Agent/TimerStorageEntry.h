@@ -4,21 +4,28 @@
 
 #include <chrono>
 
-class TimerStorageEntry
-{
-private:
-	METHOD_ID methodId;
-	JAVA_LONG startNanos = -1;
-	JAVA_LONG endNanos = -1;
+namespace inspectit {
+	namespace sensor {
+		namespace timer {
 
-public:
-	TimerStorageEntry(METHOD_ID methodId, std::chrono::duration<long long, std::nano> startNanos);
-	~TimerStorageEntry();
+			class TimerStorageEntry
+			{
+			private:
+				METHOD_ID methodId;
+				JAVA_LONG startNanos = -1;
+				JAVA_LONG endNanos = -1;
 
-	void setEndTime(std::chrono::duration<long long, std::nano> endNanos);
+			public:
+				TimerStorageEntry(METHOD_ID methodId, std::chrono::duration<long long, std::nano> startNanos);
+				~TimerStorageEntry();
 
-	METHOD_ID getMethodId();
-	JAVA_LONG getStartNanos();
-	JAVA_LONG getEndNanos();
-};
+				void setEndTime(std::chrono::duration<long long, std::nano> endNanos);
 
+				METHOD_ID getMethodId();
+				JAVA_LONG getStartNanos();
+				JAVA_LONG getEndNanos();
+			};
+
+		}
+	}
+}

@@ -6,19 +6,25 @@
 
 #include <shared_mutex>
 
-class MethodSensorFactory
-{
-private:
-	std::map<std::wstring, std::shared_ptr<MethodSensor>> knownSensors;
+namespace inspectit {
+	namespace instrumentation {
 
-	void setupKnownSensors();
-	void addKnownSensor(std::shared_ptr<MethodSensor> sensor);
+		class MethodSensorFactory
+		{
+		private:
+			std::map<std::wstring, std::shared_ptr<inspectit::sensor::MethodSensor>> knownSensors;
 
-	Logger logger = loggerFactory.createLogger("MethodSensorFactory");
+			void setupKnownSensors();
+			void addKnownSensor(std::shared_ptr<inspectit::sensor::MethodSensor> sensor);
 
-public:
-	MethodSensorFactory();
-	~MethodSensorFactory();
+			inspectit::logger::Logger logger = loggerFactory.createLogger("MethodSensorFactory");
 
-	std::shared_ptr<MethodSensor> createMethodSensor(std::shared_ptr<MethodSensorTypeConfig> sensorTypeConfig, JAVA_LONG platformId, ICorProfilerInfo3 *profilerInfo, std::shared_ptr<DataSendingService> dataSendingService);
-};
+		public:
+			MethodSensorFactory();
+			~MethodSensorFactory();
+
+			std::shared_ptr<inspectit::sensor::MethodSensor> createMethodSensor(std::shared_ptr<inspectit::config::MethodSensorTypeConfig> sensorTypeConfig, JAVA_LONG platformId, ICorProfilerInfo3 *profilerInfo, std::shared_ptr<inspectit::sending::DataSendingService> dataSendingService);
+		};
+
+	}
+}

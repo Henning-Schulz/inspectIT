@@ -1,6 +1,6 @@
 #include "ExceptionSensorTypeConfig.h"
 
-
+using namespace inspectit::config;
 
 ExceptionSensorTypeConfig::ExceptionSensorTypeConfig()
 {
@@ -16,7 +16,7 @@ bool ExceptionSensorTypeConfig::isEnhanced()
 	return enhanced;
 }
 
-void ExceptionSensorTypeConfig::fromJson(json::object json)
+void ExceptionSensorTypeConfig::fromJson(web::json::object json)
 {
 	super::fromJson(json);
 

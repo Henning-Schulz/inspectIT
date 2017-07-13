@@ -3,6 +3,13 @@
 #include "stringutils.h"
 #include "MethodSensorFactory.h"
 
+using namespace inspectit::config;
+using namespace inspectit::instrumentation;
+using namespace inspectit::logger;
+using namespace inspectit::sending;
+using namespace inspectit::sensor;
+using namespace inspectit::types;
+using namespace inspectit::utils;
 
 InstrumentationManager::InstrumentationManager(JAVA_LONG platformId, ICorProfilerInfo3 *profilerInfo, std::shared_ptr<DataSendingService> dataSendingService)
 {

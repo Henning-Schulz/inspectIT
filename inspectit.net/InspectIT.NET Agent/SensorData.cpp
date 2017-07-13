@@ -1,5 +1,6 @@
 #include "SensorData.h"
 
+using namespace inspectit::data;
 
 SensorData::SensorData(JAVA_LONG platformId, JAVA_LONG sensorTypeId, JAVA_LONG timestampMs)
 {
@@ -31,8 +32,8 @@ JAVA_LONG SensorData::getTimestampMs()
 
 json::value SensorData::toJson()
 {
-	json::value json;
-	json[KEY_TYPE] = json::value::string(typeName());
-	json[L"timestampMs"] = json::value::number(timestampMs);
+	web::json::value json;
+	json[KEY_TYPE] = web::json::value::string(typeName());
+	json[L"timestampMs"] = web::json::value::number(timestampMs);
 	return json;
 }

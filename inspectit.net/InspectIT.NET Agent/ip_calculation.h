@@ -3,4 +3,10 @@
 #include "basehdr.h"
 #include <vector>
 
-std::vector<std::string> __cdecl getAllDefinedIPs();
+namespace inspectit {
+	namespace utils {
+
+		std::vector<std::string> __cdecl getAllDefinedIPs();
+
+	}
+}

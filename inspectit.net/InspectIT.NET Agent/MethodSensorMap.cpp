@@ -1,6 +1,8 @@
 #include "MethodSensorMap.h"
 
+using namespace inspectit::data;
 
+using namespace web;
 
 MethodSensorMap::MethodSensorMap()
 {
@@ -53,14 +55,14 @@ std::vector<JAVA_LONG> MethodSensorMap::getSensors(JAVA_LONG methodId)
 
 json::value MethodSensorMap::toJson()
 {
-	json::value json;
+	web::json::value json;
 
 	for (auto oit = methodsToSensors.begin(); oit != methodsToSensors.end(); oit++) {
-		json::value inner;
+		web::json::value inner;
 
 		int i = 0;
 		for (auto iit = oit->second.begin(); iit != oit->second.end(); iit++) {
-			inner[i] = json::value::number(*iit);
+			inner[i] = web::json::value::number(*iit);
 			i++;
 		}
 

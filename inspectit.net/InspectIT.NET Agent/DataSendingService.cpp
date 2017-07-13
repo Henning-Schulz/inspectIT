@@ -3,6 +3,12 @@
 #include "DroppingBufferStrategy.h"
 #include "ListSizeStrategy.h"
 
+using namespace inspectit::config;
+using namespace inspectit::data;
+using namespace inspectit::sending;
+using namespace inspectit::sending::buffer;
+using namespace inspectit::sending::strategy;
+using namespace inspectit::storage;
 
 DataSendingService::DataSendingService(std::shared_ptr<StrategyConfig> bufferStrategyConfig, std::shared_ptr<StrategyConfig> sendingStrategyConfig)
 {

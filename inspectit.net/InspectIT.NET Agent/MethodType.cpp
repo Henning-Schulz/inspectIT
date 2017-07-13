@@ -1,6 +1,8 @@
 #include "MethodType.h"
 
+using namespace web;
 
+using namespace inspectit::types;
 
 MethodType::MethodType()
 {
@@ -83,32 +85,32 @@ void MethodType::setMethodDef(mdMethodDef methodDef)
 
 json::value MethodType::toJson()
 {
-	json::value json;
+	web::json::value json;
 
-	json[L"name"] = json::value::string(name);
-	json[L"modifiers"] = json::value::number(modifiers);
-	json[L"returnType"] = json::value::string(returnType);
+	json[L"name"] = web::json::value::string(name);
+	json[L"modifiers"] = web::json::value::number(modifiers);
+	json[L"returnType"] = web::json::value::string(returnType);
 
-	json::value parametersArray;
+	web::json::value parametersArray;
 	int i = 0;
 	for (auto it = parameters.begin(); it != parameters.end(); it++) {
-		parametersArray[i] = json::value::string(*it);
+		parametersArray[i] = web::json::value::string(*it);
 		i++;
 	}
 	json[L"parameters"] = parametersArray;
 
-	json::value exceptionsArray;
+	web::json::value exceptionsArray;
 	i = 0;
 	for (auto it = exceptions.begin(); it != exceptions.end(); it++) {
-		exceptionsArray[i] = json::value::string(*it);
+		exceptionsArray[i] = web::json::value::string(*it);
 		i++;
 	}
 	json[L"exceptions"] = exceptionsArray;
 
-	json::value annotationsArray;
+	web::json::value annotationsArray;
 	i = 0;
 	for (auto it = annotations.begin(); it != annotations.end(); it++) {
-		annotationsArray[i] = json::value::string(*it);
+		annotationsArray[i] = web::json::value::string(*it);
 		i++;
 	}
 	json[L"annotations"] = annotationsArray;

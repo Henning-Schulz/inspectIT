@@ -1,6 +1,6 @@
 #include "AnnotationType.h"
 
-
+using namespace inspectit::types;
 
 AnnotationType::AnnotationType()
 {

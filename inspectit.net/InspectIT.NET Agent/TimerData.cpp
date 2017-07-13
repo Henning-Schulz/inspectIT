@@ -1,6 +1,6 @@
 #include "TimerData.h"
 
-
+using namespace inspectit::sensor::timer;
 
 std::wstring TimerData::typeName()
 {

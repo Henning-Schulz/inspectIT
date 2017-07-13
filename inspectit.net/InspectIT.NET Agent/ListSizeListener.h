@@ -2,16 +2,24 @@
 
 #include <memory>
 
-class ListSizeListener
-{
-public:
-	ListSizeListener() {}
-	virtual ~ListSizeListener() {}
+namespace inspectit {
+	namespace sending {
+		namespace strategy {
 
-	virtual void listSizeChanged(size_t newSize) = 0;
-};
+			class ListSizeListener
+			{
+			public:
+				ListSizeListener() {}
+				virtual ~ListSizeListener() {}
 
-class ListSizeListenable
-{
-	virtual void addListSizeListener(std::shared_ptr<ListSizeListener> listener) = 0;
-};
+				virtual void listSizeChanged(size_t newSize) = 0;
+			};
+
+			class ListSizeListenable
+			{
+				virtual void addListSizeListener(std::shared_ptr<ListSizeListener> listener) = 0;
+			};
+
+		}
+	}
+}

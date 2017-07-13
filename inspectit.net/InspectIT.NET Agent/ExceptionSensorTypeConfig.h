@@ -1,19 +1,24 @@
 #pragma once
 #include "MethodSensorTypeConfig.h"
 
-class ExceptionSensorTypeConfig : MethodSensorTypeConfig
-{
-private:
-	typedef MethodSensorTypeConfig super;
+namespace inspectit {
+	namespace config {
 
-	bool enhanced;
+		class ExceptionSensorTypeConfig : MethodSensorTypeConfig
+		{
+		private:
+			typedef MethodSensorTypeConfig super;
 
-public:
-	ExceptionSensorTypeConfig();
-	~ExceptionSensorTypeConfig();
+			bool enhanced;
 
-	bool isEnhanced();
+		public:
+			ExceptionSensorTypeConfig();
+			~ExceptionSensorTypeConfig();
 
-	void fromJson(json::object json);
-};
+			bool isEnhanced();
 
+			void fromJson(web::json::object json);
+		};
+
+	}
+}

@@ -1,5 +1,9 @@
 #include "MethodSensor.h"
 
+using namespace inspectit::config;
+using namespace inspectit::sending;
+using namespace inspectit::sensor;
+
 JAVA_LONG MethodSensor::getSensorTypeId()
 {
 	return sensorTypeId;

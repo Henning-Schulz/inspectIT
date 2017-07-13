@@ -1,6 +1,8 @@
 #include "ClassType.h"
 
+using namespace web;
 
+using namespace inspectit::types;
 
 ClassType::ClassType()
 {
@@ -48,25 +50,25 @@ std::wstring ClassType::typeName()
 
 json::value ClassType::toJson()
 {
-	json::value json = super::toJson();
+	web::json::value json = super::toJson();
 
-	json::value superClassesArray;
+	web::json::value superClassesArray;
 	int i = 0;
 	for (auto it = superClasses.begin(); it != superClasses.end(); it++) {
-		superClassesArray[i] = json::value::string(*it);
+		superClassesArray[i] = web::json::value::string(*it);
 		i++;
 	}
 	json[L"superClasses"] = superClassesArray;
 
-	json::value interfacesArray;
+	web::json::value interfacesArray;
 	i = 0;
 	for (auto it = realizedInterfaces.begin(); it != realizedInterfaces.end(); it++) {
-		interfacesArray[i] = json::value::string(*it);
+		interfacesArray[i] = web::json::value::string(*it);
 		i++;
 	}
 	json[L"realizedInterfaces"] = interfacesArray;
 
-	json::value methodsArray;
+	web::json::value methodsArray;
 	i = 0;
 	for (auto it = methods.begin(); it != methods.end(); it++) {
 		methodsArray[i] = (*it)->toJson();

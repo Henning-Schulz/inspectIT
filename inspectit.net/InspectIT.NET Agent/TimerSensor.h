@@ -3,28 +3,35 @@
 
 #include "TimerHook.h"
 
-class TimerSensor :
-	public MethodSensor
-{
-private:
-	std::shared_ptr<TimerHook> hook;
+namespace inspectit {
+	namespace sensor {
+		namespace timer {
 
-public:
-	TimerSensor();
-	~TimerSensor();
+			class TimerSensor :
+				public MethodSensor
+			{
+			private:
+				std::shared_ptr<TimerHook> hook;
 
-	void init(ICorProfilerInfo *profilerInfo);
-	void notifyStartup();
-	void notifyShutdown();
+			public:
+				TimerSensor();
+				~TimerSensor();
 
-	bool hasHook();
-	std::shared_ptr<MethodHook> getHook();
+				void init(ICorProfilerInfo *profilerInfo);
+				void notifyStartup();
+				void notifyShutdown();
 
-	bool hasThreadHook();
-	std::shared_ptr<ThreadHook> getThreadHook();
+				bool hasHook();
+				std::shared_ptr<MethodHook> getHook();
 
-	DWORD getSpecialMonitorFlags();
+				bool hasThreadHook();
+				std::shared_ptr<ThreadHook> getThreadHook();
 
-	std::wstring getClassName();
-};
+				DWORD getSpecialMonitorFlags();
 
+				std::wstring getClassName();
+			};
+
+		}
+	}
+}

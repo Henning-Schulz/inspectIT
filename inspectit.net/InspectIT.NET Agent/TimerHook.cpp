@@ -4,6 +4,9 @@
 #include "DataSendingService.h"
 #include "TimerStorage.h"
 
+using namespace inspectit::sensor::timer;
+using namespace inspectit::storage;
+
 TimerHook::TimerHook()
 {
 }

@@ -2,28 +2,33 @@
 #include "AbstractSensorTypeConfig.h"
 #include "Logger.h"
 
-enum MethodSensorPriority { INVOC = 1, MIN, LOW, NORMAL, HIGH, MAX };
+namespace inspectit {
+	namespace config {
 
-class MethodSensorTypeConfig :
-	public AbstractSensorTypeConfig
-{
-private:
-	typedef AbstractSensorTypeConfig super;
+		enum MethodSensorPriority { INVOC = 1, MIN, LOW, NORMAL, HIGH, MAX };
 
-	std::wstring name;
-	MethodSensorPriority priority = NORMAL;
+		class MethodSensorTypeConfig :
+			public AbstractSensorTypeConfig
+		{
+		private:
+			typedef AbstractSensorTypeConfig super;
 
-	MethodSensorPriority prioFromString(std::wstring sPrio);
+			std::wstring name;
+			MethodSensorPriority priority = NORMAL;
 
-	Logger logger = loggerFactory.createLogger("MethodSensorTypeConfig");
+			MethodSensorPriority prioFromString(std::wstring sPrio);
 
-public:
-	MethodSensorTypeConfig();
-	~MethodSensorTypeConfig();
+			inspectit::logger::Logger logger = loggerFactory.createLogger("MethodSensorTypeConfig");
 
-	std::wstring getName();
-	MethodSensorPriority getPriority();
+		public:
+			MethodSensorTypeConfig();
+			~MethodSensorTypeConfig();
 
-	void fromJson(json::object json);
-};
+			std::wstring getName();
+			MethodSensorPriority getPriority();
 
+			void fromJson(web::json::object json);
+		};
+
+	}
+}

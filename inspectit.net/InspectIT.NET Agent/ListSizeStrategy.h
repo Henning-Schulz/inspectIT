@@ -3,22 +3,29 @@
 #include "ListSizeListener.h"
 #include "DataSendingService.h"
 
-class ListSizeStrategy : public SendingStrategy, public ListSizeListener
-{
-private:
-	DataSendingService *sendingService;
-	size_t maxSize;
-	bool active = false;
+namespace inspectit {
+	namespace sending {
+		namespace strategy {
 
-public:
-	ListSizeStrategy(size_t maxSize);
-	~ListSizeStrategy();
+			class ListSizeStrategy : public SendingStrategy, public ListSizeListener
+			{
+			private:
+				DataSendingService *sendingService;
+				size_t maxSize;
+				bool active = false;
 
-	void setDataSendingService(DataSendingService *sendingService);
+			public:
+				ListSizeStrategy(size_t maxSize);
+				~ListSizeStrategy();
 
-	void start();
-	void stop();
+				void setDataSendingService(DataSendingService *sendingService);
 
-	void listSizeChanged(size_t newSize);
-};
+				void start();
+				void stop();
 
+				void listSizeChanged(size_t newSize);
+			};
+
+		}
+	}
+}

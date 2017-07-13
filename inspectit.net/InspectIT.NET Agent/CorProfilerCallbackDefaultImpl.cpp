@@ -1,5 +1,7 @@
 #include "CorProfilerCallbackDefaultImpl.h"
 
+using namespace inspectit;
+
 CorProfilerCallbackDefaultImpl::CorProfilerCallbackDefaultImpl()
 {
 }

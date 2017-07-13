@@ -1,6 +1,7 @@
 #include "DroppingBufferStrategy.h"
 
-
+using namespace inspectit::data;
+using namespace inspectit::sending::buffer;
 
 DroppingBufferStrategy::DroppingBufferStrategy()
 {

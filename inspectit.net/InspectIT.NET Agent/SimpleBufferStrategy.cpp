@@ -1,6 +1,7 @@
 #include "SimpleBufferStrategy.h"
 
-
+using namespace inspectit::data;
+using namespace inspectit::sending::buffer;
 
 SimpleBufferStrategy::SimpleBufferStrategy()
 {

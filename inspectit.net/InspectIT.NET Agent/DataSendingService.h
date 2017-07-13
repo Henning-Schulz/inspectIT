@@ -18,59 +18,65 @@
 #include <condition_variable>
 #include <shared_mutex>
 
-class DataSendingService : public ListSizeListenable
-{
-private:
-	std::shared_ptr<BufferStrategy> bufferStrategy;
-	std::shared_ptr<SendingStrategy> sendingStrategy;
-	std::unique_ptr<std::map<std::string, std::shared_ptr<SensorData>>> measurements;
-	std::unique_ptr<std::map<std::string, std::shared_ptr<SensorData>>> measurementsPrepCopy;
-	std::shared_mutex mMeasurements;
+namespace inspectit {
+	namespace sending {
 
-	std::unique_ptr<std::map<std::string, std::shared_ptr<MeasurementStorage>>> storages;
-	std::shared_mutex mStorages;
+		class DataSendingService : public strategy::ListSizeListenable
+		{
+		private:
+			std::shared_ptr<buffer::BufferStrategy> bufferStrategy;
+			std::shared_ptr<strategy::SendingStrategy> sendingStrategy;
+			std::unique_ptr<std::map<std::string, std::shared_ptr<inspectit::data::SensorData>>> measurements;
+			std::unique_ptr<std::map<std::string, std::shared_ptr<inspectit::data::SensorData>>> measurementsPrepCopy;
+			std::shared_mutex mMeasurements;
 
-	std::unique_ptr<std::vector<std::shared_ptr<MeasurementStorage>>> finishedStorages;
-	std::unique_ptr<std::vector<std::shared_ptr<MeasurementStorage>>> finishedStoragesPrepCopy;
-	std::shared_mutex mFinishedStorages;
+			std::unique_ptr<std::map<std::string, std::shared_ptr<inspectit::storage::MeasurementStorage>>> storages;
+			std::shared_mutex mStorages;
 
-	std::thread preparingThread;
-	std::thread sendingThread;
-	std::mutex mPrepare;
-	std::mutex mSend;
-	std::condition_variable cvPrepare;
-	std::condition_variable cvSend;
+			std::unique_ptr<std::vector<std::shared_ptr<inspectit::storage::MeasurementStorage>>> finishedStorages;
+			std::unique_ptr<std::vector<std::shared_ptr<inspectit::storage::MeasurementStorage>>> finishedStoragesPrepCopy;
+			std::shared_mutex mFinishedStorages;
 
-	bool stop = false;
+			std::thread preparingThread;
+			std::thread sendingThread;
+			std::mutex mPrepare;
+			std::mutex mSend;
+			std::condition_variable cvPrepare;
+			std::condition_variable cvSend;
 
-	Logger logger = loggerFactory.createLogger("DataSendingService");
+			bool stop = false;
 
-	std::vector<std::shared_ptr<ListSizeListener>> listSizeListeners;
+			inspectit::logger::Logger logger = loggerFactory.createLogger("DataSendingService");
 
-	void prepareData();
-	void sendData();
+			std::vector<std::shared_ptr<strategy::ListSizeListener>> listSizeListeners;
 
-	std::string createKey(JAVA_LONG sensorTypeId, JAVA_LONG methodId, std::string prefix);
+			void prepareData();
+			void sendData();
 
-	std::shared_ptr<BufferStrategy> createBufferStrategy(std::shared_ptr<StrategyConfig> config);
-	std::shared_ptr<SendingStrategy> createSendingStrategy(std::shared_ptr<StrategyConfig> config);
+			std::string createKey(JAVA_LONG sensorTypeId, JAVA_LONG methodId, std::string prefix);
 
-	void notifiyListSizeListeners();
+			std::shared_ptr<buffer::BufferStrategy> createBufferStrategy(std::shared_ptr<inspectit::config::StrategyConfig> config);
+			std::shared_ptr<strategy::SendingStrategy> createSendingStrategy(std::shared_ptr<inspectit::config::StrategyConfig> config);
 
-public:
-	DataSendingService(std::shared_ptr<StrategyConfig> bufferStrategyConfig, std::shared_ptr<StrategyConfig> sendingStrategyConfig);
-	~DataSendingService();
+			void notifiyListSizeListeners();
 
-	std::shared_ptr<SensorData> getMethodSensorData(JAVA_LONG sensorTypeId, JAVA_LONG methodId, std::string prefix = "");
-	void addMethodSensorData(std::shared_ptr<SensorData> data, std::string prefix = "");
+		public:
+			DataSendingService(std::shared_ptr<inspectit::config::StrategyConfig> bufferStrategyConfig, std::shared_ptr<inspectit::config::StrategyConfig> sendingStrategyConfig);
+			~DataSendingService();
 
-	std::shared_ptr<MeasurementStorage> getMeasurementStorage(JAVA_LONG sensorTypeId, JAVA_LONG methodId, std::string prefix = "");
-	void addMeasurementStorage(std::shared_ptr<MeasurementStorage> storage, std::string prefix = "");
-	void notifyStorageFinished(std::shared_ptr<MeasurementStorage> storage, std::string prefix = "");
+			std::shared_ptr<inspectit::data::SensorData> getMethodSensorData(JAVA_LONG sensorTypeId, JAVA_LONG methodId, std::string prefix = "");
+			void addMethodSensorData(std::shared_ptr<inspectit::data::SensorData> data, std::string prefix = "");
 
-	void send();
+			std::shared_ptr<inspectit::storage::MeasurementStorage> getMeasurementStorage(JAVA_LONG sensorTypeId, JAVA_LONG methodId, std::string prefix = "");
+			void addMeasurementStorage(std::shared_ptr<inspectit::storage::MeasurementStorage> storage, std::string prefix = "");
+			void notifyStorageFinished(std::shared_ptr<inspectit::storage::MeasurementStorage> storage, std::string prefix = "");
 
-	void addListSizeListener(std::shared_ptr<ListSizeListener> listener);
+			void send();
 
-	void stopSending();
-};
+			void addListSizeListener(std::shared_ptr<strategy::ListSizeListener> listener);
+
+			void stopSending();
+		};
+
+	}
+}

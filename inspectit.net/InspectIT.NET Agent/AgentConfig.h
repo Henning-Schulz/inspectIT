@@ -11,49 +11,54 @@
 
 #include <map>
 
-class AgentConfig : JsonReceivable
-{
-private:
-	JAVA_LONG platformId;
-	bool classCacheExistsOnCmr;
-	
-	std::vector<std::shared_ptr<PlatformSensorTypeConfig>> platformSensorTypeConfigs;
-	std::vector<std::shared_ptr<MethodSensorTypeConfig>> methodSensorTypeConfigs;
-	std::shared_ptr<ExceptionSensorTypeConfig> exceptionSensorTypeConfig;
-	// JmxSensorTypeConfig does not make sense here
-	std::vector<std::shared_ptr<MethodSensorTypeConfig>> specialMethodSensorTypeConfigs;
+namespace inspectit {
+	namespace config {
 
-	std::shared_ptr<StrategyConfig> bufferStrategyConfig;
-	std::shared_ptr<StrategyConfig> sendingStrategyConfig;
+		class AgentConfig : inspectit::json::JsonReceivable
+		{
+		private:
+			JAVA_LONG platformId;
+			bool classCacheExistsOnCmr;
 
-	std::vector<std::wstring> excludeClassesPatterns;
-	std::map<std::vector<std::wstring>, std::shared_ptr<InstrumentationDefinition>> initialInstrumentationDefinitions;
+			std::vector<std::shared_ptr<PlatformSensorTypeConfig>> platformSensorTypeConfigs;
+			std::vector<std::shared_ptr<MethodSensorTypeConfig>> methodSensorTypeConfigs;
+			std::shared_ptr<ExceptionSensorTypeConfig> exceptionSensorTypeConfig;
+			// JmxSensorTypeConfig does not make sense here
+			std::vector<std::shared_ptr<MethodSensorTypeConfig>> specialMethodSensorTypeConfigs;
 
-	std::wstring configurationInfo;
+			std::shared_ptr<StrategyConfig> bufferStrategyConfig;
+			std::shared_ptr<StrategyConfig> sendingStrategyConfig;
 
-	Logger logger = loggerFactory.createLogger("AgentConfig");
+			std::vector<std::wstring> excludeClassesPatterns;
+			std::map<std::vector<std::wstring>, std::shared_ptr<InstrumentationDefinition>> initialInstrumentationDefinitions;
 
-public:
-	AgentConfig();
-	~AgentConfig();
+			std::wstring configurationInfo;
 
-	JAVA_LONG getPlatformId();
-	bool doesClassCacheExistOnCmr();
+			inspectit::logger::Logger logger = loggerFactory.createLogger("AgentConfig");
 
-	std::vector<std::shared_ptr<PlatformSensorTypeConfig>> getPlatformSensorTypeConfigs();
-	std::vector<std::shared_ptr<MethodSensorTypeConfig>> getMethodSensorTypeConfigs();
-	std::shared_ptr<ExceptionSensorTypeConfig> getExceptionSensorTypeConfig();
-	// JmxSensorTypeConfig does not make sense here
-	std::vector<std::shared_ptr<MethodSensorTypeConfig>> getSpecialMethodSensorTypeConfigs();
+		public:
+			AgentConfig();
+			~AgentConfig();
 
-	std::shared_ptr<StrategyConfig> getBufferStrategyConfig();
-	std::shared_ptr<StrategyConfig> getSendingStrategyConfig();
+			JAVA_LONG getPlatformId();
+			bool doesClassCacheExistOnCmr();
 
-	std::vector<std::wstring> getExcludeClassesPatterns();
-	std::map<std::vector<std::wstring>, std::shared_ptr<InstrumentationDefinition>> getInitialInstrumentationDefinitions();
+			std::vector<std::shared_ptr<PlatformSensorTypeConfig>> getPlatformSensorTypeConfigs();
+			std::vector<std::shared_ptr<MethodSensorTypeConfig>> getMethodSensorTypeConfigs();
+			std::shared_ptr<ExceptionSensorTypeConfig> getExceptionSensorTypeConfig();
+			// JmxSensorTypeConfig does not make sense here
+			std::vector<std::shared_ptr<MethodSensorTypeConfig>> getSpecialMethodSensorTypeConfigs();
 
-	std::wstring getConfigurationInfo();
+			std::shared_ptr<StrategyConfig> getBufferStrategyConfig();
+			std::shared_ptr<StrategyConfig> getSendingStrategyConfig();
 
-	void fromJson(json::object json);
-};
+			std::vector<std::wstring> getExcludeClassesPatterns();
+			std::map<std::vector<std::wstring>, std::shared_ptr<InstrumentationDefinition>> getInitialInstrumentationDefinitions();
 
+			std::wstring getConfigurationInfo();
+
+			void fromJson(web::json::object json);
+		};
+
+	}
+}

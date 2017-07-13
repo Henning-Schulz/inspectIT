@@ -13,321 +13,366 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\core">
-      <UniqueIdentifier>{4229934b-c9fa-4dd1-b15c-cd4f2dbfc112}</UniqueIdentifier>
+    <Filter Include="Header Files\inspectit">
+      <UniqueIdentifier>{777a6e4d-a72e-44fd-94f3-420352ab13a1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\dll">
-      <UniqueIdentifier>{47cea0d4-bfc4-4b9a-a61c-aa78100e45aa}</UniqueIdentifier>
+    <Filter Include="Source Files\inspectit">
+      <UniqueIdentifier>{28e22b60-9f4c-49c9-9b97-72b70f34aadc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\sending">
-      <UniqueIdentifier>{ba93a3bc-5701-405a-82ed-659598f5f261}</UniqueIdentifier>
+    <Filter Include="Header Files\inspectit::config">
+      <UniqueIdentifier>{276ecfa2-f20f-49f5-a3e2-679ea8976c3d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\logging">
-      <UniqueIdentifier>{a6f35c7f-ffa5-4069-ad70-a4519fe5939f}</UniqueIdentifier>
+    <Filter Include="Source Files\inspectit::config">
+      <UniqueIdentifier>{2534be75-c608-45fd-b261-0b95df175c01}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\core">
-      <UniqueIdentifier>{d59941fe-ef43-460f-b876-abb878f79585}</UniqueIdentifier>
+    <Filter Include="Header Files\inspectit::types">
+      <UniqueIdentifier>{c066001e-0528-4dc3-bc88-b90fa698f136}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\sending">
-      <UniqueIdentifier>{ddbe1c3b-ac38-4b5c-b9e1-d603d3eedb59}</UniqueIdentifier>
+    <Filter Include="Source Files\inspectit::types">
+      <UniqueIdentifier>{d3afb12d-1501-4691-8371-9eedc71de5de}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\logging">
-      <UniqueIdentifier>{fd83f324-6fef-4e2d-bf5f-f84a6c70ad2f}</UniqueIdentifier>
+    <Filter Include="Header Files\inspectit::utils">
+      <UniqueIdentifier>{c9289494-d1b1-41c3-91ba-44fec0f4997f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\utils">
-      <UniqueIdentifier>{8e37ad29-29f1-4a03-8e3c-35cf892b8ba8}</UniqueIdentifier>
+    <Filter Include="Source Files\inspectit::utils">
+      <UniqueIdentifier>{703b34f3-4b24-4efc-91f9-39ca72399768}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\utils">
-      <UniqueIdentifier>{e6d9751f-d566-4e9f-b4f6-aee95dbc42d2}</UniqueIdentifier>
+    <Filter Include="Header Files\inspectit::sending">
+      <UniqueIdentifier>{b9314c7f-60b6-444c-a4c6-005b5232daf9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\timer">
-      <UniqueIdentifier>{25f6e2ef-8c11-4133-b990-b0056beacbcf}</UniqueIdentifier>
+    <Filter Include="Header Files\inspectit::sending::buffer">
+      <UniqueIdentifier>{265cca23-b570-4b7e-8554-197dc0fe489b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\timer">
-      <UniqueIdentifier>{c6e50440-75e2-497e-836d-cf7831c499e8}</UniqueIdentifier>
+    <Filter Include="Header Files\inspectit::sending::strategy">
+      <UniqueIdentifier>{3d7357e5-44f5-42b6-b973-136518331692}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\config">
-      <UniqueIdentifier>{d0a42feb-ee34-45fd-b7bb-5b435b48f7cd}</UniqueIdentifier>
+    <Filter Include="Source Files\inspectit::sending">
+      <UniqueIdentifier>{0be7dc06-cb29-4612-8ea8-b9a95538fb63}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\config">
-      <UniqueIdentifier>{1eb1e7e0-5fb7-4816-9781-870a92691ccb}</UniqueIdentifier>
+    <Filter Include="Source Files\inspectit::sending::strategy">
+      <UniqueIdentifier>{6731001d-7642-4d54-9270-4e09c262cba4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\inspectit::sending::buffer">
+      <UniqueIdentifier>{e66a0977-2ab2-446b-8ef4-c871952fb761}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\inspectit::connection">
+      <UniqueIdentifier>{a0bf0ce5-ad3a-417e-af36-253d8eaaa713}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\inspectit::connection">
+      <UniqueIdentifier>{f699c9cb-a60e-4299-8dee-e9c4d182cd93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\inspectit::json">
+      <UniqueIdentifier>{6f7b7900-e203-4c92-947d-c237347c3c3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\inspectit::instrumentation">
+      <UniqueIdentifier>{759c6134-e2d4-4751-88ff-10842b68b27a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\inspectit::instrumentation">
+      <UniqueIdentifier>{1d4977c0-5349-4971-82ae-54c97a460a47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\inspectit::logger">
+      <UniqueIdentifier>{7d0ae8bd-b3bc-45ed-b8ce-e4457b69ec2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\inspectit::logger">
+      <UniqueIdentifier>{273c8f95-ccb0-4b99-915e-ff07879ef610}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\inspectit::data">
+      <UniqueIdentifier>{d752c310-9709-40d7-a8a5-8e0850ac5084}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\inspectit::storage">
+      <UniqueIdentifier>{6f5c59a5-6c78-4b10-8b12-10aeac15c7be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\inspectit::sensor">
+      <UniqueIdentifier>{fc8a3f74-f652-4d42-b226-0fd38344973b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\inspectit::sensor::timer">
+      <UniqueIdentifier>{68e5972c-367d-4408-a356-6e29cbf84892}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\inspectit::data">
+      <UniqueIdentifier>{552d73d8-c097-4aa4-bc07-2d31b0671e7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\inspectit::sensor">
+      <UniqueIdentifier>{235fc200-7059-4cae-b1f4-2fcd54dc9001}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\inspectit::sensor::timer">
+      <UniqueIdentifier>{fcb8b413-79dd-47ef-a872-8ac8ba8dc6dd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Agent.h">
-      <Filter>Header Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="basehdr.h">
-      <Filter>Header Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="classfactory.hpp">
-      <Filter>Header Files\dll</Filter>
-    </ClInclude>
-    <ClInclude Include="dllmain.hpp">
-      <Filter>Header Files\dll</Filter>
-    </ClInclude>
-    <ClInclude Include="regutil.h">
-      <Filter>Header Files\dll</Filter>
-    </ClInclude>
-    <ClInclude Include="regutil.hpp">
-      <Filter>Header Files\dll</Filter>
-    </ClInclude>
-    <ClInclude Include="BufferStrategy.h">
-      <Filter>Header Files\sending</Filter>
-    </ClInclude>
-    <ClInclude Include="CMRConnection.h">
-      <Filter>Header Files\sending</Filter>
+      <Filter>Header Files\inspectit</Filter>
     </ClInclude>
     <ClInclude Include="CorProfilerCallbackDefaultImpl.h">
-      <Filter>Header Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="DataSendingService.h">
-      <Filter>Header Files\sending</Filter>
-    </ClInclude>
-    <ClInclude Include="CMRRestfulConnection.h">
-      <Filter>Header Files\sending</Filter>
-    </ClInclude>
-    <ClInclude Include="ListSizeListener.h">
-      <Filter>Header Files\sending</Filter>
-    </ClInclude>
-    <ClInclude Include="ListSizeStrategy.h">
-      <Filter>Header Files\sending</Filter>
-    </ClInclude>
-    <ClInclude Include="SendingStrategy.h">
-      <Filter>Header Files\sending</Filter>
-    </ClInclude>
-    <ClInclude Include="SimpleBufferStrategy.h">
-      <Filter>Header Files\sending</Filter>
-    </ClInclude>
-    <ClInclude Include="Logger.h">
-      <Filter>Header Files\logging</Filter>
-    </ClInclude>
-    <ClInclude Include="MethodSensorData.h">
-      <Filter>Header Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="MeasurementStorage.h">
-      <Filter>Header Files\sending</Filter>
-    </ClInclude>
-    <ClInclude Include="MethodHook.h">
-      <Filter>Header Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="MethodSensor.h">
-      <Filter>Header Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="stringutils.h">
-      <Filter>Header Files\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="cmp_wstr.h">
-      <Filter>Header Files\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="ThreadHook.h">
-      <Filter>Header Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="json_string_prep.h">
-      <Filter>Header Files\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="TimerData.h">
-      <Filter>Header Files\timer</Filter>
-    </ClInclude>
-    <ClInclude Include="TimerHook.h">
-      <Filter>Header Files\timer</Filter>
-    </ClInclude>
-    <ClInclude Include="TimerStorage.h">
-      <Filter>Header Files\timer</Filter>
-    </ClInclude>
-    <ClInclude Include="TimerSensor.h">
-      <Filter>Header Files\timer</Filter>
-    </ClInclude>
-    <ClInclude Include="TimerStorageEntry.h">
-      <Filter>Header Files\timer</Filter>
-    </ClInclude>
-    <ClInclude Include="agentutils.h">
-      <Filter>Header Files\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="ip_calculation.h">
-      <Filter>Header Files\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="AbstractSensorTypeConfig.h">
-      <Filter>Header Files\config</Filter>
+      <Filter>Header Files\inspectit</Filter>
     </ClInclude>
     <ClInclude Include="AgentConfig.h">
-      <Filter>Header Files\config</Filter>
+      <Filter>Header Files\inspectit::config</Filter>
+    </ClInclude>
+    <ClInclude Include="AbstractSensorTypeConfig.h">
+      <Filter>Header Files\inspectit::config</Filter>
     </ClInclude>
     <ClInclude Include="ExceptionSensorTypeConfig.h">
-      <Filter>Header Files\config</Filter>
-    </ClInclude>
-    <ClInclude Include="InstrumentationDefinition.h">
-      <Filter>Header Files\config</Filter>
-    </ClInclude>
-    <ClInclude Include="JsonReceivable.h">
-      <Filter>Header Files\config</Filter>
+      <Filter>Header Files\inspectit::config</Filter>
     </ClInclude>
     <ClInclude Include="MethodInstrumentationConfig.h">
-      <Filter>Header Files\config</Filter>
+      <Filter>Header Files\inspectit::config</Filter>
     </ClInclude>
     <ClInclude Include="MethodSensorTypeConfig.h">
-      <Filter>Header Files\config</Filter>
+      <Filter>Header Files\inspectit::config</Filter>
     </ClInclude>
     <ClInclude Include="PlatformSensorTypeConfig.h">
-      <Filter>Header Files\config</Filter>
-    </ClInclude>
-    <ClInclude Include="SensorInstrumentationPoint.h">
-      <Filter>Header Files\config</Filter>
-    </ClInclude>
-    <ClInclude Include="Type.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="JsonSendable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ClassType.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MethodType.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InterfaceType.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AnnotationType.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MethodSensorMap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SensorData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InstrumentationManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MethodSensorFactory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="java_modifiers.h">
-      <Filter>Header Files\utils</Filter>
+      <Filter>Header Files\inspectit::config</Filter>
     </ClInclude>
     <ClInclude Include="StrategyConfig.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\inspectit::config</Filter>
+    </ClInclude>
+    <ClInclude Include="dllmain.hpp">
+      <Filter>Header Files\inspectit</Filter>
+    </ClInclude>
+    <ClInclude Include="InstrumentationDefinition.h">
+      <Filter>Header Files\inspectit::config</Filter>
+    </ClInclude>
+    <ClInclude Include="AnnotationType.h">
+      <Filter>Header Files\inspectit::types</Filter>
+    </ClInclude>
+    <ClInclude Include="ClassType.h">
+      <Filter>Header Files\inspectit::types</Filter>
+    </ClInclude>
+    <ClInclude Include="InterfaceType.h">
+      <Filter>Header Files\inspectit::types</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodType.h">
+      <Filter>Header Files\inspectit::types</Filter>
+    </ClInclude>
+    <ClInclude Include="Type.h">
+      <Filter>Header Files\inspectit::types</Filter>
+    </ClInclude>
+    <ClInclude Include="agentutils.h">
+      <Filter>Header Files\inspectit::utils</Filter>
+    </ClInclude>
+    <ClInclude Include="basehdr.h">
+      <Filter>Header Files\inspectit</Filter>
+    </ClInclude>
+    <ClInclude Include="classfactory.hpp">
+      <Filter>Header Files\inspectit</Filter>
+    </ClInclude>
+    <ClInclude Include="cmp_wstr.h">
+      <Filter>Header Files\inspectit::utils</Filter>
+    </ClInclude>
+    <ClInclude Include="ip_calculation.h">
+      <Filter>Header Files\inspectit::utils</Filter>
+    </ClInclude>
+    <ClInclude Include="java_modifiers.h">
+      <Filter>Header Files\inspectit::utils</Filter>
+    </ClInclude>
+    <ClInclude Include="json_string_prep.h">
+      <Filter>Header Files\inspectit::utils</Filter>
+    </ClInclude>
+    <ClInclude Include="regutil.h">
+      <Filter>Header Files\inspectit</Filter>
+    </ClInclude>
+    <ClInclude Include="regutil.hpp">
+      <Filter>Header Files\inspectit</Filter>
+    </ClInclude>
+    <ClInclude Include="stringutils.h">
+      <Filter>Header Files\inspectit::utils</Filter>
+    </ClInclude>
+    <ClInclude Include="DataSendingService.h">
+      <Filter>Header Files\inspectit::sending</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferStrategy.h">
+      <Filter>Header Files\inspectit::sending::buffer</Filter>
     </ClInclude>
     <ClInclude Include="DroppingBufferStrategy.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\inspectit::sending::buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleBufferStrategy.h">
+      <Filter>Header Files\inspectit::sending::buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="ListSizeListener.h">
+      <Filter>Header Files\inspectit::sending::strategy</Filter>
+    </ClInclude>
+    <ClInclude Include="ListSizeStrategy.h">
+      <Filter>Header Files\inspectit::sending::strategy</Filter>
+    </ClInclude>
+    <ClInclude Include="SendingStrategy.h">
+      <Filter>Header Files\inspectit::sending::strategy</Filter>
+    </ClInclude>
+    <ClInclude Include="CMRConnection.h">
+      <Filter>Header Files\inspectit::connection</Filter>
+    </ClInclude>
+    <ClInclude Include="CMRRestfulConnection.h">
+      <Filter>Header Files\inspectit::connection</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonReceivable.h">
+      <Filter>Header Files\inspectit::json</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonSendable.h">
+      <Filter>Header Files\inspectit::json</Filter>
+    </ClInclude>
+    <ClInclude Include="InstrumentationManager.h">
+      <Filter>Header Files\inspectit::instrumentation</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodSensorFactory.h">
+      <Filter>Header Files\inspectit::instrumentation</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>Header Files\inspectit::logger</Filter>
+    </ClInclude>
+    <ClInclude Include="SensorData.h">
+      <Filter>Header Files\inspectit::data</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodSensorData.h">
+      <Filter>Header Files\inspectit::data</Filter>
+    </ClInclude>
+    <ClInclude Include="MeasurementStorage.h">
+      <Filter>Header Files\inspectit::storage</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodSensorMap.h">
+      <Filter>Header Files\inspectit::data</Filter>
+    </ClInclude>
+    <ClInclude Include="SensorInstrumentationPoint.h">
+      <Filter>Header Files\inspectit::config</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodHook.h">
+      <Filter>Header Files\inspectit::sensor</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodSensor.h">
+      <Filter>Header Files\inspectit::sensor</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadHook.h">
+      <Filter>Header Files\inspectit::sensor</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerData.h">
+      <Filter>Header Files\inspectit::sensor::timer</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerHook.h">
+      <Filter>Header Files\inspectit::sensor::timer</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerSensor.h">
+      <Filter>Header Files\inspectit::sensor::timer</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerStorage.h">
+      <Filter>Header Files\inspectit::sensor::timer</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerStorageEntry.h">
+      <Filter>Header Files\inspectit::sensor::timer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Agent.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
-    <ClCompile Include="DataSendingService.cpp">
-      <Filter>Source Files\sending</Filter>
-    </ClCompile>
-    <ClCompile Include="CMRRestfulConnection.cpp">
-      <Filter>Source Files\sending</Filter>
+      <Filter>Source Files\inspectit</Filter>
     </ClCompile>
     <ClCompile Include="CorProfilerCallbackDefaultImpl.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
-    <ClCompile Include="ListSizeStrategy.cpp">
-      <Filter>Source Files\sending</Filter>
-    </ClCompile>
-    <ClCompile Include="SimpleBufferStrategy.cpp">
-      <Filter>Source Files\sending</Filter>
-    </ClCompile>
-    <ClCompile Include="Logger.cpp">
-      <Filter>Source Files\logging</Filter>
-    </ClCompile>
-    <ClCompile Include="stringutils.cpp">
-      <Filter>Source Files\utils</Filter>
-    </ClCompile>
-    <ClCompile Include="json_string_prep.cpp">
-      <Filter>Source Files\utils</Filter>
-    </ClCompile>
-    <ClCompile Include="TimerData.cpp">
-      <Filter>Source Files\timer</Filter>
-    </ClCompile>
-    <ClCompile Include="TimerHook.cpp">
-      <Filter>Source Files\timer</Filter>
-    </ClCompile>
-    <ClCompile Include="TimerStorage.cpp">
-      <Filter>Source Files\timer</Filter>
-    </ClCompile>
-    <ClCompile Include="TimerSensor.cpp">
-      <Filter>Source Files\timer</Filter>
-    </ClCompile>
-    <ClCompile Include="TimerStorageEntry.cpp">
-      <Filter>Source Files\timer</Filter>
-    </ClCompile>
-    <ClCompile Include="agentutils.cpp">
-      <Filter>Source Files\utils</Filter>
-    </ClCompile>
-    <ClCompile Include="ip_calculation.cpp">
-      <Filter>Source Files\utils</Filter>
-    </ClCompile>
-    <ClCompile Include="AbstractSensorTypeConfig.cpp">
-      <Filter>Source Files\config</Filter>
+      <Filter>Source Files\inspectit</Filter>
     </ClCompile>
     <ClCompile Include="AgentConfig.cpp">
-      <Filter>Source Files\config</Filter>
+      <Filter>Source Files\inspectit::config</Filter>
+    </ClCompile>
+    <ClCompile Include="AbstractSensorTypeConfig.cpp">
+      <Filter>Source Files\inspectit::config</Filter>
     </ClCompile>
     <ClCompile Include="ExceptionSensorTypeConfig.cpp">
-      <Filter>Source Files\config</Filter>
-    </ClCompile>
-    <ClCompile Include="InstrumentationDefinition.cpp">
-      <Filter>Source Files\config</Filter>
+      <Filter>Source Files\inspectit::config</Filter>
     </ClCompile>
     <ClCompile Include="MethodInstrumentationConfig.cpp">
-      <Filter>Source Files\config</Filter>
+      <Filter>Source Files\inspectit::config</Filter>
     </ClCompile>
     <ClCompile Include="MethodSensorTypeConfig.cpp">
-      <Filter>Source Files\config</Filter>
+      <Filter>Source Files\inspectit::config</Filter>
     </ClCompile>
     <ClCompile Include="PlatformSensorTypeConfig.cpp">
-      <Filter>Source Files\config</Filter>
-    </ClCompile>
-    <ClCompile Include="SensorInstrumentationPoint.cpp">
-      <Filter>Source Files\config</Filter>
+      <Filter>Source Files\inspectit::config</Filter>
     </ClCompile>
     <ClCompile Include="StrategyConfig.cpp">
-      <Filter>Source Files\config</Filter>
+      <Filter>Source Files\inspectit::config</Filter>
     </ClCompile>
-    <ClCompile Include="ClassType.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MethodType.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="InterfaceType.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="InstrumentationDefinition.cpp">
+      <Filter>Source Files\inspectit::config</Filter>
     </ClCompile>
     <ClCompile Include="AnnotationType.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\inspectit::types</Filter>
     </ClCompile>
-    <ClCompile Include="MethodSensorMap.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="ClassType.cpp">
+      <Filter>Source Files\inspectit::types</Filter>
     </ClCompile>
-    <ClCompile Include="SensorData.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="InterfaceType.cpp">
+      <Filter>Source Files\inspectit::types</Filter>
     </ClCompile>
-    <ClCompile Include="InstrumentationManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="MethodType.cpp">
+      <Filter>Source Files\inspectit::types</Filter>
     </ClCompile>
-    <ClCompile Include="MethodSensor.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="agentutils.cpp">
+      <Filter>Source Files\inspectit::utils</Filter>
     </ClCompile>
-    <ClCompile Include="MethodSensorFactory.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="ip_calculation.cpp">
+      <Filter>Source Files\inspectit::utils</Filter>
+    </ClCompile>
+    <ClCompile Include="json_string_prep.cpp">
+      <Filter>Source Files\inspectit::utils</Filter>
+    </ClCompile>
+    <ClCompile Include="stringutils.cpp">
+      <Filter>Source Files\inspectit::utils</Filter>
+    </ClCompile>
+    <ClCompile Include="DataSendingService.cpp">
+      <Filter>Source Files\inspectit::sending</Filter>
     </ClCompile>
     <ClCompile Include="DroppingBufferStrategy.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\inspectit::sending::buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpleBufferStrategy.cpp">
+      <Filter>Source Files\inspectit::sending::buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="ListSizeStrategy.cpp">
+      <Filter>Source Files\inspectit::sending::strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="CMRRestfulConnection.cpp">
+      <Filter>Source Files\inspectit::connection</Filter>
+    </ClCompile>
+    <ClCompile Include="InstrumentationManager.cpp">
+      <Filter>Source Files\inspectit::instrumentation</Filter>
+    </ClCompile>
+    <ClCompile Include="MethodSensorFactory.cpp">
+      <Filter>Source Files\inspectit::instrumentation</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>Source Files\inspectit::logger</Filter>
+    </ClCompile>
+    <ClCompile Include="SensorInstrumentationPoint.cpp">
+      <Filter>Source Files\inspectit::config</Filter>
+    </ClCompile>
+    <ClCompile Include="SensorData.cpp">
+      <Filter>Source Files\inspectit::data</Filter>
+    </ClCompile>
+    <ClCompile Include="MethodSensorMap.cpp">
+      <Filter>Source Files\inspectit::data</Filter>
     </ClCompile>
     <ClCompile Include="MethodHook.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\inspectit::sensor</Filter>
+    </ClCompile>
+    <ClCompile Include="MethodSensor.cpp">
+      <Filter>Source Files\inspectit::sensor</Filter>
+    </ClCompile>
+    <ClCompile Include="TimerData.cpp">
+      <Filter>Source Files\inspectit::sensor::timer</Filter>
+    </ClCompile>
+    <ClCompile Include="TimerHook.cpp">
+      <Filter>Source Files\inspectit::sensor::timer</Filter>
+    </ClCompile>
+    <ClCompile Include="TimerSensor.cpp">
+      <Filter>Source Files\inspectit::sensor::timer</Filter>
+    </ClCompile>
+    <ClCompile Include="TimerStorage.cpp">
+      <Filter>Source Files\inspectit::sensor::timer</Filter>
+    </ClCompile>
+    <ClCompile Include="TimerStorageEntry.cpp">
+      <Filter>Source Files\inspectit::sensor::timer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="agent.def">
-      <Filter>Source Files\core</Filter>
+      <Filter>Source Files\inspectit</Filter>
     </None>
   </ItemGroup>
 </Project>

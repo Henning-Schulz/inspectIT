@@ -3,54 +3,60 @@
 #include <vector>
 #include <shared_mutex>
 
-enum LogLevel { LEVEL_ERROR = 0, LEVEL_WARN, LEVEL_INFO, LEVEL_DEBUG };
-const std::vector<char*> logLevelNames = { "ERROR", "WARN", "INFO", "DEBUG" };
+namespace inspectit {
+	namespace logger {
 
-class Logger
-{
-private:
-	LogLevel logLevel;
-	char* name = "";
-	bool toFile = false;
-	FILE *logFile;
+		enum LogLevel { LEVEL_ERROR = 0, LEVEL_WARN, LEVEL_INFO, LEVEL_DEBUG };
+		const std::vector<char*> logLevelNames = { "ERROR", "WARN", "INFO", "DEBUG" };
 
-	void log(LogLevel level, char* message, va_list ap);
+		class Logger
+		{
+		private:
+			LogLevel logLevel;
+			char* name = "";
+			bool toFile = false;
+			FILE *logFile;
 
-public:
-	Logger(char* name, LogLevel logLevel);
-	Logger(char* name, LogLevel logLevel, bool toFile, FILE *logFile);
-	~Logger();
+			void log(LogLevel level, char* message, va_list ap);
 
-	void debug(char* message, ...);
-	void info(char* message, ...);
-	void warn(char* message, ...);
-	void error(char* message, ...);
-	void log(LogLevel level, char* message, ...);
-};
+		public:
+			Logger(char* name, LogLevel logLevel);
+			Logger(char* name, LogLevel logLevel, bool toFile, FILE *logFile);
+			~Logger();
 
-class LoggerFactory
-{
-private:
-	LogLevel logLevel;
-	bool toFile = false;
-	char* fileName = "";
-	FILE *logFile;
+			void debug(char* message, ...);
+			void info(char* message, ...);
+			void warn(char* message, ...);
+			void error(char* message, ...);
+			void log(LogLevel level, char* message, ...);
+		};
 
-	std::shared_mutex mUpdate;
+		class LoggerFactory
+		{
+		private:
+			LogLevel logLevel;
+			bool toFile = false;
+			char* fileName = "";
+			FILE *logFile;
 
-	void updateLogLevel();
+			std::shared_mutex mUpdate;
 
-public:
-	LoggerFactory();
-	~LoggerFactory();
+			void updateLogLevel();
 
-	Logger createLogger(char* name);
-	LogLevel getLogLevel();
+		public:
+			LoggerFactory();
+			~LoggerFactory();
 
-	void staticLog(LogLevel level, char *loggerName, char *message, ...);
-	void staticLogWithoutNewLine(LogLevel level, char *loggerName, char *message, ...);
-	void printf(char* message, ...);
-};
+			Logger createLogger(char* name);
+			LogLevel getLogLevel();
 
-extern LoggerFactory loggerFactory;
+			void staticLog(LogLevel level, char *loggerName, char *message, ...);
+			void staticLogWithoutNewLine(LogLevel level, char *loggerName, char *message, ...);
+			void printf(char* message, ...);
+		};
+
+	}
+}
+
+extern inspectit::logger::LoggerFactory loggerFactory;
 

@@ -3,22 +3,29 @@
 #include "MethodHook.h"
 #include "Logger.h"
 
-class TimerHook : public MethodHook
-{
-private:
-	Logger logger = loggerFactory.createLogger("TimerHook");
+namespace inspectit {
+	namespace sensor {
+		namespace timer {
 
-	ICorProfilerInfo *profilerInfo;
+			class TimerHook : public MethodHook
+			{
+			private:
+				inspectit::logger::Logger logger = loggerFactory.createLogger("TimerHook");
 
-protected:
-	void init(ICorProfilerInfo *profilerInfo);
+				ICorProfilerInfo *profilerInfo;
 
-public:
-	TimerHook();
-	~TimerHook();
-	void notifyShutdown();
+			protected:
+				void init(ICorProfilerInfo *profilerInfo);
 
-	void beforeBody(METHOD_ID methodID);
-	void afterBody(METHOD_ID methodID);
-};
+			public:
+				TimerHook();
+				~TimerHook();
+				void notifyShutdown();
 
+				void beforeBody(METHOD_ID methodID);
+				void afterBody(METHOD_ID methodID);
+			};
+
+		}
+	}
+}

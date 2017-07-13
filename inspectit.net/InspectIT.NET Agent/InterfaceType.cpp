@@ -1,6 +1,8 @@
 #include "InterfaceType.h"
 
+using namespace web;
 
+using namespace inspectit::types;
 
 InterfaceType::InterfaceType()
 {
@@ -26,14 +28,14 @@ std::wstring InterfaceType::typeName()
 	return TYPE_NAME;
 }
 
-json::value InterfaceType::toJson()
+web::json::value InterfaceType::toJson()
 {
-	json::value json = super::toJson();
+	web::json::value json = super::toJson();
 
-	json::value interfArray;
+	web::json::value interfArray;
 	int i = 0;
 	for (auto it = superInterfaces.begin(); it != superInterfaces.end(); it++) {
-		interfArray[i] = json::value::string(*it);
+		interfArray[i] = web::json::value::string(*it);
 		i++;
 	}
 

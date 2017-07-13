@@ -3,12 +3,17 @@
 
 #define TYPE_NAME L"Interface"
 
-class AnnotationType : Type
-{
-public:
-	AnnotationType();
-	~AnnotationType();
+namespace inspectit {
+	namespace types {
 
-	std::wstring typeName();
-};
+		class AnnotationType : Type
+		{
+		public:
+			AnnotationType();
+			~AnnotationType();
 
+			std::wstring typeName();
+		};
+
+	}
+}

@@ -1,6 +1,6 @@
 #include "MethodInstrumentationConfig.h"
 
-
+using namespace inspectit::config;
 
 MethodInstrumentationConfig::MethodInstrumentationConfig()
 {
@@ -36,13 +36,13 @@ std::shared_ptr<SensorInstrumentationPoint> MethodInstrumentationConfig::getSens
 	return sensorInstrumentationPoint;
 }
 
-void MethodInstrumentationConfig::fromJson(json::object json)
+void MethodInstrumentationConfig::fromJson(web::json::object json)
 {
 	targetClassFqn = json.at(L"targetClassFqn").as_string();
 	targetMethodName = json.at(L"targetMethodName").as_string();
 	returnType = json.at(L"returnType").as_string();
 
-	json::array parameterArray = json.at(L"parameterTypes").as_array();
+	web::json::array parameterArray = json.at(L"parameterTypes").as_array();
 	for (auto it = parameterArray.begin(); it != parameterArray.end(); it++) {
 		parameterTypes.push_back(it->as_string());
 	}

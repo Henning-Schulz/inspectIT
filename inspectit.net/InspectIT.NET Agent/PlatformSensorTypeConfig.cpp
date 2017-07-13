@@ -1,6 +1,6 @@
 #include "PlatformSensorTypeConfig.h"
 
-
+using namespace inspectit::config;
 
 PlatformSensorTypeConfig::PlatformSensorTypeConfig()
 {
@@ -11,7 +11,7 @@ PlatformSensorTypeConfig::~PlatformSensorTypeConfig()
 {
 }
 
-void PlatformSensorTypeConfig::fromJson(json::object json)
+void PlatformSensorTypeConfig::fromJson(web::json::object json)
 {
 	super::fromJson(json);
 }

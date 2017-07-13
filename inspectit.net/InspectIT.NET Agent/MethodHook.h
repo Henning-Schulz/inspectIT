@@ -4,39 +4,45 @@
 #include "MethodSensorTypeConfig.h"
 #include "DataSendingService.h"
 
-/*
- * Interface for method sensors.
- */
-class MethodHook {
+namespace inspectit {
+	namespace sensor {
 
-private:
-	JAVA_LONG sensorTypeId;
-	JAVA_LONG platformId;
-	MethodSensorPriority priority = MIN;
+		/*
+		 * Interface for method sensors.
+		 */
+		class MethodHook {
 
-	std::shared_ptr<DataSendingService> dataSendingService;
+		private:
+			JAVA_LONG sensorTypeId;
+			JAVA_LONG platformId;
+			inspectit::config::MethodSensorPriority priority = inspectit::config::MIN;
 
-protected:
-	virtual void init(ICorProfilerInfo *profilerInfo) = 0;
+			std::shared_ptr<inspectit::sending::DataSendingService> dataSendingService;
 
-	std::shared_ptr<DataSendingService> getDataSendingService();
+		protected:
+			virtual void init(ICorProfilerInfo *profilerInfo) = 0;
 
-public:
-	MethodHook() {}
-	virtual ~MethodHook() {}
+			std::shared_ptr<inspectit::sending::DataSendingService> getDataSendingService();
 
-	MethodSensorPriority getPriority();
-	void setPriority(MethodSensorPriority priority);
+		public:
+			MethodHook() {}
+			virtual ~MethodHook() {}
 
-	void initialize(ICorProfilerInfo *profilerInfo, std::shared_ptr<DataSendingService> dataSendingService);
-	virtual void notifyShutdown() = 0;
+			inspectit::config::MethodSensorPriority getPriority();
+			void setPriority(inspectit::config::MethodSensorPriority priority);
 
-	virtual void beforeBody(METHOD_ID methodID) = 0;
-	virtual void afterBody(METHOD_ID methodID) = 0;
+			void initialize(ICorProfilerInfo *profilerInfo, std::shared_ptr<inspectit::sending::DataSendingService> dataSendingService);
+			virtual void notifyShutdown() = 0;
 
-	void setSensorTypeId(JAVA_LONG sensorTypeId);
-	JAVA_LONG getSensorTypeId();
+			virtual void beforeBody(METHOD_ID methodID) = 0;
+			virtual void afterBody(METHOD_ID methodID) = 0;
 
-	void setPlatformId(JAVA_LONG platformId);
-	JAVA_LONG getPlatformId();
-};
+			void setSensorTypeId(JAVA_LONG sensorTypeId);
+			JAVA_LONG getSensorTypeId();
+
+			void setPlatformId(JAVA_LONG platformId);
+			JAVA_LONG getPlatformId();
+		};
+
+	}
+}

@@ -4,24 +4,27 @@
 
 #define TYPE_NAME L"Interface"
 
-using namespace web;
+namespace inspectit {
+	namespace types {
 
-class InterfaceType : Type
-{
-private:
-	typedef Type super;
+		class InterfaceType : Type
+		{
+		private:
+			typedef Type super;
 
-	std::vector<std::wstring> superInterfaces;
+			std::vector<std::wstring> superInterfaces;
 
-public:
-	InterfaceType();
-	~InterfaceType();
+		public:
+			InterfaceType();
+			~InterfaceType();
 
-	std::vector<std::wstring> getSuperInterfaces();
-	void addSuperInterface(std::wstring superInterface);
+			std::vector<std::wstring> getSuperInterfaces();
+			void addSuperInterface(std::wstring superInterface);
 
-	std::wstring typeName();
+			std::wstring typeName();
 
-	json::value toJson();
-};
+			web::json::value toJson();
+		};
 
+	}
+}

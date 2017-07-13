@@ -4,6 +4,12 @@
 
 #include <string>
 
-std::wstring prepareStringForJson(std::wstring str);
+namespace inspectit {
+	namespace utils {
 
-std::wstring prepareStringForJson(LPWSTR lpwStr);
+		std::wstring prepareStringForJson(std::wstring str);
+
+		std::wstring prepareStringForJson(LPWSTR lpwStr);
+
+	}
+}
