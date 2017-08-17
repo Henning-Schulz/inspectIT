@@ -2,6 +2,7 @@
 
 #include "MethodHook.h"
 #include "Logger.h"
+#include "SensorDataWrapper.h"
 
 namespace inspectit {
 	namespace sensor {

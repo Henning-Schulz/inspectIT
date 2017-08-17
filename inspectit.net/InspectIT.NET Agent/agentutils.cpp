@@ -72,7 +72,18 @@ namespace inspectit {
 					loggerFactory.staticLog(LEVEL_WARN, "agentutils", "Could not get props of superclass %i of class %ls! Ignoring the superclass.", parentClassId, wcharBuffer);
 				}
 				else {
-					classType->addSuperClass(std::wstring(wcharBuffer, wcharBufferLength - 1)); // Omit terminating \0
+					std::wstring parentClassName(wcharBuffer, wcharBufferLength - 1);
+
+					if (parentClassName.compare(classType->getFqn()) != 0) {
+						classType->addSuperClass(std::wstring(wcharBuffer, wcharBufferLength - 1)); // Omit terminating \0
+					}
+					else {
+						// TODO: It happened that in the CMR, the super class is the same as the considered class.
+						//       This causes an endless recursion at the CMR and therefore, should be prevented.
+						//       However, it is currently unclear if the reason is actual self-inheritance or
+						//       a problem due to the class hashes.
+						loggerFactory.staticLog(LEVEL_WARN, "agentutils", "%ls inherits from itself! Ignoring the superclass.", parentClassName);
+					}
 				}
 			}
 

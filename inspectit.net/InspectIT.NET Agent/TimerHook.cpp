@@ -2,8 +2,9 @@
 
 #include "MeasurementStorage.h"
 #include "DataSendingService.h"
-#include "TimerStorage.h"
+#include "TimerData.h"
 
+using namespace inspectit::sending;
 using namespace inspectit::sensor::timer;
 using namespace inspectit::storage;
 
@@ -25,7 +26,7 @@ void TimerHook::notifyShutdown()
 {
 }
 
-thread_local std::vector<std::shared_ptr<TimerStorage>> storages;
+thread_local std::map<JAVA_LONG, std::shared_ptr<inspectit::sending::SensorDataWrapper>> storedSensorData;
 
 void TimerHook::beforeBody(METHOD_ID methodID)
 {
@@ -34,21 +35,17 @@ void TimerHook::beforeBody(METHOD_ID methodID)
 
 	auto startNanos = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch());
 
-	std::shared_ptr<MeasurementStorage> uncastedStorage = getDataSendingService()->getMeasurementStorage(getSensorTypeId(), threadId);
-	std::shared_ptr<TimerStorage> storage;
-
-	if (uncastedStorage == nullptr) {
-		storage = std::make_shared<TimerStorage>(getPlatformId(), getSensorTypeId(), threadId, startNanos);
-	}
-	else {
-		storage = std::static_pointer_cast<TimerStorage>(uncastedStorage);
+	std::shared_ptr<SensorDataWrapper> dataWrapper = getDataSendingService()->getDataWrapper();
+	if (!dataWrapper) {
+		logger.debug("Did not get data wrapper for TimerHook and method %i", methodID);
+		return;
 	}
 
-	storage->newEntry(methodID, startNanos);
+	std::shared_ptr<TimerData> timerData = std::make_shared<TimerData>(getPlatformId(), getSensorTypeId(), methodID, threadId, startNanos.count());
+	timerData->setStartTime(startNanos.count());
+	dataWrapper->setData(timerData);
 
-	if (uncastedStorage == nullptr) {
-		getDataSendingService()->addMeasurementStorage(storage);
-	}
+	storedSensorData.emplace(methodID, dataWrapper);
 }
 
 void TimerHook::afterBody(METHOD_ID methodID)
@@ -58,18 +55,18 @@ void TimerHook::afterBody(METHOD_ID methodID)
 	ThreadID threadId = 0;
 	profilerInfo->GetCurrentThreadID(&threadId);
 
-	std::shared_ptr<MeasurementStorage> uncastedStorage = getDataSendingService()->getMeasurementStorage(getSensorTypeId(), threadId);
-	std::shared_ptr<TimerStorage> storage;
+	auto it = storedSensorData.find(methodID);
 
-	if (uncastedStorage == nullptr) {
-		logger.error("No storage for method %i and thread %i existed!", methodID, threadId);
+	if (it == storedSensorData.end()) {
+		logger.debug("There is no data wrapper for TimerHook and method %i", methodID);
+		return;
 	}
-	else {
-		storage = std::static_pointer_cast<TimerStorage>(uncastedStorage);
-		storage->finishCurrentEntry(endNanos);
 
-		if (storage->finished()) {
-			getDataSendingService()->notifyStorageFinished(storage);
-		}
-	}
+	std::shared_ptr<SensorDataWrapper> dataWrapper = it->second;
+	storedSensorData.erase(it);
+
+	std::shared_ptr<TimerData> timerData = std::static_pointer_cast<TimerData>(dataWrapper->getData());
+	timerData->setEndTime(endNanos.count());
+
+	getDataSendingService()->publishDataWrapper(dataWrapper);
 }

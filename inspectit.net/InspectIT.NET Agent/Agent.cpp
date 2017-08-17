@@ -9,8 +9,6 @@
 #include <limits.h>
 #include <inttypes.h>
 
-#include "SimpleBufferStrategy.h"
-#include "ListSizeStrategy.h"
 #include "StrategyConfig.h"
 #include "TimerSensor.h"
 #include "ClassType.h"
@@ -302,7 +300,7 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 		logger.debug("profilerInfo set.");
 	}
 
-	dataSendingService = std::make_shared<DataSendingService>(agentConfig->getBufferStrategyConfig(), agentConfig->getSendingStrategyConfig());
+	dataSendingService = std::make_shared<DataSendingService>(256); // TODO: Get buffer size from CMR
 
 	instrumentationManager = std::make_shared<InstrumentationManager>(platformID, profilerInfo3, dataSendingService);
 	instrumentationManager->addSensorTypeConfigs(agentConfig->getMethodSensorTypeConfigs());

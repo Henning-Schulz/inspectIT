@@ -40,20 +40,8 @@
     <Filter Include="Header Files\inspectit::sending">
       <UniqueIdentifier>{b9314c7f-60b6-444c-a4c6-005b5232daf9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\inspectit::sending::buffer">
-      <UniqueIdentifier>{265cca23-b570-4b7e-8554-197dc0fe489b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\inspectit::sending::strategy">
-      <UniqueIdentifier>{3d7357e5-44f5-42b6-b973-136518331692}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\inspectit::sending">
       <UniqueIdentifier>{0be7dc06-cb29-4612-8ea8-b9a95538fb63}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\inspectit::sending::strategy">
-      <UniqueIdentifier>{6731001d-7642-4d54-9270-4e09c262cba4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\inspectit::sending::buffer">
-      <UniqueIdentifier>{e66a0977-2ab2-446b-8ef4-c871952fb761}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\inspectit::connection">
       <UniqueIdentifier>{a0bf0ce5-ad3a-417e-af36-253d8eaaa713}</UniqueIdentifier>
@@ -180,24 +168,6 @@
     <ClInclude Include="DataSendingService.h">
       <Filter>Header Files\inspectit::sending</Filter>
     </ClInclude>
-    <ClInclude Include="BufferStrategy.h">
-      <Filter>Header Files\inspectit::sending::buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="DroppingBufferStrategy.h">
-      <Filter>Header Files\inspectit::sending::buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="SimpleBufferStrategy.h">
-      <Filter>Header Files\inspectit::sending::buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="ListSizeListener.h">
-      <Filter>Header Files\inspectit::sending::strategy</Filter>
-    </ClInclude>
-    <ClInclude Include="ListSizeStrategy.h">
-      <Filter>Header Files\inspectit::sending::strategy</Filter>
-    </ClInclude>
-    <ClInclude Include="SendingStrategy.h">
-      <Filter>Header Files\inspectit::sending::strategy</Filter>
-    </ClInclude>
     <ClInclude Include="CMRConnection.h">
       <Filter>Header Files\inspectit::connection</Filter>
     </ClInclude>
@@ -252,11 +222,17 @@
     <ClInclude Include="TimerSensor.h">
       <Filter>Header Files\inspectit::sensor::timer</Filter>
     </ClInclude>
-    <ClInclude Include="TimerStorage.h">
-      <Filter>Header Files\inspectit::sensor::timer</Filter>
+    <ClInclude Include="RingBuffer.h">
+      <Filter>Header Files\inspectit::sending</Filter>
     </ClInclude>
-    <ClInclude Include="TimerStorageEntry.h">
-      <Filter>Header Files\inspectit::sensor::timer</Filter>
+    <ClInclude Include="SensorDataWrapper.h">
+      <Filter>Header Files\inspectit::sending</Filter>
+    </ClInclude>
+    <ClInclude Include="IntegerIterable.h">
+      <Filter>Header Files\inspectit::sending</Filter>
+    </ClInclude>
+    <ClInclude Include="IntegerIterator.h">
+      <Filter>Header Files\inspectit::sending</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -317,15 +293,6 @@
     <ClCompile Include="DataSendingService.cpp">
       <Filter>Source Files\inspectit::sending</Filter>
     </ClCompile>
-    <ClCompile Include="DroppingBufferStrategy.cpp">
-      <Filter>Source Files\inspectit::sending::buffer</Filter>
-    </ClCompile>
-    <ClCompile Include="SimpleBufferStrategy.cpp">
-      <Filter>Source Files\inspectit::sending::buffer</Filter>
-    </ClCompile>
-    <ClCompile Include="ListSizeStrategy.cpp">
-      <Filter>Source Files\inspectit::sending::strategy</Filter>
-    </ClCompile>
     <ClCompile Include="CMRRestfulConnection.cpp">
       <Filter>Source Files\inspectit::connection</Filter>
     </ClCompile>
@@ -362,11 +329,14 @@
     <ClCompile Include="TimerSensor.cpp">
       <Filter>Source Files\inspectit::sensor::timer</Filter>
     </ClCompile>
-    <ClCompile Include="TimerStorage.cpp">
-      <Filter>Source Files\inspectit::sensor::timer</Filter>
+    <ClCompile Include="RingBuffer.cpp">
+      <Filter>Source Files\inspectit::sending</Filter>
     </ClCompile>
-    <ClCompile Include="TimerStorageEntry.cpp">
-      <Filter>Source Files\inspectit::sensor::timer</Filter>
+    <ClCompile Include="SensorDataWrapper.cpp">
+      <Filter>Source Files\inspectit::sending</Filter>
+    </ClCompile>
+    <ClCompile Include="IntegerIterator.cpp">
+      <Filter>Source Files\inspectit::sending</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
