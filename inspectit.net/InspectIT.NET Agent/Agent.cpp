@@ -283,8 +283,18 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 	}
 
 	// Register agent
+	WCHAR *agentName;
+	size_t len;
+	errno_t err = _wdupenv_s(&agentName, &len, L"AGENT_NAME");
+	if (err || len == 0) {
+		logger.warn("No agent name specified. Please use the environment variable AGENT_NAME. Using agent name 'unknown-dotNET-agent'");
+		agentName = L"unknown-dotNET-agent";
+	}
+	else {
+		logger.info("Agent name is %ls.", agentName);
+	}
 
-	auto agentConfig = cmrConnection->registerPlatform(L"dotNET-agent", L"1"); // TODO: Retrieve the name dynamically
+	auto agentConfig = cmrConnection->registerPlatform(agentName, L"1"); // TODO: Retrieve the version dynamically
 	logger.debug("Got AgentConfig.");
 	platformID = agentConfig->getPlatformId();
 
