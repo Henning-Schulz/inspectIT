@@ -20,6 +20,9 @@ namespace inspectit {
 			std::wstring getClassName();
 			std::map<std::wstring, std::wstring> getSettings();
 
+			std::wstring getSetting(std::wstring key);
+			int getIntegerSetting(std::wstring key);
+
 			void fromJson(web::json::object json);
 		};
 	}

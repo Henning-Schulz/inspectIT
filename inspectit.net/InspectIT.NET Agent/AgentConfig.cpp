@@ -44,14 +44,9 @@ std::vector<std::shared_ptr<MethodSensorTypeConfig>> AgentConfig::getSpecialMeth
 	return specialMethodSensorTypeConfigs;
 }
 
-std::shared_ptr<StrategyConfig> AgentConfig::getBufferStrategyConfig()
+std::shared_ptr<StrategyConfig> AgentConfig::getBufferSizeConfig()
 {
-	return bufferStrategyConfig;
-}
-
-std::shared_ptr<StrategyConfig> AgentConfig::getSendingStrategyConfig()
-{
-	return sendingStrategyConfig;
+	return bufferSizeConfig;
 }
 
 std::vector<std::wstring> AgentConfig::getExcludeClassesPatterns()
@@ -102,11 +97,8 @@ void AgentConfig::fromJson(web::json::object json)
 	}
 
 	// strategy configs
-	bufferStrategyConfig = std::make_shared<StrategyConfig>();
-	bufferStrategyConfig->fromJson(json.at(L"bufferStrategyConfig").as_object());
-
-	sendingStrategyConfig = std::make_shared<StrategyConfig>();
-	sendingStrategyConfig->fromJson(json.at(L"sendingStrategyConfig").as_object());
+	bufferSizeConfig = std::make_shared<StrategyConfig>();
+	bufferSizeConfig->fromJson(json.at(L"disruptorStrategyConfig").as_object());
 
 	// exclusions
 	web::json::array excludesArray = json.at(L"excludeClassesPatterns").as_array();

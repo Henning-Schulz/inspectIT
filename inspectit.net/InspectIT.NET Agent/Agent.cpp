@@ -300,7 +300,9 @@ HRESULT Agent::Initialize(IUnknown *pICorProfilerInfoUnk)
 		logger.debug("profilerInfo set.");
 	}
 
-	dataSendingService = std::make_shared<DataSendingService>(256); // TODO: Get buffer size from CMR
+	size_t bufferSize = agentConfig->getBufferSizeConfig()->getIntegerSetting(L"bufferSize");
+	dataSendingService = std::make_shared<DataSendingService>(bufferSize);
+	logger.info("Buffer size is %u.", bufferSize);
 
 	instrumentationManager = std::make_shared<InstrumentationManager>(platformID, profilerInfo3, dataSendingService);
 	instrumentationManager->addSensorTypeConfigs(agentConfig->getMethodSensorTypeConfigs());
